@@ -6,7 +6,7 @@ library(shiny, quietly = TRUE)
 library(rhandsontable, quietly = TRUE)
 library(pedsuite, quietly = TRUE)
 library(segregatr, quietly = TRUE)
-library(flexsurv, quietly = TRUE)
+# library(flexsurv, quietly = TRUE)
 library(ggplot2, quietly = TRUE)
 
 # Age
@@ -1143,9 +1143,9 @@ server = function(input, output, session) {
     slidervals = switch(gsub(".*_", "", input$flb_v1),
                         "afreq" = c(-5, -1),
                         "f0a" = c(1, 5),
-                        "f1a" = c(1, 5),
-                        "f0b" = c(1, 500),
-                        "f1b" = c(1, 500),
+                        "f2a" = c(1, 5),
+                        "f0b" = c(5, 500),
+                        "f2b" = c(5, 500),
                         "risk" = c(-3, +3))
     updateSliderInput(inputId = "flb_s1", min = slidervals[1], max = slidervals[2], value = slidervals)
   })
@@ -1153,9 +1153,9 @@ server = function(input, output, session) {
     slidervals = switch(gsub(".*_", "", input$flb_v2),
                         "afreq" = c(-5, -1),
                         "f0a" = c(1, 5),
-                        "f1a" = c(1, 5),
-                        "f0b" = c(1, 500),
-                        "f1b" = c(1, 500),
+                        "f2a" = c(1, 5),
+                        "f0b" = c(5, 500),
+                        "f2b" = c(5, 500),
                         "risk" = c(-3, +3))
     updateSliderInput(inputId = "flb_s2", min = slidervals[1], max = slidervals[2], value = slidervals)
   }) 

@@ -1,3 +1,6 @@
+library(flexsurv, quietly = TRUE)
+
+
 get_hazards = function(x, distr, params) {
   
   # Cumulative hazards
