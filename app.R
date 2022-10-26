@@ -690,9 +690,9 @@ server = function(input, output, session) {
     })
     colnames(h_2) = values[["pheno_vector"]]
     h_1 = sapply(seq(values[["pheno_total"]]), function(i){
-      switch(input[[paste0("pheno", i, "_f1_fx")]],
-             "f0" = h_0[,i] * exp(input[[paste0("pheno", i, "_f1_val")]]),
-             "f2" = h_2[,i] * exp(input[[paste0("pheno", i, "_f1_val")]])
+      switch(input[[paste0("pheno", i, "_f1fx")]],
+             "f0" = h_0[,i] * exp(input[[paste0("pheno", i, "_f1v")]]),
+             "f2" = h_2[,i] * exp(input[[paste0("pheno", i, "_f1v")]])
       )
     })
     colnames(h_1) = values[["pheno_vector"]]
@@ -986,11 +986,11 @@ server = function(input, output, session) {
             column(3, p(HTML(paste0("&nbsp;", input$pheno_name)), style = "color:#4B4B4B;background-color:#FFEC98;")),
             column(4, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_dist"), label = "hazards",
                                                              choices = c("Weibull", "Log-logist"), selected = "Weibull"))),
-            column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1_val"), label = HTML("f<sub>1</sub>=exp"),
+            column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1v"), label = HTML("f<sub>1</sub>=exp"),
                                                               min = -3, max = +3, step = 0.1, value = 0))),
-            column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1_fx"), label = "x",
+            column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "x",
                                                              choices = c("f0", "f2"), selected = "f2")))
-            # column(5, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1_fx"), label = "f1 = exp(lambda) x",
+            # column(5, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "f1 = exp(lambda) x",
             #                                                  choices = c("f0", "f2"), selected = "f2")))
           ),
           fluidRow(id = new_id,
@@ -1003,7 +1003,7 @@ server = function(input, output, session) {
                                           min = 1, max = 5, step = 0.1, value = 1)),
                    column(3, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
                                           min = 1, max = 500, step = 5, value = 50))
-                   # column(2, numericInput(inputId = paste0(new_id, "_f1_val"), label = if(values[["pheno_total"]] == 0) HTML("&lambda;") else NULL,
+                   # column(2, numericInput(inputId = paste0(new_id, "_f1v"), label = if(values[["pheno_total"]] == 0) HTML("&lambda;") else NULL,
                    #                        min = -3, max = +3, step = 0.1, value = 0))
           )
         )
@@ -1014,7 +1014,7 @@ server = function(input, output, session) {
     
     
     # Update sensitivity analysis choices
-    values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, c("_f0a", "_f0b", "_f2a", "_f2b")))
+    values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
     
     
     # Update risk factor phenotype choices
@@ -1042,7 +1042,7 @@ server = function(input, output, session) {
     
     
     # Update sensitivity analysis choices
-    values[["flb_v"]] = setdiff(values[["flb_v"]], paste0("pheno", values[["pheno_total"]], c("_f0a", "_f0b", "_f2a", "_f2b")))
+    values[["flb_v"]] = setdiff(values[["flb_v"]], paste0("pheno", values[["pheno_total"]], c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
     
     
     length(values[["pheno_vector"]]) = values[["pheno_total"]] - 1
@@ -1127,11 +1127,11 @@ server = function(input, output, session) {
   observeEvent(values[["flb_v"]], {
     sortedlist = factor(values[["flb_v"]],
                         levels = c("afreq",
-                                   paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b"), paste0)))),
+                                   paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
                                    paste0("factor", seq(values[["factor_total"]]), "_risk")))
     sortedlist = sort(sortedlist)
     names(sortedlist) = c("log10(afreq)",
-                          if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 alpha", "f0 beta", "f1 alpha", "f1 beta"), paste))),
+                          if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "f1 coef"), paste))),
                           if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)"))
     updateSelectInput(inputId = "flb_v1", choices = sortedlist, selected = values[["flb_v1"]])
     updateSelectInput(inputId = "flb_v2", choices = sortedlist, selected = values[["flb_v2"]])
@@ -1146,6 +1146,7 @@ server = function(input, output, session) {
                         "f2a" = c(1, 5),
                         "f0b" = c(5, 500),
                         "f2b" = c(5, 500),
+                        "f1v" = c(-3, +3),
                         "risk" = c(-3, +3))
     updateSliderInput(inputId = "flb_s1", min = slidervals[1], max = slidervals[2], value = slidervals)
   })
@@ -1156,6 +1157,7 @@ server = function(input, output, session) {
                         "f2a" = c(1, 5),
                         "f0b" = c(5, 500),
                         "f2b" = c(5, 500),
+                        "f1v" = c(-3, +3),
                         "risk" = c(-3, +3))
     updateSliderInput(inputId = "flb_s2", min = slidervals[1], max = slidervals[2], value = slidervals)
   }) 
