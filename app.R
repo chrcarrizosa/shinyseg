@@ -73,6 +73,13 @@ W_load =
     style = "padding-top:4px;padding-bottom:4px;margin-top:25px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
   )
 
+W_reset = 
+  actionButton(
+    inputId = "reset",
+    label = "Reset",
+    style = "padding-top:4px;padding-bottom:4px;margin-top:25px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+  )
+
 W_pheno_name = 
   textInput(
     inputId = "pheno_name",
@@ -321,8 +328,9 @@ ui = fluidPage(
       fluidRow(
         # Allele frequency
         column(3, W_afreq),
-        column(3, offset = 3, W_save),
-        column(3, W_load)
+        column(2, offset = 3, W_save),
+        column(2, W_load),
+        column(2, W_reset)
       ),
       
       # Phenotype selection
@@ -429,6 +437,11 @@ server = function(input, output, session) {
   # values[["pheno_vector"]] = character()
   # values[["factor_vector"]] = character()
   values[["flb_v"]] = c("afreq")
+  
+  
+  
+  # Reset session
+  observeEvent(input$reset, session$reload()) 
   
   
   
