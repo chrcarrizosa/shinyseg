@@ -488,7 +488,7 @@ server = function(input, output, session) {
     temp = data.frame(
       readRDS(input$input_pedigree$datapath),
       phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
-      carrier = factor(NA_character_, levels = c("", "yes", "no")),
+      carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
       proband = FALSE,
       age = 50)
     
@@ -513,7 +513,7 @@ server = function(input, output, session) {
              temp = data.frame(
                nuclearPed(),
                phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
-               carrier = factor(NA_character_, levels = c("", "yes", "no")),
+               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = c(40, 40, 10))
            },
@@ -522,7 +522,7 @@ server = function(input, output, session) {
              temp = data.frame(
                nuclearPed(nch = 2),
                phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
-               carrier = factor(NA_character_, levels = c("", "yes", "no")),
+               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = c(40, 40, 10, 10))
            }
@@ -646,7 +646,8 @@ server = function(input, output, session) {
     values[["affected"]] = which(values[["peddata"]][["phenotype"]] != "" & values[["peddata"]][["phenotype"]] != "nonaff")
     values[["unknown"]] = which(values[["peddata"]][["phenotype"]] == "")
     values[["proband"]] = which(values[["peddata"]][["proband"]] == 1)
-    values[["carriers"]] = which(values[["peddata"]][["carrier"]] == "yes")
+    values[["carriers"]] = which(values[["peddata"]][["carrier"]] == "het")
+    values[["homozygous"]] = which(values[["peddata"]][["carrier"]] == "hom")
     values[["noncarriers"]] = which(values[["peddata"]][["carrier"]] == "no")
   })
   
@@ -660,6 +661,7 @@ server = function(input, output, session) {
                     unknown = values[["unknown"]],
                     proband = values[["proband"]],
                     if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+                    if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
                     if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]]
     )
   })
@@ -818,6 +820,7 @@ server = function(input, output, session) {
           unknown = values[["unknown"]],
           proband = values[["proband"]],
           if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+          if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
           if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
           freq = 10^input$afreq,
           penetrances = values[["f"]][,c("f0", "f1", "f2")],
@@ -881,9 +884,16 @@ server = function(input, output, session) {
                     params = c(fullgrid[gridrow, paste0("pheno", i, "_f0a")], fullgrid[gridrow, paste0("pheno", i, "_f0b")]))
       })
       colnames(h_0) = values[["pheno_vector"]]
-      h_1 = sapply(seq(values[["pheno_total"]]), function(i){
+      h_2 = sapply(seq(values[["pheno_total"]]), function(i){
         get_hazards(x, distr = input[[paste0("pheno", i, "_dist")]],
                     params = c(fullgrid[gridrow, paste0("pheno", i, "_f2a")], fullgrid[gridrow, paste0("pheno", i, "_f2b")]))
+      })
+      colnames(h_2) = values[["pheno_vector"]]
+      h_1 = sapply(seq(values[["pheno_total"]]), function(i){
+        switch(input[[paste0("pheno", i, "_f1fx")]],
+               "f0" = h_0[,i] * exp(fullgrid[gridrow, paste0("pheno", i, "_f1v")]),
+               "f2" = h_2[,i] * exp(fullgrid[gridrow, paste0("pheno", i, "_f1v")])
+        )
       })
       colnames(h_1) = values[["pheno_vector"]]
       
@@ -897,21 +907,24 @@ server = function(input, output, session) {
         # Update hazards
         h_0 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_0)
         h_1 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_1)
+        h_2 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_2)
       }
       else {
         h_0 = list(h_0)
         h_1 = list(h_1)
+        h_2 = list(h_2)
       }
       
       # Penetrance values
       f_0_all = surv_penetrance(h_0)
       f_1_all = surv_penetrance(h_1)
+      f_2_all = surv_penetrance(h_2)
       
       # Penetrance values
       f = lapply(1:length(h_0), function(i) {
         cbind(reshape2::melt(f_0_all[["SP"]][[i]], varnames = c("age", "phenotype"), value.name = "f0"),
               f1 = as.vector(f_1_all[["SP"]][[i]]),
-              f2 = as.vector(f_1_all[["SP"]][[i]]))
+              f2 = as.vector(f_2_all[["SP"]][[i]]))
       })
       f = dplyr::bind_rows(f, .id = 'comb')
 
@@ -924,6 +937,7 @@ server = function(input, output, session) {
             unknown = values[["unknown"]],
             proband = values[["proband"]],
             if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
             if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
             freq = 10^fullgrid[gridrow, "afreq"],
             penetrances = f[,c("f0", "f1", "f2")],
