@@ -37,7 +37,7 @@ W_input_example =
   selectInput(
     inputId = "input_example",
     label = "Load example",
-    choices = c("", "Trio", "Full siblings"),
+    choices = list("", "Basic pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2")),
     selected = "")
 
 W_toquickped =
@@ -538,6 +538,36 @@ server = function(input, output, session) {
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = c(40, 40, 10, 10))
+           },
+           
+           "Example 1" = {
+             # temp = data.frame(
+             #   nuclearPed(nch = 2),
+             #   phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
+             #   carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
+             #   proband = c(FALSE, FALSE, FALSE, TRUE),
+             #   age = c(40, 40, 10, 10))
+             temp = data.frame(
+               nuclearPed(nch = 2),
+               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
+               proband = FALSE,
+               age = c(40, 40, 10, 10))
+           },
+           
+           "Example 2" = {
+             # temp = data.frame(
+             #   nuclearPed(nch = 2),
+             #   phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
+             #   carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
+             #   proband = c(FALSE, FALSE, FALSE, TRUE),
+             #   age = c(40, 40, 10, 10))
+             temp = data.frame(
+               nuclearPed(nch = 2),
+               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
+               proband = FALSE,
+               age = c(40, 40, 10, 10))
            }
     )
     
@@ -866,7 +896,7 @@ server = function(input, output, session) {
   
   observeEvent(input$flb_run, {
     
-    req(values[["pheno_total"]]>0, values[["peddata"]])
+    req(values[["pheno_total"]]>0, values[["peddata"]], input$flb_v1 != input$flb_v2)
     
     # Create grid of values
     values[["grid"]] = setNames(
@@ -879,7 +909,7 @@ server = function(input, output, session) {
     
     # Collect inputs
     fullgrid = sapply(c("afreq",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b"), paste0)))),
+                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
                         if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                       function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
