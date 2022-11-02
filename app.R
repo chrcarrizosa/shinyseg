@@ -37,7 +37,7 @@ W_input_example =
   selectInput(
     inputId = "input_example",
     label = "Load example",
-    choices = list("", "Basic pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2")),
+    choices = list("", "Clear pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2 (TODO)")),
     selected = "")
 
 W_toquickped =
@@ -525,7 +525,7 @@ server = function(input, output, session) {
            "Trio" = {
              temp = data.frame(
                nuclearPed(),
-               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = c(40, 40, 10))
@@ -534,28 +534,58 @@ server = function(input, output, session) {
            "Full siblings" = {
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = c(40, 40, 10, 10))
            },
            
            "Example 1" = {
-             # temp = data.frame(
-             #   nuclearPed(nch = 2),
-             #   phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
-             #   carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
-             #   proband = c(FALSE, FALSE, FALSE, TRUE),
-             #   age = c(40, 40, 10, 10))
+             # Update UI
+             clearUI(values)
+             new_id = paste0("pheno", 1)
+             pheno_name = "affected"
+             insertUI(
+               selector = paste0("#pheno", values[["pheno_total"]]),
+               where = "afterEnd",
+               ui = 
+                 div(
+                   fluidRow(
+                     column(3, p(HTML(paste0("&nbsp;", pheno_name)), style = "color:#4B4B4B;background-color:#FFEC98;")),
+                     column(4, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_dist"), label = "hazards",
+                                                                      choices = c("Weibull", "Log-logist"), selected = "Weibull"))),
+                     column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1v"), label = HTML("f<sub>1</sub>=exp"),
+                                                                       min = -3, max = +3, step = 0.1, value = 0))),
+                     column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "x",
+                                                                      choices = c("f0", "f2"), selected = "f2")))
+                   ),
+                   fluidRow(id = new_id,
+                            style = "margin-bottom:15px;",
+                            column(3, numericInput(inputId = paste0(new_id, "_f0a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> shape") else NULL,
+                                                   min = 1, max = 5, step = 0.1, value = 1)),
+                            column(3, numericInput(inputId = paste0(new_id, "_f0b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> scale") else NULL,
+                                                   min = 1, max = 500, step = 5, value = 200)),
+                            column(3, numericInput(inputId = paste0(new_id, "_f2a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> shape") else NULL,
+                                                   min = 1, max = 5, step = 0.1, value = 1)),
+                            column(3, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
+                                                   min = 1, max = 500, step = 5, value = 50))
+                   )
+                 )
+             )
+             values[["pheno_vector"]] = c(values[["pheno_vector"]], pheno_name)
+             values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
+             values[["pheno_total"]] = values[["pheno_total"]] + 1
+
+             
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
-               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
-               proband = FALSE,
+               phenotype = factor(c("", "affected", "nonaff", "affected"), levels = c("", "nonaff", values[["pheno_vector"]])),
+               carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
+               proband = c(FALSE, FALSE, FALSE, TRUE),
                age = c(40, 40, 10, 10))
            },
            
-           "Example 2" = {
+           "Example 2 (TODO)" = {
              # temp = data.frame(
              #   nuclearPed(nch = 2),
              #   phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
