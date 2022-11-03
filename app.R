@@ -21,6 +21,7 @@ x = seq(1:100)
 #   Separate baseline penetrances calculation
 #   When user selects same variable in sensitivity analysis...
 #   Clear uploaded pedigree if example
+#   Pedigree labels
 
 
 # Input widgets -----------------------------------------------------------------
@@ -542,40 +543,9 @@ server = function(input, output, session) {
            
            "Example 1" = {
              # Update UI
-             clearUI(values)
-             new_id = paste0("pheno", 1)
-             pheno_name = "affected"
-             insertUI(
-               selector = paste0("#pheno", values[["pheno_total"]]),
-               where = "afterEnd",
-               ui = 
-                 div(
-                   fluidRow(
-                     column(3, p(HTML(paste0("&nbsp;", pheno_name)), style = "color:#4B4B4B;background-color:#FFEC98;")),
-                     column(4, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_dist"), label = "hazards",
-                                                                      choices = c("Weibull", "Log-logist"), selected = "Weibull"))),
-                     column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1v"), label = HTML("f<sub>1</sub>=exp"),
-                                                                       min = -3, max = +3, step = 0.1, value = 0))),
-                     column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "x",
-                                                                      choices = c("f0", "f2"), selected = "f2")))
-                   ),
-                   fluidRow(id = new_id,
-                            style = "margin-bottom:15px;",
-                            column(3, numericInput(inputId = paste0(new_id, "_f0a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> shape") else NULL,
-                                                   min = 1, max = 5, step = 0.1, value = 1)),
-                            column(3, numericInput(inputId = paste0(new_id, "_f0b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> scale") else NULL,
-                                                   min = 1, max = 500, step = 5, value = 200)),
-                            column(3, numericInput(inputId = paste0(new_id, "_f2a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> shape") else NULL,
-                                                   min = 1, max = 5, step = 0.1, value = 1)),
-                            column(3, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
-                                                   min = 1, max = 500, step = 5, value = 50))
-                   )
-                 )
-             )
-             values[["pheno_vector"]] = c(values[["pheno_vector"]], pheno_name)
-             values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
-             values[["pheno_total"]] = values[["pheno_total"]] + 1
-
+             if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
+             if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
+             add_pheno(values, "affected", params = c(0, 1, 200, 1, 50))
              
              temp = data.frame(
                nuclearPed(nch = 2),
@@ -636,7 +606,7 @@ server = function(input, output, session) {
   # Update data from table edits (this runs twice...)
   observe(priority = 1, {
     req(!is.null(input$pedTable))
-    message("Update data from table edits (this runs twice")
+    message("Update data from table edits (this runs twice)")
     
     temp_full = hot_to_r(input$pedTable)
 
@@ -1061,145 +1031,27 @@ server = function(input, output, session) {
     req(values[["pheno_total"]] < 9,
         !grepl("^\\s*$", input$pheno_name),
         !input$pheno_name %in% c(values[["pheno_vector"]], "nonaff"))
-    
-    new_id = paste0("pheno", values[["pheno_total"]] + 1)
-    
-    insertUI(
-      selector = paste0("#pheno", values[["pheno_total"]]),
-      where = "afterEnd",
-      ui = 
-        div(
-          fluidRow(
-            column(3, p(HTML(paste0("&nbsp;", input$pheno_name)), style = "color:#4B4B4B;background-color:#FFEC98;")),
-            column(4, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_dist"), label = "hazards",
-                                                             choices = c("Weibull", "Log-logist"), selected = "Weibull"))),
-            column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1v"), label = HTML("f<sub>1</sub>=exp"),
-                                                              min = -3, max = +3, step = 0.1, value = 0))),
-            column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "x",
-                                                             choices = c("f0", "f2"), selected = "f2")))
-            # column(5, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "f1 = exp(lambda) x",
-            #                                                  choices = c("f0", "f2"), selected = "f2")))
-          ),
-          fluidRow(id = new_id,
-                   style = "margin-bottom:15px;",
-                   column(3, numericInput(inputId = paste0(new_id, "_f0a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> shape") else NULL,
-                                          min = 1, max = 5, step = 0.1, value = 1)),
-                   column(3, numericInput(inputId = paste0(new_id, "_f0b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> scale") else NULL,
-                                          min = 1, max = 500, step = 5, value = 50)),
-                   column(3, numericInput(inputId = paste0(new_id, "_f2a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> shape") else NULL,
-                                          min = 1, max = 5, step = 0.1, value = 1)),
-                   column(3, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
-                                          min = 1, max = 500, step = 5, value = 50))
-                   # column(2, numericInput(inputId = paste0(new_id, "_f1v"), label = if(values[["pheno_total"]] == 0) HTML("&lambda;") else NULL,
-                   #                        min = -3, max = +3, step = 0.1, value = 0))
-          )
-        )
-    )
-    
-    values[["pheno_vector"]] = c(values[["pheno_vector"]], input$pheno_name)
+    add_pheno(values, input$pheno_name, c(0, 1, 50, 1, 50))
     updateTextInput(inputId = "pheno_name", value = "")
-    
-    
-    # Update sensitivity analysis choices
-    values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
-    
-    
-    # Update risk factor phenotype choices
-    if(values[["factor_total"]]> 0)
-      lapply(seq(values[["factor_total"]]), function(x)
-        updateSelectizeInput(
-          inputId = paste0("factor", x, "_pheno"),
-          choices = values[["pheno_vector"]],
-          selected = values[[paste0("factor", x, "_pheno")]])
-      )
-    
-    values[["pheno_total"]] = values[["pheno_total"]] + 1
   })
-  
-  
   observeEvent(input$pheno_rmv, {
     req(values[["pheno_total"]] > 0)
-    
-    to_remove = paste0("pheno", values[["pheno_total"]])
-    
-    removeUI(
-      selector = paste0("div:has(> #", to_remove, ")"),
-      multiple = TRUE
-    )
-    
-    
-    # Update sensitivity analysis choices
-    values[["flb_v"]] = setdiff(values[["flb_v"]], paste0("pheno", values[["pheno_total"]], c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v")))
-    
-    
-    length(values[["pheno_vector"]]) = values[["pheno_total"]] - 1
-    
-    # Update risk factor phenotype choices
-    if(values[["factor_total"]]> 0)
-      lapply(seq(values[["factor_total"]]), function(x)
-        updateSelectizeInput(
-          inputId = paste0("factor", x, "_pheno"),
-          choices = values[["pheno_vector"]],
-          selected = values[[paste0("factor", x, "_pheno")]])
-      )
-    
-    values[["pheno_total"]] = values[["pheno_total"]] - 1
+    rmv_pheno(values)
   })
   
   
   
   # Add/remove factors
-  
   observeEvent(input$factor_add, {
     req(values[["factor_total"]] < 3,
         !grepl("^\\s*$", input$factor_name),
         !input$factor_name %in% c(values[["factor_vector"]], "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age"))
-    
-    new_id = paste0("factor", values[["factor_total"]] + 1)
-    
-    insertUI(
-      selector = paste0("#factor", values[["factor_total"]]),
-      where = "afterEnd",
-      ui = 
-        div(fluidRow(id = new_id,
-                     column(3, style = ifelse(values[["factor_total"]] == 0, "margin-top: 30px;", "margin-top: 5px;"), p(HTML(paste0("&nbsp;", input$factor_name)), style = "color:#4B4B4B;background-color:#FFCF80;")),
-                     column(6, selectizeInput(inputId = paste0(new_id, "_pheno"),
-                                              label = if(values[["factor_total"]] == 0) "phenotypes" else NULL,
-                                              choices = values[["pheno_vector"]],
-                                              multiple = TRUE)),
-                     column(3, numericInput(inputId = paste0(new_id, "_risk"), label = if(values[["factor_total"]] == 0) "log(risk)" else NULL,
-                                            min = -3, max = 3, step = 0.1, value = 0))
-        ))
-    )
-    
-    values[["factor_vector"]] = c(values[["factor_vector"]], input$factor_name)
+    add_factor(values, input$factor_name, 0)
     updateTextInput(inputId = "factor_name", value = "")
-    
-    
-    # Update sensitivity analysis choices
-    values[["flb_v"]] = c(values[["flb_v"]], paste0(new_id, "_risk"))
-    
-    
-    values[["factor_total"]] = values[["factor_total"]] + 1
   })
-  
-  
   observeEvent(input$factor_rmv, {
     req(values[["factor_total"]] > 0)
-    
-    to_remove = paste0("factor", values[["factor_total"]])
-    
-    removeUI(
-      selector = paste0("div:has(> #", to_remove, ")"),
-      multiple = TRUE
-    )
-    
-    # Update sensitivity analysis choices
-    values[["flb_v"]] = setdiff(values[["flb_v"]], paste0("factor", values[["factor_total"]], "_risk"))
-    
-    length(values[["factor_vector"]]) = values[["factor_total"]] - 1
-    
-    values[["factor_total"]] = values[["factor_total"]] - 1
+    rmv_factor(values)
   })
   
   
