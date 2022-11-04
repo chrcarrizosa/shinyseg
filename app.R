@@ -13,7 +13,7 @@ library(ggplot2, quietly = TRUE)
 x = seq(1:100)
 
 # Notes
-#   Numeric validation of age not working decimals
+#   Decimal places for age are ignored
 #   Add risk factors to penetrance plots?
 #   Missing ages?
 #   Add phenotype number to riskplots?
@@ -253,9 +253,9 @@ W_flb_run =
 # Define UI
 ui = fluidPage(
   
-  tags$head(
-    tags$style(type = "text/css",
-    "
+  tags$style(
+    HTML("
+    
     .inline label{
         display: table-cell;
         text-align: left;
@@ -285,25 +285,24 @@ ui = fluidPage(
       border-radius: 0px;
       border: 0px;
     }
-    ")
-  ),
-  
-  tags$style(
-    HTML(".tabbable > .nav > li > a {
-            border:1px solid #DEDEDE;
-          }
+    
+    .tabbable > .nav > li > a {
+      border:1px solid #DEDEDE;
+    }
 
-          .tabbable > .nav > li[class=active] > a {
-            background-color: #3295b8;
-            color:white
-          }
+    .tabbable > .nav > li[class=active] > a {
+      background-color: #3295b8;
+      color:white
+    }
 
-          .irs .irs-single, .irs .irs-bar-edge, .irs .irs-bar, .irs .irs-from, .irs .irs-to {
-            background: #0BAABA;
-            border-top: #0BAABA;
-            border-bottom:#0BAABA;
-            border: #0BAABA;
-          }")
+    .irs .irs-single, .irs .irs-bar-edge, .irs .irs-bar, .irs .irs-from, .irs .irs-to {
+      background: #0BAABA;
+      border-top: #0BAABA;
+      border-bottom:#0BAABA;
+      border: #0BAABA;
+    }
+
+         ")
   ),
   
   
@@ -593,12 +592,11 @@ server = function(input, output, session) {
       hot_col(col = 'age', format = "0") %>% 
       hot_validate_numeric(col = 'age', min = 1, max = 100, allowInvalid = FALSE) %>%
       hot_table(highlightRow = TRUE) %>%
-      # hot_col("phenotype", allowInvalid = TRUE) %>%
       hot_col(1:4, renderer = "function(instance, td, row, col, prop, value, cellProperties) {
                               Handsontable.renderers.NumericRenderer.apply(this, arguments);
                               td.style.background = '#FCFCFC';
                               cellProperties.readOnly = true;}") %>%
-    hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
+      hot_context_menu(allowRowEdit = FALSE, allowColEdit = FALSE)
   })
   
   
@@ -993,40 +991,20 @@ server = function(input, output, session) {
   })
   
   
+  
+  # Add/remove penetrance data
   observeEvent(input$fhelp_add, {
     req(values[["fhelp_total"]]<9)
-    
-    insertUI(
-      selector = paste0("#fhelp", values[["fhelp_total"]]),
-      where = "afterEnd",
-      ui = fluidRow(id = paste0("fhelp", values[["fhelp_total"]]+1),
-                    column(6, style = "margin-top:-10px",
-                           numericInput(inputId = paste0("fhelp", values[["fhelp_total"]] + 1, "_p"),
-                                        label = NULL, value = 0, min = 0, max = 1, step = 0.05)),
-                    column(5, style = "margin-top:-10px",
-                           numericInput(inputId = paste0("fhelp", values[["fhelp_total"]] + 1, "_q"),
-                                        label = NULL, value = 1, min = 1, max = 100, step = 1))
-      )
-    )
-    
-    values[["fhelp_total"]] = values[["fhelp_total"]] + 1
+    add_fhelp(values)
   })
-  
-  
   observeEvent(input$fhelp_rmv, {
     req(values[["fhelp_total"]]>3)
-    id = c(paste0("fhelp", values[["fhelp_total"]], "_p"), paste0("fhelp", values[["fhelp_total"]], "_q"))
-    removeUI(
-      selector = paste0("div:has(> #", id, ")"),
-      multiple = TRUE
-    )
-    values[["fhelp_total"]] = values[["fhelp_total"]] - 1
+    rmv_fhelp(values)
   })
   
   
   
   # Add/remove phenotypes
-  
   observeEvent(input$pheno_add, {
     req(values[["pheno_total"]] < 9,
         !grepl("^\\s*$", input$pheno_name),
