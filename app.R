@@ -721,56 +721,15 @@ server = function(input, output, session) {
     
     message("Update penetrances")
     
-    # Baseline hazards
-    h_0 = sapply(seq(values[["pheno_total"]]), function(i){
-      get_hazards(x, distr = input[[paste0("pheno", i, "_dist")]],
-                  params = c(input[[paste0("pheno", i, "_f0a")]], input[[paste0("pheno", i, "_f0b")]]))
-    })
-    colnames(h_0) = values[["pheno_vector"]]
-    h_2 = sapply(seq(values[["pheno_total"]]), function(i){
-      get_hazards(x, distr = input[[paste0("pheno", i, "_dist")]],
-                  params = c(input[[paste0("pheno", i, "_f2a")]], input[[paste0("pheno", i, "_f2b")]]))
-    })
-    colnames(h_2) = values[["pheno_vector"]]
-    h_1 = sapply(seq(values[["pheno_total"]]), function(i){
-      switch(input[[paste0("pheno", i, "_f1fx")]],
-             "f0" = h_0[,i] * exp(input[[paste0("pheno", i, "_f1v")]]),
-             "f2" = h_2[,i] * exp(input[[paste0("pheno", i, "_f1v")]])
-      )
-    })
-    colnames(h_1) = values[["pheno_vector"]]
-
-    if(values[["factor_total"]] > 0) {
-      # Calculate risk factors
-      risks_change = exp(sapply(paste0("factor", 1:values[["factor_total"]], "_risk"), function(x) input[[x]]))
-      riskmat = log(t(risks_change*t(values[["rf_combs"]]) + rep(1,values[["factor_total"]])*t(!values[["rf_combs"]])))
-      final = exp(riskmat %*% t(matrix(values[["phenomat"]], ncol = values[["factor_total"]])))
-      # Update hazards
-      values[["h_0"]] = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_0)
-      values[["h_1"]] = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_1)
-      values[["h_2"]] = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_2)
-    }
-    else {
-      values[["h_0"]] = list(h_0)
-      values[["h_1"]] = list(h_1)
-      values[["h_2"]] = list(h_2)
-    }
+    # Collect inputs
+    inputs = sapply(c("afreq",
+                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v", "_f1fx", "_dist"), paste0)))),
+                        if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+                      function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+    inputs = as.data.frame(inputs)
     
-    # Penetrance values
-    values[["f_0_all"]] = surv_penetrance(values[["h_0"]])
-    values[["f_1_all"]] = surv_penetrance(values[["h_1"]])
-    values[["f_2_all"]] = surv_penetrance(values[["h_2"]])
-    
-    # Penetrance values
-    f = lapply(1:length(values[["h_0"]]), function(i) {
-      cbind(reshape2::melt(values[["f_0_all"]][["SP"]][[i]], varnames = c("age", "phenotype"), value.name = "f0"),
-            f1 = as.vector(values[["f_1_all"]][["SP"]][[i]]),
-            f2 = as.vector(values[["f_2_all"]][["SP"]][[i]]))
-    })
-    values[["f"]] = dplyr::bind_rows(f, .id = 'comb')
-    values[["f_idx"]] = array(1:nrow(values[["f"]]),
-                              dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]]),
-                              dimnames = list(x, colnames(values[["f_0_all"]][["SP"]][[1]]), seq(2^values[["factor_total"]])))
+    # Get penetrance values and indexes
+    get_f(x, values, inputs)
   })
   
   
@@ -817,12 +776,8 @@ server = function(input, output, session) {
   #       facet_wrap(~ phenotype, scales = 'free_y')
   # })
   output$CRPlot = renderPlot({
-    req(values[["f_0_all"]], values[["f_1_all"]], values[["f_2_all"]], values[["pheno_total"]]>0)
-    dat = cbind(
-      reshape2::melt(values[["f_0_all"]][["CR"]][[1]], varnames = c("age", "phenotype"), value.name = "f0"),
-      f1 = as.vector(values[["f_1_all"]][["CR"]][[1]]),
-      f2 = as.vector(values[["f_2_all"]][["CR"]][[1]])
-    )
+    req(values[["CR"]], values[["pheno_total"]]>0)
+    dat = values[["CR"]]
     dat$phenotype = gsub('nonaff', 'total', dat$phenotype)
     dat$phenotype = factor(dat$phenotype, levels = c(values[["pheno_vector"]], 'total'))
     ggplot(dat) +
@@ -907,7 +862,7 @@ server = function(input, output, session) {
     
     # Collect inputs
     fullgrid = sapply(c("afreq",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
+                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v", "_f1fx", "_dist"), paste0)))),
                         if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                       function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
@@ -916,60 +871,10 @@ server = function(input, output, session) {
     
   
     # Calculate FLB
-    
-    values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(gridrow) {
+    values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
       
-      # Baseline hazards
-      h_0 = sapply(seq(values[["pheno_total"]]), function(i){
-        get_hazards(x, distr = input[[paste0("pheno", i, "_dist")]],
-                    params = c(fullgrid[gridrow, paste0("pheno", i, "_f0a")], fullgrid[gridrow, paste0("pheno", i, "_f0b")]))
-      })
-      colnames(h_0) = values[["pheno_vector"]]
-      h_2 = sapply(seq(values[["pheno_total"]]), function(i){
-        get_hazards(x, distr = input[[paste0("pheno", i, "_dist")]],
-                    params = c(fullgrid[gridrow, paste0("pheno", i, "_f2a")], fullgrid[gridrow, paste0("pheno", i, "_f2b")]))
-      })
-      colnames(h_2) = values[["pheno_vector"]]
-      h_1 = sapply(seq(values[["pheno_total"]]), function(i){
-        switch(input[[paste0("pheno", i, "_f1fx")]],
-               "f0" = h_0[,i] * exp(fullgrid[gridrow, paste0("pheno", i, "_f1v")]),
-               "f2" = h_2[,i] * exp(fullgrid[gridrow, paste0("pheno", i, "_f1v")])
-        )
-      })
-      colnames(h_1) = values[["pheno_vector"]]
-      
-      
-      if(values[["factor_total"]] > 0) {
-        # Calculate risk factors
-        risks_change = exp(fullgrid[gridrow, paste0("factor", 1:values[["factor_total"]], "_risk")])
-        riskmat = log(t(risks_change*t(values[["rf_combs"]]) + rep(1,values[["factor_total"]])*t(!values[["rf_combs"]])))
-        final = exp(riskmat %*% t(matrix(values[["phenomat"]], ncol = values[["factor_total"]])))
-        
-        # Update hazards
-        h_0 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_0)
-        h_1 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_1)
-        h_2 = lapply(1:nrow(values[["rf_combs"]]), function(i) final[i,] * h_2)
-      }
-      else {
-        h_0 = list(h_0)
-        h_1 = list(h_1)
-        h_2 = list(h_2)
-      }
-      
-      # Penetrance values
-      f_0_all = surv_penetrance(h_0)
-      f_1_all = surv_penetrance(h_1)
-      f_2_all = surv_penetrance(h_2)
-      
-      # Penetrance values
-      f = lapply(1:length(h_0), function(i) {
-        cbind(reshape2::melt(f_0_all[["SP"]][[i]], varnames = c("age", "phenotype"), value.name = "f0"),
-              f1 = as.vector(f_1_all[["SP"]][[i]]),
-              f2 = as.vector(f_2_all[["SP"]][[i]]))
-      })
-      f = dplyr::bind_rows(f, .id = 'comb')
-
-      
+      # Get penetrance values
+      f = get_f(x, values, fullgrid[i,], sensitivity = TRUE)
       
       # Calculate BF
       tryCatch(
@@ -980,14 +885,14 @@ server = function(input, output, session) {
             if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
             if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
             if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-            freq = 10^fullgrid[gridrow, "afreq"],
+            freq = 10^fullgrid[i, "afreq"],
             penetrances = f[,c("f0", "f1", "f2")],
             liability = values[["lclass"]],
             details = FALSE),
         error = function(err) NULL)
       
     })
-    
+
   })
   
   
