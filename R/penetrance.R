@@ -36,20 +36,17 @@ get_f = function(x, values, inputs, sensitivity = FALSE) {
 
   # Baseline hazards
   h_0 = sapply(seq(values[["pheno_total"]]), function(i){
-    get_hazards(x, distr = inputs[[paste0("pheno", i, "_dist")]],
+    get_hazards(x, distr = inputs[["pheno_dist"]],
                 params = c(inputs[[paste0("pheno", i, "_f0a")]], inputs[[paste0("pheno", i, "_f0b")]]))
   })
   colnames(h_0) = values[["pheno_vector"]]
   h_2 = sapply(seq(values[["pheno_total"]]), function(i){
-    get_hazards(x, distr = inputs[[paste0("pheno", i, "_dist")]],
+    get_hazards(x, distr = inputs[["pheno_dist"]],
                 params = c(inputs[[paste0("pheno", i, "_f2a")]], inputs[[paste0("pheno", i, "_f2b")]]))
   })
   colnames(h_2) = values[["pheno_vector"]]
   h_1 = sapply(seq(values[["pheno_total"]]), function(i){
-    switch(inputs[[paste0("pheno", i, "_f1fx")]],
-           "f0" = h_0[,i] * exp(inputs[[paste0("pheno", i, "_f1v")]]),
-           "f2" = h_2[,i] * exp(inputs[[paste0("pheno", i, "_f1v")]])
-    )
+    h_2[,i] * exp(inputs[[paste0("pheno", i, "_f1v")]])
   })
   colnames(h_1) = values[["pheno_vector"]]
   

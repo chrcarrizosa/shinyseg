@@ -1,5 +1,7 @@
 # Libraries
 library(shiny, quietly = TRUE)
+library(shinydashboard, quietly = TRUE)
+library(shinydashboardPlus, quietly = TRUE)
 # library(shinyjs)
 # library(tidyverse) # dplyr::bind_rows() is being used!
 # library(rlang) # is_empty (also in tidyverse purrr?)
@@ -22,6 +24,10 @@ x = seq(1:100)
 #   When user selects same variable in sensitivity analysis...
 #   Clear uploaded pedigree if example
 #   Pedigree labels
+#   Multiple pedigrees
+#   Age groups and custom penetrances
+#   FLB = f(x)
+#   Notifications
 
 
 # Input widgets -----------------------------------------------------------------
@@ -39,16 +45,8 @@ W_input_example =
     inputId = "input_example",
     label = "Load example",
     choices = list("", "Clear pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2 (TODO)")),
-    selected = "")
-
-W_toquickped =
-  actionButton(
-    inputId = "toquickped",
-    label = "QuickPed",
-    value = "Open popup",
-    onclick = "window.open('https://magnusdv.shinyapps.io/quickped/')",
-    style = "padding-top:2px;padding-bottom:2px;margin-top:30px;margin-left:10px;color:#52a173;border:1px solid #52a173;font-size:90%;"
-  )
+    selected = ""
+    )
 
 W_afreq =
   numericInput(
@@ -58,27 +56,6 @@ W_afreq =
     min = -5,
     max = 0,
     step = 0.1
-  )
-
-W_save = 
-  actionButton(
-    inputId = "save",
-    label = "Save",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:25px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
-  )
-
-W_load = 
-  actionButton(
-    inputId = "load",
-    label = "Load",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:25px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
-  )
-
-W_reset = 
-  actionButton(
-    inputId = "reset",
-    label = "Reset",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:25px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
   )
 
 W_pheno_name = 
@@ -92,14 +69,14 @@ W_pheno_add =
   actionButton(
     inputId = "pheno_add",
     label = "Add",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
   )
 
 W_pheno_rmv = 
   actionButton(
     inputId = "pheno_rmv",
     label = "Undo",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%;margin-left:-10px"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
   )
 
 W_factor_name = 
@@ -113,14 +90,14 @@ W_factor_add =
   actionButton(
     inputId = "factor_add",
     label = "Add",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
   )
 
 W_factor_rmv = 
   actionButton(
     inputId = "factor_rmv",
     label = "Undo",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%;margin-left:-10px"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
   )
 
 W_fhelp_dist = 
@@ -195,14 +172,15 @@ W_fhelp_add =
   actionButton(
     inputId = "fhelp_add",
     label = "Add pair",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+    # style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:90%"
   )
 
 W_fhelp_rmv =
   actionButton(
     inputId = "fhelp_rmv",
     label = "Undo",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:90%"
   )
 
 W_flb_v1 = 
@@ -251,33 +229,54 @@ W_flb_run =
 # UI ----------------------------------------------------------------------
 
 # Define UI
-ui = fluidPage(
+ui = dashboardPage(
   
-  tags$style(
-    HTML("
+  skin = "black",
+  
+  # Application title
+  dashboardHeader(title = "shinyseg"),
+  
+  # Sidebar
+  dashboardSidebar(disable = TRUE, width = 0, minified = FALSE),
+  
+  # Main panel
+  dashboardBody(
     
-    .inline label{
-        display: table-cell;
-        text-align: left;
-        vertical-align: middle;
-        font-weight: normal;
-        padding-right: 5px;
-        padding-bottom: 10px;
-      } 
-    
-     .inline .form-group{
-        display: table-row;
-      }
-    
-    .inline .selectize-input{
-        display: table-row;
-      }
-    
-    .inline .selectize-control.single .selectize-input:after{
-      content: none;
+    tags$head(
+      tags$style(
+        HTML("
+
+    .skin-black .main-header .navbar {
+      background-color: #ebebeb;
     }
     
-    .inline .form-control.shiny-bound-input{
+    .skin-black .main-header .logo {
+      background-color: #fafafa;
+      color: #333;
+    }
+
+    .skin-black .inline label{
+      display: table-cell;
+      text-align: left;
+      vertical-align: middle;
+      font-weight: normal;
+      padding-right: 5px;
+      padding-bottom: 10px;
+    }
+
+    .skin-black .inline .form-group{
+      display: table-row;
+    }
+
+    .skin-black .inline .selectize-input{
+      display: table-row;
+    }
+
+    .skin-black .inline .selectize-control.single .selectize-input:after{
+      content: none;
+    }
+
+    .skin-black .inline .form-control.shiny-bound-input{
       display: table-row;
       height: 20px;
       width: 50px;
@@ -285,137 +284,179 @@ ui = fluidPage(
       border-radius: 0px;
       border: 0px;
     }
-    
-    .tabbable > .nav > li > a {
+
+    .skin-black .tabbable > .nav > li > a {
       border:1px solid #DEDEDE;
     }
 
-    .tabbable > .nav > li[class=active] > a {
+    .skin-black .tabbable > .nav > li[class=active] > a {
       background-color: #3295b8;
       color:white
     }
 
-    .irs .irs-single, .irs .irs-bar-edge, .irs .irs-bar, .irs .irs-from, .irs .irs-to {
+    .skin-black .irs .irs-single, .irs .irs-bar-edge, .irs .irs-bar, .irs .irs-from, .irs .irs-to {
       background: #0BAABA;
       border-top: #0BAABA;
       border-bottom:#0BAABA;
       border: #0BAABA;
     }
 
+    .nav-tabs-custom>.nav-tabs>li.header {
+      line-height: 35px;
+      padding: 0 10px;
+      font-size: 19px;
+      color: #3665b5;
+      font-family: Helvetica;
+    }
+    
+    .box-header .box-title, .box-header>.fa, .box-header>.glyphicon, .box-header>.ion {
+      font-size: 18px;
+      color: #1f6a99;
+      font-family: Helvetica;
+    }
+    
+    .box-header.with-border {
+      background-color: #fafafa;
+    }
+    
+    .box.box-solid {
+      border: 1px solid;
+      border-color:#abcacc;
+    }
          ")
-  ),
-  
-  
-  # Application title
-  titlePanel("Application title"),
-  
-  # Sidebar
-  sidebarLayout(
-    sidebarPanel(width = 4,
-      
-      helpText(h4("Data and settings", style = "color:white;background-color:#3295b8;padding:2px;font-size:110%;")),
-      
-      fluidRow(
-        
-        # Load file
-        column(5, W_input_pedigree),
-        
-        # Load example
-        column(4, W_input_example),
-        column(3, W_toquickped)
-      ),
-      
-      fluidRow(
-        # Allele frequency
-        column(3, W_afreq),
-        column(2, offset = 3, W_save),
-        column(2, W_load),
-        column(2, W_reset)
-      ),
-      
-      # Phenotype selection
-      helpText(h4("Phenotypes", style = "color:white;background-color:#3295b8;padding:2px;font-size:110%;")),
-      fluidRow(id = "pheno0",
-               column(6, W_pheno_name),
-               column(2, offset = 2, W_pheno_add),
-               column(2, W_pheno_rmv)
-      ),
-      
-      # Risk factor selection
-      helpText(h4("Risk factors", style = "color:white;background-color:#3295b8;padding:2px;font-size:110%;")),
-      fluidRow(id = "factor0",
-               column(6, W_factor_name),
-               column(2, offset = 2, W_factor_add),
-               column(2, W_factor_rmv)
       )
     ),
     
-    
-    # Main panel
-    mainPanel(width = 8,
-      
-      # fluidRow(
-      #   column(7, tabsetPanel(type = "tabs",
-      #                         tabPanel("Pedigree data", rHandsontableOutput("pedTable", height = "350px")),
-      #                         selected = "Pedigree data")),
-      #   column(5, tabsetPanel(type = "tabs",
-      #                         tabPanel("Segregation plot", plotOutput("pedPlot", height = "350px")),
-      #                         tabPanel("Plot settings"),
-      #                         selected = "Segregation plot")
-      #   )
-      # ),
-      
-      fluidRow(
-        column(7, rHandsontableOutput("pedTable", height = "350px")),
-        column(5, plotOutput("pedPlot", height = "350px"))
+    fluidRow(
+      column(5,
+             
+             box(width = 12,
+                 title = "Data and settings",
+                 collapsible = FALSE,
+                 solidHeader = TRUE,
+
+                 fluidRow(
+                   
+                   # Load file
+                   column(6, W_input_pedigree),
+                   
+                   # Load example
+                   column(6, W_input_example),
+                 ),
+                 
+                 
+                 fluidRow(
+                   # Allele frequency
+                   column(3, W_afreq),
+                   
+                 ),
+                 
+                 dropdownMenu = boxDropdown(
+                   boxDropdownItem("Load session", id = "load", icon = icon("upload")),
+                   boxDropdownItem("Save session", id = "save", icon = icon("download")),
+                   boxDropdownItem("Reset session", id = "reset", icon = icon("sync")),
+                   dropdownDivider(),
+                   boxDropdownItem("To QuickPed", href = "https://magnusdv.shinyapps.io/quickped/", icon = icon("network-wired"))
+                 )
+             ),
+             
+             # Phenotype selection
+             box(width = 12,
+                 title = "Phenotypes",
+                 collapsible = TRUE,
+                 fluidRow(id = "pheno0",
+                          column(6, W_pheno_name),
+                          column(2, offset = 2, W_pheno_add),
+                          column(2, W_pheno_rmv)
+                 ),
+                 sidebar = boxSidebar(
+                   width = 100,
+                   id = "flb_sidebar",
+                   background = "white",
+                   column(4, selectInput(inputId = "pheno_dist", label = "hazards model",
+                                         choices = c("Weibull", "Log-logist"), selected = "Weibull"))
+                 )
+             ),
+             
+             # Risk factor selection
+             # helpText(h4("Risk factors", style = "color:white;background-color:#3295b8;padding:2px;font-size:110%;")),
+             box(width = 12,
+                 title = "Risk factors",
+                 collapsible = TRUE,
+                 collapsed = TRUE,
+                 fluidRow(id = "factor0",
+                          column(6, W_factor_name),
+                          column(2, offset = 2, W_factor_add),
+                          column(2, W_factor_rmv)
+                 )
+             )
       ),
-      
-      fluidRow(
-        column(7,
-               tabsetPanel(type = "tabs",
-                           # tabPanel("Hazards", plotOutput("hazardPlot"), height = "350px"),
-                           tabPanel("Cumulative risks", plotOutput("CRPlot", height = "350px")),
-                           # tabPanel("Survival penetrance", plotOutput("SPPlot"), height = "350px"),
-                           tabPanel("Assistant",
-                                    column(5,
-                                           inputPanel(
-                                             W_fhelp_dist,
-                                             div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
-                                                 verbatimTextOutput("fhelp_text")),
-                                                      fluidRow(id = "fhelp1", class = 'littlei',
-                                                               column(6, W_fhelp1_p),
-                                                               column(5, W_fhelp1_q)),
-                                                      fluidRow(id = "fhelp2",
-                                                               column(6, style = "margin-top:-10px", W_fhelp2_p),
-                                                               column(5, style = "margin-top:-10px", W_fhelp2_q)),
-                                                      fluidRow(id = "fhelp3",
-                                                               column(6, style = "margin-top:-10px", W_fhelp3_p),
-                                                               column(5, style = "margin-top:-10px", W_fhelp3_q)),
-                                             fluidRow(column(4, offset = 2, W_fhelp_add),
-                                                      column(3, W_fhelp_rmv)
-                                             )
-                                           )
-                                    ),
-                                    column(7,
-                                           plotOutput(outputId = "fhelp_plot", height = "350px")),
-                                    
-                           ),
-                           selected = "Assistant")),
-        column(5, tabsetPanel(type = "tabs",
-                              tabPanel("FLB",
-                                       verbatimTextOutput("flb_main"),
-                                       plotOutput(outputId = "flb_colorbar", height = "60px")),
-                              tabPanel("FLB = f(x1,x2)",
-                                       sidebarPanel(width = 12,
-                                                    fluidRow(column(6, W_flb_v1),
-                                                             column(6, W_flb_s1)),
-                                                    fluidRow(column(6, W_flb_v2),
-                                                             column(6, W_flb_s2)),
-                                                    W_flb_run
-                                       )
-                              ),
-                              tabPanel("Plot results", plotOutput(outputId = "testplot", height = "350px")),
-                              selected = "FLB"))
+      column(7,
+             box(width = 12,
+                 title = "Pedigree table",
+                 collapsible = TRUE,
+                 rHandsontableOutput("pedTable"),
+                 label = boxLabel(
+                   text = 1,
+                   status = "danger",
+                   style = "circle"
+                 )
+             ),
+             box(width = 6,
+                 title = "Plot",
+                 collapsible = TRUE,
+                 plotOutput("pedPlot", height = "350px"),
+                 label = boxLabel(
+                   text = 1,
+                   status = "danger",
+                   style = "circle"
+                 )
+             ),
+             # tabBox(width = 6,
+             #        title = "Penetrance",
+             #        side = "right",
+             #        # tabPanel("Hazards", plotOutput("hazardPlot"), height = "350px"),
+             #        tabPanel(title = "Cumulative risks", plotOutput("CRPlot", height = "350px")),
+             #        # tabPanel("Survival penetrance", plotOutput("SPPlot"), height = "350px"),
+             #        tabPanel(title = "Assistant",
+             #                 column(5,
+             #                        inputPanel(
+             #                          W_fhelp_dist,
+             #                          div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
+             #                              verbatimTextOutput("fhelp_text")),
+             #                          fluidRow(id = "fhelp1", class = 'littlei',
+             #                                   column(6, W_fhelp1_p),
+             #                                   column(5, W_fhelp1_q)),
+             #                          fluidRow(id = "fhelp2",
+             #                                   column(6, style = "margin-top:-10px", W_fhelp2_p),
+             #                                   column(5, style = "margin-top:-10px", W_fhelp2_q)),
+             #                          fluidRow(id = "fhelp3",
+             #                                   column(6, style = "margin-top:-10px", W_fhelp3_p),
+             #                                   column(5, style = "margin-top:-10px", W_fhelp3_q)),
+             #                          fluidRow(column(4, offset = 2, W_fhelp_add),
+             #                                   column(3, W_fhelp_rmv)
+             #                          )
+             #                        )
+             #                 ),
+             #                 column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
+             #        )
+             # ),
+             box(width = 6,
+                 title = "FLB",
+                 collapsible = TRUE,
+                 verbatimTextOutput("flb_main"),
+                 plotOutput(outputId = "flb_colorbar", height = "60px"),
+                 sidebar = boxSidebar(
+                   width = 100,
+                   id = "flb_sidebar",
+                   background = "white",
+                   fluidRow(column(6, W_flb_v1), column(6, W_flb_s1)),
+                   fluidRow(column(6, W_flb_v2), column(6, W_flb_s2)),
+                   W_flb_run
+                   
+                 )
+             )
+             
       )
     )
   )
@@ -588,7 +629,7 @@ server = function(input, output, session) {
                   useTypes = TRUE,
                   manualColumnResize = TRUE,
                   rowHeaders = NULL,
-                  height = 300) %>%
+                  height = if(nrow(values[["peddata"]])> 12) 300 else NULL) %>%
       hot_col(col = 'age', format = "0") %>% 
       hot_validate_numeric(col = 'age', min = 1, max = 100, allowInvalid = FALSE) %>%
       hot_table(highlightRow = TRUE) %>%
@@ -715,15 +756,15 @@ server = function(input, output, session) {
     req(values[["pheno_total"]]>0)
     
     # Validate that all neccesary UI inputs are created
-    validate(need(input[[paste0("pheno", values[["pheno_total"]], "_f2b")]], ""))
+    validate(need(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]], ""))
     if(values[["factor_total"]] > 0)
       validate(need(input[[paste0("factor", values[["factor_total"]], "_risk")]], ""))
     
     message("Update penetrances")
     
     # Collect inputs
-    inputs = sapply(c("afreq",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v", "_f1fx", "_dist"), paste0)))),
+    inputs = sapply(c("afreq", "pheno_dist",
+                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
                         if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                       function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     inputs = as.data.frame(inputs)
@@ -861,8 +902,8 @@ server = function(input, output, session) {
     
     
     # Collect inputs
-    fullgrid = sapply(c("afreq",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v", "_f1fx", "_dist"), paste0)))),
+    fullgrid = sapply(c("afreq", "pheno_dist",
+                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
                         if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                       function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     fullgrid[[input$flb_v1]] = values[["grid"]][, 1]

@@ -8,24 +8,20 @@ add_pheno = function(values, label, params) {
     ui = 
       div(
         fluidRow(
-          column(3, p(HTML(paste0("&nbsp;", label)), style = "color:#4B4B4B;background-color:#FFEC98;")),
-          column(4, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_dist"), label = "hazards",
-                                                           choices = c("Weibull", "Log-logist"), selected = "Weibull"))),
-          column(3, tags$div(class = "inline", numericInput(inputId = paste0(new_id, "_f1v"), label = HTML("f<sub>1</sub>=exp"),
-                                                            min = -3, max = +3, step = 0.1, value = params[1]))),
-          column(2, tags$div(class = "inline", selectInput(inputId = paste0(new_id, "_f1fx"), label = "x",
-                                                           choices = c("f0", "f2"), selected = "f2")))
+          #style = "margin-top:12px;",
+          column(3, p(HTML(paste0("&nbsp;&nbsp;", label)), style = "color:#4b4b4b;background-color:#fff2cc"))
         ),
         fluidRow(id = new_id,
-                 style = "margin-bottom:15px;",
-                 column(3, numericInput(inputId = paste0(new_id, "_f0a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> shape") else NULL,
-                                        min = 1, max = 5, step = 0.1, value = params[2])),
-                 column(3, numericInput(inputId = paste0(new_id, "_f0b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> scale") else NULL,
+                 column(2, offset = 1, numericInput(inputId = paste0(new_id, "_f0a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> shape") else NULL,
+                                                    min = 1, max = 5, step = 0.1, value = params[2])),
+                 column(2, numericInput(inputId = paste0(new_id, "_f0b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>0</sub> scale") else NULL,
                                         min = 1, max = 500, step = 5, value = params[3])),
-                 column(3, numericInput(inputId = paste0(new_id, "_f2a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> shape") else NULL,
+                 column(2, numericInput(inputId = paste0(new_id, "_f2a"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> shape") else NULL,
                                         min = 1, max = 5, step = 0.1, value = params[4])),
-                 column(3, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
-                                        min = 1, max = 500, step = 5, value = params[5]))
+                 column(2, numericInput(inputId = paste0(new_id, "_f2b"), label = if(values[["pheno_total"]] == 0) HTML("f<sub>2</sub> scale") else NULL,
+                                        min = 1, max = 500, step = 5, value = params[5])),
+                 column(3, numericInput(inputId = paste0(new_id, "_f1v"), label = if(values[["pheno_total"]] == 0) HTML("log(f<sub>1</sub> coef)") else NULL,
+                                        min = -3, max = +3, step = 0.1, value = params[1]))
         )
       )
   )
@@ -90,7 +86,7 @@ add_factor = function(values, label, params) {
     where = "afterEnd",
     ui = 
       div(fluidRow(id = new_id,
-                   column(3, style = ifelse(values[["factor_total"]] == 0, "margin-top: 30px;", "margin-top: 5px;"), p(HTML(paste0("&nbsp;", label)), style = "color:#4B4B4B;background-color:#FFCF80;")),
+                   column(3, style = ifelse(values[["factor_total"]] == 0, "margin-top: 30px;", "margin-top: 5px;"), p(HTML(paste0("&nbsp;", label)), style = "color:#4b4b4b;background-color:#fce5cd")),
                    column(6, selectizeInput(inputId = paste0(new_id, "_pheno"),
                                             label = if(values[["factor_total"]] == 0) "phenotypes" else NULL,
                                             choices = values[["pheno_vector"]],
