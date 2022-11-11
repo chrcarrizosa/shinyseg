@@ -401,7 +401,7 @@ ui = dashboardPage(
                  ),
                  sidebar = boxSidebar(
                    width = 100,
-                   id = "flb_sidebar",
+                   id = "pheno_sidebar",
                    background = "white",
                    column(4, selectInput(inputId = "pheno_dist", label = "hazards model",
                                          choices = c("Weibull", "Log-logist"), selected = "Weibull"))
@@ -413,7 +413,7 @@ ui = dashboardPage(
                  id = "box_factor",
                  title = "Risk factors",
                  collapsible = TRUE,
-                 collapsed = TRUE,
+                 # collapsed = TRUE,
                  fluidRow(id = "factor0",
                           column(6, W_factor_name),
                           column(2, offset = 2, W_factor_add),
@@ -426,7 +426,7 @@ ui = dashboardPage(
                  id = "box_lclass",
                  title = "Liability classes",
                  collapsible = TRUE,
-                 collapsed = TRUE,
+                 # collapsed = TRUE,
                  fluidRow(id = "lclass0",
                           column(6, W_lclass_name),
                           column(2, offset = 2, W_lclass_add),
@@ -488,6 +488,7 @@ ui = dashboardPage(
                  title = "FLB",
                  collapsible = TRUE,
                  verbatimTextOutput("flb_main"),
+                 HTML("<br><br><br><br><br><br>"),
                  plotOutput(outputId = "flb_colorbar", height = "60px"),
                  sidebar = boxSidebar(
                    width = 100,
@@ -530,7 +531,7 @@ server = function(input, output, session) {
   
   
   # Update mode (sidebar boxes)
-  observeEvent(ignoreInit = TRUE, input$mode, {
+  observeEvent(input$mode, {
     if(input$mode) {
       shinyjs::hide("box_pheno")
       shinyjs::hide("box_factor")
@@ -993,6 +994,10 @@ server = function(input, output, session) {
         error = function(err) NULL)
       
     })
+    
+    # Show if not null
+    if(!is.null(values[["flb_vals"]]))
+      showModal(modalDialog(plotOutput("testplot"), size = "m"))
 
   })
   
