@@ -2,7 +2,7 @@
 library(shiny, quietly = TRUE)
 library(shinydashboard, quietly = TRUE)
 library(shinydashboardPlus, quietly = TRUE)
-# library(shinyjs)
+library(shinyjs, quietly = TRUE) # show/hide boxes
 # library(tidyverse) # dplyr::bind_rows() is being used!
 # library(rlang) # is_empty (also in tidyverse purrr?)
 library(rhandsontable, quietly = TRUE)
@@ -224,6 +224,33 @@ W_flb_run =
     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
   )
 
+W_mode = 
+  checkboxInput(
+    inputId = "mode",
+    label = "Custom liab classes",
+    value = FALSE
+  )
+
+W_lclass_name = 
+  textInput(
+    inputId = "lclass_name",
+    label = NULL,
+    placeholder = "New liability class label"
+  )
+
+W_lclass_add =
+  actionButton(
+    inputId = "lclass_add",
+    label = "Add",
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
+  )
+
+W_lclass_rmv = 
+  actionButton(
+    inputId = "lclass_rmv",
+    label = "Undo",
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
+  )
 
 
 # UI ----------------------------------------------------------------------
@@ -241,6 +268,8 @@ ui = dashboardPage(
   
   # Main panel
   dashboardBody(
+    
+    useShinyjs(),
     
     tags$head(
       tags$style(
@@ -341,14 +370,14 @@ ui = dashboardPage(
                    column(6, W_input_pedigree),
                    
                    # Load example
-                   column(6, W_input_example),
+                   column(6, W_input_example)
                  ),
                  
                  
                  fluidRow(
                    # Allele frequency
                    column(3, W_afreq),
-                   
+                   column(3, W_mode)
                  ),
                  
                  dropdownMenu = boxDropdown(
@@ -362,6 +391,7 @@ ui = dashboardPage(
              
              # Phenotype selection
              box(width = 12,
+                 id = "box_pheno",
                  title = "Phenotypes",
                  collapsible = TRUE,
                  fluidRow(id = "pheno0",
@@ -379,8 +409,8 @@ ui = dashboardPage(
              ),
              
              # Risk factor selection
-             # helpText(h4("Risk factors", style = "color:white;background-color:#3295b8;padding:2px;font-size:110%;")),
              box(width = 12,
+                 id = "box_factor",
                  title = "Risk factors",
                  collapsible = TRUE,
                  collapsed = TRUE,
@@ -388,6 +418,19 @@ ui = dashboardPage(
                           column(6, W_factor_name),
                           column(2, offset = 2, W_factor_add),
                           column(2, W_factor_rmv)
+                 )
+             ),
+             
+             # Liability classes
+             box(width = 12,
+                 id = "box_lclass",
+                 title = "Liability classes",
+                 collapsible = TRUE,
+                 collapsed = TRUE,
+                 fluidRow(id = "lclass0",
+                          column(6, W_lclass_name),
+                          column(2, offset = 2, W_lclass_add),
+                          column(2, W_lclass_rmv)
                  )
              )
       ),
@@ -483,6 +526,23 @@ server = function(input, output, session) {
   
   # Reset session
   observeEvent(input$reset, session$reload()) 
+  
+  
+  
+  # Update mode (sidebar boxes)
+  observeEvent(ignoreInit = TRUE, input$mode, {
+    if(input$mode) {
+      shinyjs::hide("box_pheno")
+      shinyjs::hide("box_factor")
+      shinyjs::show("box_lclass")
+      
+    }
+    else {
+      shinyjs::show("box_pheno")
+      shinyjs::show("box_factor")
+      shinyjs::hide("box_lclass")
+    }
+  })
   
   
   
