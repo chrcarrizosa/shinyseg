@@ -15,7 +15,6 @@ library(ggplot2, quietly = TRUE)
 x = seq(1:100)
 
 # Notes
-#   Decimal places for age are ignored
 #   Add risk factors to penetrance plots?
 #   Missing ages?
 #   Add phenotype number to riskplots?
@@ -231,26 +230,26 @@ W_mode =
     value = FALSE
   )
 
-W_lclass_name = 
-  textInput(
-    inputId = "lclass_name",
-    label = NULL,
-    placeholder = "New liability class label"
-  )
-
-W_lclass_add =
-  actionButton(
-    inputId = "lclass_add",
-    label = "Add",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
-  )
-
-W_lclass_rmv = 
-  actionButton(
-    inputId = "lclass_rmv",
-    label = "Undo",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
-  )
+# W_lclass_name = 
+#   textInput(
+#     inputId = "lclass_name",
+#     label = NULL,
+#     placeholder = "New liability class label"
+#   )
+# 
+# W_lclass_add =
+#   actionButton(
+#     inputId = "lclass_add",
+#     label = "Add",
+#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
+#   )
+# 
+# W_lclass_rmv = 
+#   actionButton(
+#     inputId = "lclass_rmv",
+#     label = "Undo",
+#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
+#   )
 
 
 # UI ----------------------------------------------------------------------
@@ -427,11 +426,12 @@ ui = dashboardPage(
                  title = "Liability classes",
                  collapsible = TRUE,
                  # collapsed = TRUE,
-                 fluidRow(id = "lclass0",
-                          column(6, W_lclass_name),
-                          column(2, offset = 2, W_lclass_add),
-                          column(2, W_lclass_rmv)
-                 )
+                 # fluidRow(id = "lclass0",
+                 #          column(6, W_lclass_name),
+                 #          column(2, offset = 2, W_lclass_add),
+                 #          column(2, W_lclass_rmv)
+                 # ),
+                 rHandsontableOutput("lclassTable")
              )
       ),
       column(7,
@@ -461,7 +461,7 @@ ui = dashboardPage(
              #        # tabPanel("Hazards", plotOutput("hazardPlot"), height = "350px"),
              #        tabPanel(title = "Cumulative risks", plotOutput("CRPlot", height = "350px")),
              #        # tabPanel("Survival penetrance", plotOutput("SPPlot"), height = "350px"),
-             #        tabPanel(title = "Assistant",
+             #        tabPanel(title = "Help",
              #                 column(5,
              #                        inputPanel(
              #                          W_fhelp_dist,
@@ -522,6 +522,10 @@ server = function(input, output, session) {
   # values[["pheno_vector"]] = character()
   # values[["factor_vector"]] = character()
   values[["flb_v"]] = c("afreq")
+  values[["lclassdata"]] = data.frame(id = character(1),
+                                      f0 = 0.1,
+                                      f1 = 0.8,
+                                      f2 = 0.8)
   
   
   
@@ -630,7 +634,8 @@ server = function(input, output, session) {
                phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
-               age = c(40, 40, 10))
+               age = as.integer(c(40, 40, 10)),
+               lclass = as.integer(rep(1, 3)))
            },
            
            "Full siblings" = {
@@ -639,7 +644,8 @@ server = function(input, output, session) {
                phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
-               age = c(40, 40, 10, 10))
+               age = as.integer(c(40, 40, 10, 10)),
+               lclass = as.integer(rep(1, 4)))
            },
            
            "Example 1" = {
@@ -647,13 +653,15 @@ server = function(input, output, session) {
              if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
              if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
              add_pheno(values, "affected", params = c(0, 1, 200, 1, 50))
+             updateCheckboxInput(inputId = "mode", value = FALSE)
              
              temp = data.frame(
                nuclearPed(nch = 2),
                phenotype = factor(c("", "affected", "nonaff", "affected"), levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
                proband = c(FALSE, FALSE, FALSE, TRUE),
-               age = c(40, 40, 10, 10))
+               age = as.integer(c(40, 40, 10, 10)),
+               lclass = as.integer(rep(1, 4)))
            },
            
            "Example 2 (TODO)" = {
@@ -668,7 +676,8 @@ server = function(input, output, session) {
                phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
-               age = c(40, 40, 10, 10))
+               age = as.integer(c(40, 40, 10, 10)),
+               lclass = as.integer(rep(1, 4)))
            }
     )
     
@@ -691,8 +700,8 @@ server = function(input, output, session) {
                   manualColumnResize = TRUE,
                   rowHeaders = NULL,
                   height = if(nrow(values[["peddata"]])> 12) 300 else NULL) %>%
-      hot_col(col = 'age', format = "0") %>% 
       hot_validate_numeric(col = 'age', min = 1, max = 100, allowInvalid = FALSE) %>%
+      hot_validate_numeric(col = 'lclass', min = 1, max = nrow(values[["lclassdata"]]), allowInvalid = FALSE) %>%
       hot_table(highlightRow = TRUE) %>%
       hot_col(1:4, renderer = "function(instance, td, row, col, prop, value, cellProperties) {
                               Handsontable.renderers.NumericRenderer.apply(this, arguments);
@@ -712,7 +721,7 @@ server = function(input, output, session) {
 
     temp =
       within(
-        temp_full[,1:8], {
+        temp_full[,1:9], {
           if(!is.null(values[["factor_vector"]])){ # values[["factor_vector"]] != ''
             for(i in rev(values[["factor_vector"]])){
               if(!is.null(temp_full[[i]]))
@@ -780,6 +789,32 @@ server = function(input, output, session) {
   #   values[["peddata"]] = temp
   # 
   # })
+  
+  
+  
+  # Liability classes table
+  output$lclassTable = renderRHandsontable({
+    req(values[["lclassdata"]])
+    rhandsontable(values[["lclassdata"]],
+                  useTypes = TRUE,
+                  manualColumnResize = TRUE,
+                  # rowHeaders = NULL,
+                  height = if(nrow(values[["lclassdata"]])> 12) 300 else NULL) %>%
+      hot_validate_numeric(col = c('f0', 'f1', 'f2'), min = 0, max = 1, allowInvalid = FALSE) %>% 
+      hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
+  })
+  
+  
+  
+  # Update lclass data from table edits (this runs twice...)
+  observe(priority = 1, {
+    req(!is.null(input$lclassTable))
+    message("Update liability classes from table edits (this runs twice)")
+    
+    temp = hot_to_r(input$lclassTable)
+    values[["lclassdata"]] = temp
+    
+  })
   
   
   
@@ -913,17 +948,30 @@ server = function(input, output, session) {
     
     # Calculate BF
     values[["flb"]] = tryCatch(
-      FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-          affected = values[["affected"]],
-          unknown = values[["unknown"]],
-          proband = values[["proband"]],
-          if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-          if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-          if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-          freq = 10^input$afreq,
-          penetrances = values[["f"]][,c("f0", "f1", "f2")],
-          liability = values[["lclass"]],
-          details = FALSE),
+      if(input$mode)
+        FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
+            affected = values[["affected"]],
+            unknown = values[["unknown"]],
+            proband = values[["proband"]],
+            if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
+            if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
+            freq = 10^input$afreq,
+            penetrances = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")],
+            liability = values[["peddata"]][["lclass"]],
+            details = FALSE)
+      else
+        FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
+            affected = values[["affected"]],
+            unknown = values[["unknown"]],
+            proband = values[["proband"]],
+            if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
+            if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
+            freq = 10^input$afreq,
+            penetrances = values[["f"]][,c("f0", "f1", "f2")],
+            liability = values[["lclass"]],
+            details = FALSE),
       error = function(err) NULL)
   })
   
@@ -997,7 +1045,7 @@ server = function(input, output, session) {
     
     # Show if not null
     if(!is.null(values[["flb_vals"]]))
-      showModal(modalDialog(plotOutput("testplot"), size = "m"))
+      showModal(modalDialog(plotOutput("testplot", height = "550px"), size = "m"))
 
   })
   
