@@ -814,6 +814,10 @@ server = function(input, output, session) {
     temp = hot_to_r(input$lclassTable)
     values[["lclassdata"]] = temp
     
+    # Update sensitivity analysis choices
+    to_keep = grep("_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$", values[["flb_v"]], value = TRUE)
+    values[["flb_v"]] = c("afreq", paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("_f0", "_f1", "_f2"), paste0)))), to_keep)
+    
   })
   
   
@@ -999,7 +1003,9 @@ server = function(input, output, session) {
   
   observeEvent(input$flb_run, {
     
-    req(values[["pheno_total"]]>0, values[["peddata"]], input$flb_v1 != input$flb_v2)
+    req(values[["pheno_total"]]>0 | nrow(values[["lclassdata"]]) >=1, # (right now, not necessary due to 3rd condition + lack of choices)
+        values[["peddata"]],
+        input$flb_v1 != input$flb_v2)
     
     # Create grid of values
     values[["grid"]] = setNames(
@@ -1008,45 +1014,84 @@ server = function(input, output, session) {
       c(names(values[["flb_choices"]])[which(values[["flb_v"]] == input$flb_v1)],
         names(values[["flb_choices"]])[which(values[["flb_v"]] == input$flb_v2)])
     )
+
     
+    if(input$mode) {
+      
+      # Collect inputs
+      fullgrid = sapply(c("afreq"),
+                        function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+      fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
+      fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
+      fullgrid = as.data.frame(fullgrid)
+      
+      # Calculate FLB
+      values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
+        
+        # Get penetrance values
+        f = values[["lclassdata"]]
+        if(grepl("_f[0-2]$", input$flb_v1))
+          f[gsub("\\D+(\\d+)_.*", "\\1", input$flb_v1), gsub(".*_", "", input$flb_v1)] = values[["grid"]][i,1]
+        if(grepl("_f[0-2]$", input$flb_v2))
+          f[gsub("\\D+(\\d+)_.*", "\\1", input$flb_v2), gsub(".*_", "", input$flb_v2)] = values[["grid"]][i,2]
+        f = data.matrix(f)[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")]
+        
+        # Calculate BF
+        tryCatch(
+          FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
+              affected = values[["affected"]],
+              unknown = values[["unknown"]],
+              proband = values[["proband"]],
+              if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+              if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
+              if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
+              freq = 10^fullgrid[i, "afreq"],
+              penetrances = f,
+              liability = values[["peddata"]][["lclass"]],
+              details = FALSE),
+          error = function(err) NULL)
+      })
+    }
     
-    # Collect inputs
-    fullgrid = sapply(c("afreq", "pheno_dist",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
-                        if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
-                      function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
-    fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
-    fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
-    fullgrid = as.data.frame(fullgrid)
+    else {
+      # Collect inputs
+      fullgrid = sapply(c("afreq", "pheno_dist",
+                          if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
+                          if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+                        function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+      fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
+      fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
+      fullgrid = as.data.frame(fullgrid)
+      
+      
+      # Calculate FLB
+      values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
+        
+        # Get penetrance values
+        f = get_f(x, values, fullgrid[i,], sensitivity = TRUE)
+        
+        # Calculate BF
+        tryCatch(
+          FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
+              affected = values[["affected"]],
+              unknown = values[["unknown"]],
+              proband = values[["proband"]],
+              if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
+              if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
+              if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
+              freq = 10^fullgrid[i, "afreq"],
+              penetrances = f[,c("f0", "f1", "f2")],
+              liability = values[["lclass"]],
+              details = FALSE),
+          error = function(err) NULL)
+      })
+    }
     
-  
-    # Calculate FLB
-    values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
-      
-      # Get penetrance values
-      f = get_f(x, values, fullgrid[i,], sensitivity = TRUE)
-      
-      # Calculate BF
-      tryCatch(
-        FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-            affected = values[["affected"]],
-            unknown = values[["unknown"]],
-            proband = values[["proband"]],
-            if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-            if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-            freq = 10^fullgrid[i, "afreq"],
-            penetrances = f[,c("f0", "f1", "f2")],
-            liability = values[["lclass"]],
-            details = FALSE),
-        error = function(err) NULL)
-      
-    })
     
     # Show if not null
     if(!is.null(values[["flb_vals"]]))
       showModal(modalDialog(plotOutput("testplot", height = "550px"), size = "m"))
-
+    
   })
   
   
@@ -1100,18 +1145,18 @@ server = function(input, output, session) {
   })
   
   # Update sensitivity analysis choices
-  observeEvent(values[["flb_v"]], {
-    sortedlist = factor(values[["flb_v"]],
-                        levels = c("afreq",
-                                   paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
-                                   paste0("factor", seq(values[["factor_total"]]), "_risk")))
-    sortedlist = sort(sortedlist)
-    names(sortedlist) = c("log10(afreq)",
-                          if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "f1 coef"), paste))),
-                          if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)"))
-    updateSelectInput(inputId = "flb_v1", choices = sortedlist, selected = values[["flb_v1"]])
-    updateSelectInput(inputId = "flb_v2", choices = sortedlist, selected = values[["flb_v2"]])
-    values[["flb_choices"]] = sortedlist
+  observeEvent(ignoreInit = TRUE, c(values[["flb_v"]], input$mode), {
+    choicelist = values[["flb_v"]]
+    names(choicelist) = c("log10(afreq)",
+                          if(nrow(values[["lclassdata"]])>=1) paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("f0", "f1", "f2"), paste)))),
+                          if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "log(f1 coef)"), paste))),
+                          if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)")
+    )
+    to_keep = ifelse(input$mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$"))
+    choicelist = choicelist[grep(to_keep, choicelist)]
+    updateSelectInput(inputId = "flb_v1", choices = choicelist, selected = values[["flb_v1"]])
+    updateSelectInput(inputId = "flb_v2", choices = choicelist, selected = values[["flb_v2"]])
+    values[["flb_choices"]] = choicelist
   })
   
   # Update sliders
@@ -1123,8 +1168,12 @@ server = function(input, output, session) {
                         "f0b" = c(5, 500),
                         "f2b" = c(5, 500),
                         "f1v" = c(-3, +3),
-                        "risk" = c(-3, +3))
-    updateSliderInput(inputId = "flb_s1", min = slidervals[1], max = slidervals[2], value = slidervals)
+                        "risk" = c(-3, +3),
+                        "f0" = c(0.001, 0.999),
+                        "f1" = c(0.001, 0.999),
+                        "f2" = c(0.001, 0.999))
+    stepsize = (slidervals[2]-slidervals[1])/100
+    updateSliderInput(inputId = "flb_s1", min = slidervals[1], max = slidervals[2], step = stepsize, value = slidervals)
   })
   observeEvent(input$flb_v2, {
     slidervals = switch(gsub(".*_", "", input$flb_v2),
@@ -1134,8 +1183,12 @@ server = function(input, output, session) {
                         "f0b" = c(5, 500),
                         "f2b" = c(5, 500),
                         "f1v" = c(-3, +3),
-                        "risk" = c(-3, +3))
-    updateSliderInput(inputId = "flb_s2", min = slidervals[1], max = slidervals[2], value = slidervals)
+                        "risk" = c(-3, +3),
+                        "f0" = c(0.001, 0.999),
+                        "f1" = c(0.001, 0.999),
+                        "f2" = c(0.001, 0.999))
+    stepsize = (slidervals[2]-slidervals[1])/100
+    updateSliderInput(inputId = "flb_s2", min = slidervals[1], max = slidervals[2], step = stepsize, value = slidervals)
   }) 
   
   
