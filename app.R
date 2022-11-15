@@ -106,82 +106,6 @@ W_fhelp_dist =
     choices = c("Weibull", "Log-logist")
   )
 
-W_fhelp1_p =
-  numericInput(
-    inputId = 'fhelp1_p',
-    label = 'Quantile',
-    value = 0.25,
-    min = 0,
-    max = 1,
-    step = 0.05
-  )
-
-W_fhelp1_q =
-  numericInput(
-    inputId = 'fhelp1_q',
-    label = 'Age',
-    value = 40,
-    min = 1,
-    max = 100,
-    step = 1
-  )
-
-
-W_fhelp2_p =
-  numericInput(
-    inputId = 'fhelp2_p',
-    label = NULL,
-    value = 0.50,
-    min = 0,
-    max = 1,
-    step = 0.05
-  )
-
-W_fhelp2_q =
-  numericInput(
-    inputId = 'fhelp2_q',
-    label = NULL,
-    value = 50,
-    min = 1,
-    max = 100,
-    step = 1
-  )
-
-W_fhelp3_p =
-  numericInput(
-    inputId = 'fhelp3_p',
-    label = NULL,
-    value = 0.75,
-    min = 0,
-    max = 1,
-    step = 0.05
-  )
-
-W_fhelp3_q =
-  numericInput(
-    inputId = 'fhelp3_q',
-    label = NULL,
-    value = 60,
-    min = 1,
-    max = 100,
-    step = 1
-  )
-
-W_fhelp_add =
-  actionButton(
-    inputId = "fhelp_add",
-    label = "Add pair",
-    # style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:90%"
-  )
-
-W_fhelp_rmv =
-  actionButton(
-    inputId = "fhelp_rmv",
-    label = "Undo",
-    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:90%"
-  )
-
 W_flb_v1 = 
   selectInput(
     inputId = "flb_v1",
@@ -230,26 +154,6 @@ W_mode =
     value = TRUE
   )
 
-# W_lclass_name = 
-#   textInput(
-#     inputId = "lclass_name",
-#     label = NULL,
-#     placeholder = "New liability class label"
-#   )
-# 
-# W_lclass_add =
-#   actionButton(
-#     inputId = "lclass_add",
-#     label = "Add",
-#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#d9ead3;font-size:80%;margin-left:-10px"
-#   )
-# 
-# W_lclass_rmv = 
-#   actionButton(
-#     inputId = "lclass_rmv",
-#     label = "Undo",
-#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#4b4b4b;border:1px solid #d4d4d4;background-color:#f4cccc;font-size:80%;margin-left:-10px"
-#   )
 
 
 # UI ----------------------------------------------------------------------
@@ -414,6 +318,7 @@ ui = dashboardPage(
                           column(2, offset = 2, W_pheno_add),
                           column(2, W_pheno_rmv)
                  ),
+                 actionLink(inputId = "link1", label = "Help"),
                  sidebar = boxSidebar(
                    width = 100,
                    id = "pheno_sidebar",
@@ -477,41 +382,12 @@ ui = dashboardPage(
                    style = "circle"
                  )
              ),
-             # tabBox(width = 6,
-             #        title = "Penetrance",
-             #        side = "right",
-             #        # tabPanel("Hazards", plotOutput("hazardPlot"), height = "350px"),
-             #        tabPanel(title = "Cumulative risks", plotOutput("CRPlot", height = "350px")),
-             #        # tabPanel("Survival penetrance", plotOutput("SPPlot"), height = "350px"),
-             #        tabPanel(title = "Help",
-             #                 column(5,
-             #                        inputPanel(
-             #                          W_fhelp_dist,
-             #                          div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
-             #                              verbatimTextOutput("fhelp_text")),
-             #                          fluidRow(id = "fhelp1", class = 'littlei',
-             #                                   column(6, W_fhelp1_p),
-             #                                   column(5, W_fhelp1_q)),
-             #                          fluidRow(id = "fhelp2",
-             #                                   column(6, style = "margin-top:-10px", W_fhelp2_p),
-             #                                   column(5, style = "margin-top:-10px", W_fhelp2_q)),
-             #                          fluidRow(id = "fhelp3",
-             #                                   column(6, style = "margin-top:-10px", W_fhelp3_p),
-             #                                   column(5, style = "margin-top:-10px", W_fhelp3_q)),
-             #                          fluidRow(column(4, offset = 2, W_fhelp_add),
-             #                                   column(3, W_fhelp_rmv)
-             #                          )
-             #                        )
-             #                 ),
-             #                 column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
-             #        )
-             # ),
              box(width = 6,
                  title = "FLB",
                  collapsible = TRUE,
                  verbatimTextOutput("flb_main"),
                  # HTML("<br><br><br><br><br><br>"),
-                 plotOutput(outputId = "flb_colorbar", height = "60px"),
+                 plotOutput(outputId = "flb_colorbar", height = "55px"),
                  HTML("<br><br><br>"),
                  # fluidRow(
                    fluidRow(column(6, W_flb_v1), column(6, W_flb_s1)),
@@ -535,7 +411,6 @@ server = function(input, output, session) {
   
   # Reactive values object
   values = reactiveValues()
-  values[["fhelp_total"]] = 3
   values[["pheno_total"]] = 0
   values[["factor_total"]] = 0
   values[["flb_v"]] = c("afreq")
@@ -543,7 +418,8 @@ server = function(input, output, session) {
                                       f0 = 0.1,
                                       f1 = 0.8,
                                       f2 = 0.8)
-  
+  values[["fhelpdata"]] = data.frame(quantile = c(0.25, 0.50, 0.75),
+                                      age = as.integer(c(20, 40, 60)))
   
   
   # Reset session
@@ -1085,18 +961,6 @@ server = function(input, output, session) {
   
   
   
-  # Add/remove penetrance data
-  observeEvent(input$fhelp_add, {
-    req(values[["fhelp_total"]]<9)
-    add_fhelp(values)
-  })
-  observeEvent(input$fhelp_rmv, {
-    req(values[["fhelp_total"]]>3)
-    rmv_fhelp(values)
-  })
-  
-  
-  
   # Add/remove phenotypes
   observeEvent(input$pheno_add, {
     req(values[["pheno_total"]] < 9,
@@ -1181,25 +1045,23 @@ server = function(input, output, session) {
   }) 
   
   
-  # F helper values
+  # fhelp values
   observe({
-    validate(
-      need(input[[paste0("fhelp", values[["fhelp_total"]], "_p")]], ""),
-      need(input[[paste0("fhelp", values[["fhelp_total"]], "_q")]], "")
-      )
-    values[["fhelp_p"]] = sapply(paste0("fhelp", seq(values[["fhelp_total"]]), "_p"), function(x) input[[x]])
-    values[["fhelp_q"]] = sapply(paste0("fhelp", seq(values[["fhelp_total"]]), "_q"), function(x) input[[x]])
+    values[["fhelp_p"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "quantile"]
+    values[["fhelp_q"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "age"]
     
-    values[["fhelp_sol"]] = switch(input$fhelp_dist,
-                                   "Weibull" = optim(par = c(0, 1), function(params) {
-                                     summand = suppressWarnings(pweibull(q = values[["fhelp_q"]], shape = params[1], scale = params[2]) - values[["fhelp_p"]])
-                                     sum(summand^2)},
-                                     method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000)),
-                                   "Log-logist" = optim(par = c(0, 1), function(params) {
-                                     summand = suppressWarnings(pllogis(q = values[["fhelp_q"]], shape = params[1], scale = params[2]) - values[["fhelp_p"]])
-                                     sum(summand^2)},
-                                     method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000)))
-      
+    values[["fhelp_sol"]] = 
+      tryCatch(
+        switch(input$fhelp_dist,
+               "Weibull" = optim(par = c(0, 1), function(params) {
+                 summand = suppressWarnings(pweibull(q = values[["fhelp_q"]], shape = params[1], scale = params[2]) - values[["fhelp_p"]])
+                 sum(summand^2)},
+                 method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000)),
+               "Log-logist" = optim(par = c(0, 1), function(params) {
+                 summand = suppressWarnings(pllogis(q = values[["fhelp_q"]], shape = params[1], scale = params[2]) - values[["fhelp_p"]])
+                 sum(summand^2)},
+                 method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000))),
+        error = function(err) NULL)
   })
   
   output$fhelp_plot = renderPlot({
@@ -1228,6 +1090,55 @@ server = function(input, output, session) {
   })
   
   
+  
+  observeEvent(input$link1, {
+    showModal(modalDialog(
+      # h5("Data Guidelines"),
+      # tags$ol(
+      #   tags$li("Must have Resp_ID as the first column, occasion_ID as second and dependent variable as the third"), 
+      #   tags$li("Must have no missing value in any fields")
+      # ),
+      fluidRow(
+        column(5,
+               inputPanel(
+                 W_fhelp_dist,
+                 div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
+                     verbatimTextOutput("fhelp_text")),
+                 rHandsontableOutput("fhelpTable")
+               )
+        ),
+        column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
+      ),
+      easyClose = TRUE, footer = NULL, size = "m")
+    )
+  })
+  
+  
+  
+  # fhelp table
+  output$fhelpTable = renderRHandsontable({
+    req(values[["fhelpdata"]])
+    rhandsontable(values[["fhelpdata"]],
+                  useTypes = TRUE,
+                  manualColumnResize = TRUE,
+                  # rowHeaders = NULL,
+                  height = if(nrow(values[["fhelpdata"]])> 12) 300 else NULL) %>%
+      hot_validate_numeric(col = 'quantile', min = 0, max = 1, allowInvalid = FALSE) %>% 
+      hot_validate_numeric(col = 'age', min = 0, max = 100, allowInvalid = FALSE) %>% 
+      hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
+  })
+  
+  
+  
+  # Update fhelp data from table edits (this runs twice...)
+  observe(priority = 1, {
+    req(!is.null(input$fhelpTable))
+    message("Update fhelp from table edits (this runs twice)")
+    
+    temp = hot_to_r(input$fhelpTable)
+    values[["fhelpdata"]] = temp
+    
+  })
 }
 
 

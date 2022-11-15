@@ -128,32 +128,3 @@ rmv_factor = function(values, all = FALSE) {
   
   values[["factor_total"]] = values[["factor_total"]] - length(to_remove)
 }
-
-
-
-add_fhelp = function(values) {
-  insertUI(
-    selector = paste0("#fhelp", values[["fhelp_total"]]),
-    where = "afterEnd",
-    ui = fluidRow(id = paste0("fhelp", values[["fhelp_total"]]+1),
-                  column(6, style = "margin-top:-10px",
-                         numericInput(inputId = paste0("fhelp", values[["fhelp_total"]] + 1, "_p"),
-                                      label = NULL, value = 0, min = 0, max = 1, step = 0.05)),
-                  column(5, style = "margin-top:-10px",
-                         numericInput(inputId = paste0("fhelp", values[["fhelp_total"]] + 1, "_q"),
-                                      label = NULL, value = 1, min = 1, max = 100, step = 1))
-    )
-  )
-  values[["fhelp_total"]] = values[["fhelp_total"]] + 1
-}
-
-
-
-rmv_fhelp = function(values) {
-  id = c(paste0("fhelp", values[["fhelp_total"]], "_p"), paste0("fhelp", values[["fhelp_total"]], "_q"))
-  removeUI(
-    selector = paste0("div:has(> #", id, ")"),
-    multiple = TRUE
-  )
-  values[["fhelp_total"]] = values[["fhelp_total"]] - 1
-}
