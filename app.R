@@ -227,7 +227,7 @@ W_mode =
   checkboxInput(
     inputId = "mode",
     label = "Custom liab classes",
-    value = FALSE
+    value = TRUE
   )
 
 # W_lclass_name = 
@@ -260,7 +260,23 @@ ui = dashboardPage(
   skin = "black",
   
   # Application title
-  dashboardHeader(title = "shinyseg"),
+  dashboardHeader(
+    title = "shinyseg"#,
+    # dropdownMenu(type = "tasks", badgeStatus = "success",
+    #              taskItem(value = 90, color = "green",
+    #                       "Documentation"
+    #              ),
+    #              taskItem(value = 17, color = "aqua",
+    #                       "Project X"
+    #              ),
+    #              taskItem(value = 75, color = "yellow",
+    #                       "Server deployment"
+    #              ),
+    #              taskItem(value = 80, color = "red",
+    #                       "Overall project"
+    #              )
+    # )
+  ),
   
   # Sidebar
   dashboardSidebar(disable = TRUE, width = 0, minified = FALSE),
@@ -438,14 +454,20 @@ ui = dashboardPage(
              box(width = 12,
                  title = "Pedigree table",
                  collapsible = TRUE,
-                 rHandsontableOutput("pedTable"),
-                 label = boxLabel(
-                   text = 1,
-                   status = "danger",
-                   style = "circle"
-                 )
+                 rHandsontableOutput("pedTable")
              ),
+             # box(width = 3,
+             #     title = "Info",
+             #     collapsible = TRUE,
+             #     p(HTML("hello<br><br><br><br><br>")),
+             #     label = boxLabel(
+             #       text = 1,
+             #       status = "danger",
+             #       style = "circle"
+             #     )
+             # ),
              box(width = 6,
+                 id = "box_pedplot",
                  title = "Plot",
                  collapsible = TRUE,
                  plotOutput("pedPlot", height = "350px"),
@@ -488,17 +510,14 @@ ui = dashboardPage(
                  title = "FLB",
                  collapsible = TRUE,
                  verbatimTextOutput("flb_main"),
-                 HTML("<br><br><br><br><br><br>"),
+                 # HTML("<br><br><br><br><br><br>"),
                  plotOutput(outputId = "flb_colorbar", height = "60px"),
-                 sidebar = boxSidebar(
-                   width = 100,
-                   id = "flb_sidebar",
-                   background = "white",
+                 HTML("<br><br><br>"),
+                 # fluidRow(
                    fluidRow(column(6, W_flb_v1), column(6, W_flb_s1)),
                    fluidRow(column(6, W_flb_v2), column(6, W_flb_s2)),
                    W_flb_run
-                   
-                 )
+                 # )
              )
              
       )
@@ -519,8 +538,6 @@ server = function(input, output, session) {
   values[["fhelp_total"]] = 3
   values[["pheno_total"]] = 0
   values[["factor_total"]] = 0
-  # values[["pheno_vector"]] = character()
-  # values[["factor_vector"]] = character()
   values[["flb_v"]] = c("afreq")
   values[["lclassdata"]] = data.frame(id = character(1),
                                       f0 = 0.1,
@@ -563,13 +580,16 @@ server = function(input, output, session) {
   
   
   # Update phenotype selection
-  observeEvent(priority = 2, ignoreNULL = FALSE, values[["pheno_vector"]], {
+  observeEvent(priority = 2, ignoreNULL = FALSE, c(input$mode, values[["pheno_vector"]]), {
     req(values[["peddata"]])
     message("Update phenotype selection")
-    
-    temp = factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", values[["pheno_vector"]]))
+    print(input$mode)
+    temp = if(input$mode) factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", "aff", values[["pheno_vector"]]),
+                                 labels = c("", "nonaff", rep("aff", 1+length(values[["pheno_vector"]]))))
+    else factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", values[["pheno_vector"]]))
     temp[is.na(temp)] = ""
     values[["peddata"]]["phenotype"] = temp
+    print(temp)
   })
   
   
@@ -606,10 +626,12 @@ server = function(input, output, session) {
     message("Load pedigree from file")
     temp = data.frame(
       readRDS(input$input_pedigree$datapath),
-      phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+      phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+      else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
       carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
       proband = FALSE,
-      age = 50)
+      age = as.integer(50),
+      lclass = as.integer(1))
     
     # Attach factors
     if(!is.null(values[["factor_vector"]])) # not needed...
@@ -618,6 +640,14 @@ server = function(input, output, session) {
     values[["peddata"]] = temp
   })
   
+  
+  
+  # Change mode for example pedigrees (higher priority)
+  observeEvent(priority = 1000, ignoreInit = TRUE, ignoreNULL = TRUE, input$input_example, {
+    req(input$input_example != "")
+    if(input$input_example == "Example 1")
+      updateCheckboxInput(inputId = "mode", value = FALSE)
+  })
   
   
   # Example pedigree (+ factors)
@@ -631,7 +661,8 @@ server = function(input, output, session) {
            "Trio" = {
              temp = data.frame(
                nuclearPed(),
-               phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = as.integer(c(40, 40, 10)),
@@ -641,7 +672,8 @@ server = function(input, output, session) {
            "Full siblings" = {
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = as.integer(c(40, 40, 10, 10)),
@@ -649,15 +681,20 @@ server = function(input, output, session) {
            },
            
            "Example 1" = {
+             
+             if(input$mode){
+               updateCheckboxInput(inputId = "mode", value = FALSE)
+               freezeReactiveValue(input, "mode")
+             }
+             
              # Update UI
              if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
              if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
-             add_pheno(values, "affected", params = c(0, 1, 200, 1, 50))
-             updateCheckboxInput(inputId = "mode", value = FALSE)
+             add_pheno(values, "pheno1", params = c(0, 1, 200, 1, 50))
              
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = factor(c("", "affected", "nonaff", "affected"), levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
                proband = c(FALSE, FALSE, FALSE, TRUE),
                age = as.integer(c(40, 40, 10, 10)),
@@ -673,7 +710,8 @@ server = function(input, output, session) {
              #   age = c(40, 40, 10, 10))
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = factor("nonaff", levels = c("", "nonaff", values[["pheno_vector"]])),
+               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
                age = as.integer(c(40, 40, 10, 10)),
@@ -686,7 +724,7 @@ server = function(input, output, session) {
       temp[, values[["factor_vector"]]] = FALSE
     
     values[["peddata"]] = temp
-    
+
     updateSelectInput(inputId = "input_example", selected = "")
   })
   
@@ -699,7 +737,8 @@ server = function(input, output, session) {
                   useTypes = TRUE,
                   manualColumnResize = TRUE,
                   rowHeaders = NULL,
-                  height = if(nrow(values[["peddata"]])> 12) 300 else NULL) %>%
+                  # height = if(nrow(values[["peddata"]])> 12) 300 else NULL
+                  height = 175) %>%
       hot_validate_numeric(col = 'age', min = 1, max = 100, allowInvalid = FALSE) %>%
       hot_validate_numeric(col = 'lclass', min = 1, max = nrow(values[["lclassdata"]]), allowInvalid = FALSE) %>%
       hot_table(highlightRow = TRUE) %>%
@@ -739,56 +778,6 @@ server = function(input, output, session) {
     values[["peddata"]] = temp
     
   })
-  
-  
-  
-  # # Update data from table edits (this runs twice...)
-  # observe({
-  #   req(!is.null(input$pedTable))
-  #   
-  #   values[["peddata"]] =
-  #     within(
-  #       hot_to_r(input$pedTable)[,1:8], {
-  #         if(!is.null(values[["factor_vector"]])){ # values[["factor_vector"]] != ''
-  #           for(i in rev(values[["factor_vector"]])){
-  #             if(!is.null(hot_to_r(input$pedTable)[[i]]))
-  #               assign(i, hot_to_r(input$pedTable)[[i]])
-  #             else
-  #               assign(i, FALSE)
-  #           }
-  #           rm(i)
-  #         }
-  #       }
-  #     )
-  # })
-  
-  
-  
-  # # Update data from table edits (this runs twice...)
-  # observe(priority = -1000, {
-  #   req(!is.null(input$pedTable))
-  #   
-  #   print('oh')
-  #   
-  #   temp = hot_to_r(input$pedTable)[,1:8]
-  #   
-  #   # within(
-  #   #   temp, {
-  #   #     if(!is.null(values[["factor_vector"]])){ # values[["factor_vector"]] != ''
-  #   #       for(i in rev(values[["factor_vector"]])){
-  #   #         if(!is.null(hot_to_r(input$pedTable)[[i]]))
-  #   #           assign(i, hot_to_r(input$pedTable)[[i]])
-  #   #         else
-  #   #           assign(i, FALSE)
-  #   #       }
-  #   #       rm(i)
-  #   #     }
-  #   #   }
-  #   # )
-  #   
-  #   values[["peddata"]] = temp
-  # 
-  # })
   
   
   
@@ -853,7 +842,7 @@ server = function(input, output, session) {
   # Update penetrances
   observe({
     
-    req(values[["pheno_total"]]>0)
+    req(!input$mode, values[["pheno_total"]]>0)
     
     # Validate that all neccesary UI inputs are created
     validate(need(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]], ""))
@@ -877,7 +866,7 @@ server = function(input, output, session) {
   
   # Update liability class groups (problem with double run)
   observe(priority = -1, {
-    req(values[["peddata"]])
+    req(!input$mode, values[["peddata"]])
     
     message("Update liability class groups (problem with double run)")
 
