@@ -1011,8 +1011,8 @@ server = function(input, output, session) {
     values[["grid"]] = setNames(
       expand.grid(seq(input$flb_s1[1], input$flb_s1[2], l = 10),
                   seq(input$flb_s2[1], input$flb_s2[2], l = 10)),
-      c(names(values[["flb_choices"]])[which(values[["flb_v"]] == input$flb_v1)],
-        names(values[["flb_choices"]])[which(values[["flb_v"]] == input$flb_v2)])
+      c(names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v1)],
+        names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v2)])
     )
 
     
