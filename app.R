@@ -149,7 +149,7 @@ W_flb_run =
 
 W_mode = 
   checkboxInput(
-    inputId = "mode",
+    inputId = "lclass_mode",
     label = "Custom liab classes",
     value = TRUE
   )
@@ -420,6 +420,7 @@ server = function(input, output, session) {
                                       f2 = 0.8)
   values[["fhelpdata"]] = data.frame(quantile = c(0.25, 0.50, 0.75),
                                       age = as.integer(c(20, 40, 60)))
+  # values[["fhelp_choices"]] = ""
   
   
   # Reset session
@@ -428,8 +429,8 @@ server = function(input, output, session) {
   
   
   # Update mode (sidebar boxes)
-  observeEvent(input$mode, {
-    if(input$mode) {
+  observeEvent(input$lclass_mode, {
+    if(input$lclass_mode) {
       shinyjs::hide("box_pheno")
       shinyjs::hide("box_factor")
       shinyjs::show("box_lclass")
@@ -456,11 +457,11 @@ server = function(input, output, session) {
   
   
   # Update phenotype selection
-  observeEvent(priority = 2, ignoreNULL = FALSE, c(input$mode, values[["pheno_vector"]]), {
+  observeEvent(priority = 2, ignoreNULL = FALSE, c(input$lclass_mode, values[["pheno_vector"]]), {
     req(values[["peddata"]])
     message("Update phenotype selection")
-    print(input$mode)
-    temp = if(input$mode) factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", "aff", values[["pheno_vector"]]),
+    print(input$lclass_mode)
+    temp = if(input$lclass_mode) factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", "aff", values[["pheno_vector"]]),
                                  labels = c("", "nonaff", rep("aff", 1+length(values[["pheno_vector"]]))))
     else factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", values[["pheno_vector"]]))
     temp[is.na(temp)] = ""
@@ -502,7 +503,7 @@ server = function(input, output, session) {
     message("Load pedigree from file")
     temp = data.frame(
       readRDS(input$input_pedigree$datapath),
-      phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+      phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
       else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
       carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
       proband = FALSE,
@@ -522,7 +523,7 @@ server = function(input, output, session) {
   observeEvent(priority = 1000, ignoreInit = TRUE, ignoreNULL = TRUE, input$input_example, {
     req(input$input_example != "")
     if(input$input_example == "Example 1")
-      updateCheckboxInput(inputId = "mode", value = FALSE)
+      updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
   })
   
   
@@ -537,7 +538,7 @@ server = function(input, output, session) {
            "Trio" = {
              temp = data.frame(
                nuclearPed(),
-               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
@@ -548,7 +549,7 @@ server = function(input, output, session) {
            "Full siblings" = {
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
@@ -558,9 +559,9 @@ server = function(input, output, session) {
            
            "Example 1" = {
              
-             if(input$mode){
-               updateCheckboxInput(inputId = "mode", value = FALSE)
-               freezeReactiveValue(input, "mode")
+             if(input$lclass_mode){
+               updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
+               freezeReactiveValue(input, "lclass_mode")
              }
              
              # Update UI
@@ -586,7 +587,7 @@ server = function(input, output, session) {
              #   age = c(40, 40, 10, 10))
              temp = data.frame(
                nuclearPed(nch = 2),
-               phenotype = if(input$mode) factor("", levels = c("", "nonaff", "aff"))
+               phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
@@ -718,7 +719,7 @@ server = function(input, output, session) {
   # Update penetrances
   observe({
     
-    req(!input$mode, values[["pheno_total"]]>0)
+    req(!input$lclass_mode, values[["pheno_total"]]>0)
     
     # Validate that all neccesary UI inputs are created
     validate(need(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]], ""))
@@ -742,7 +743,7 @@ server = function(input, output, session) {
   
   # Update liability class groups (problem with double run)
   observe(priority = -1, {
-    req(!input$mode, values[["peddata"]])
+    req(!input$lclass_mode, values[["peddata"]])
     
     message("Update liability class groups (problem with double run)")
 
@@ -817,7 +818,7 @@ server = function(input, output, session) {
     
     # Calculate BF
     values[["flb"]] = tryCatch(
-      if(input$mode)
+      if(input$lclass_mode)
         FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
             affected = values[["affected"]],
             unknown = values[["unknown"]],
@@ -881,7 +882,7 @@ server = function(input, output, session) {
     )
 
     
-    if(input$mode) {
+    if(input$lclass_mode) {
       
       # Collect inputs
       fullgrid = sapply(c("afreq"),
@@ -998,18 +999,30 @@ server = function(input, output, session) {
   })
   
   # Update sensitivity analysis choices
-  observeEvent(ignoreInit = TRUE, c(values[["flb_v"]], input$mode), {
-    choicelist = values[["flb_v"]]
-    names(choicelist) = c("log10(afreq)",
+  observeEvent(ignoreInit = TRUE, c(values[["flb_v"]], input$lclass_mode), {
+    # observe({
+    allvars = values[["flb_v"]]
+    names(allvars) = c("log10(afreq)",
                           if(nrow(values[["lclassdata"]])>=1) paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("f0", "f1", "f2"), paste)))),
                           if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "log(f1 coef)"), paste))),
                           if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)")
     )
-    to_keep = ifelse(input$mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$"))
-    choicelist = choicelist[grep(to_keep, choicelist)]
-    updateSelectInput(inputId = "flb_v1", choices = choicelist, selected = values[["flb_v1"]])
-    updateSelectInput(inputId = "flb_v2", choices = choicelist, selected = values[["flb_v2"]])
-    values[["flb_choices"]] = choicelist
+    to_keep = ifelse(input$lclass_mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$"))
+    flb_choices = allvars[grep(to_keep, allvars)]
+    updateSelectInput(inputId = "flb_v1", choices = flb_choices, selected = values[["flb_v1"]])
+    updateSelectInput(inputId = "flb_v2", choices = flb_choices, selected = values[["flb_v2"]])
+    values[["flb_choices"]] = flb_choices
+    
+    # fhelp transfer options
+    if(!input$lclass_mode & values[["pheno_total"]]>0) {
+      # newvars = flb_choices[1 + rep(c(1,3,5), values[["pheno_total"]]) + rep(seq(0, 5*(values[["pheno_total"]]-1), 5), each = 3)]
+      # values[["fhelp_choices"]] = c("", newvars)
+      fhelp_choices = c("", paste0("pheno", as.vector(t(outer(1:values[["pheno_total"]], c("_f0", "_f2"), paste0)))))
+      names(fhelp_choices) = c("", as.vector(t(outer(values[["pheno_vector"]], c("f0", "f2"), paste))))
+      values[["fhelp_choices"]] = fhelp_choices
+    }
+    else 
+      values[["fhelp_choices"]] = ""
   })
   
   # Update sliders
@@ -1107,7 +1120,8 @@ server = function(input, output, session) {
                  rHandsontableOutput("fhelpTable")
                )
         ),
-        column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
+        column(7, plotOutput(outputId = "fhelp_plot", height = "350px")),
+        selectInput(inputId = "fhelp_transfer", label = "Transfer to", choices = values[["fhelp_choices"]])
       ),
       easyClose = TRUE, footer = NULL, size = "m")
     )
@@ -1139,6 +1153,17 @@ server = function(input, output, session) {
     values[["fhelpdata"]] = temp
     
   })
+  
+  
+  # Transfer parameters (selection inside modal)
+  observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
+    req(input$fhelp_transfer != "")
+    message("Transfering parameters")
+    updateNumericInput(inputId = paste0(input$fhelp_transfer, "a"), value = values[["fhelp_sol"]]$par[1])
+    updateNumericInput(inputId = paste0(input$fhelp_transfer, "b"), value = values[["fhelp_sol"]]$par[2])
+    updateSelectInput(inputId = "fhelp_transfer", selected = "")
+  })
+
 }
 
 
