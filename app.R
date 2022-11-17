@@ -140,6 +140,13 @@ W_flb_s2 =
     value = c(-5,-1)
   )
 
+# W_flb_show = 
+#   actionButton(
+#     inputId = "flb_show",
+#     label = "Calculate",
+#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+#   )
+
 W_flb_run = 
   actionButton(
     inputId = "flb_run",
@@ -147,13 +154,19 @@ W_flb_run =
     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
   )
 
-W_mode = 
+W_lclass_mode = 
   checkboxInput(
     inputId = "lclass_mode",
     label = "Custom liab classes",
     value = TRUE
   )
 
+W_sexspec_mode =
+  checkboxInput(
+    inputId = "sexspec_mode",
+    label = "Sex-specific parameters",
+    value = FALSE
+  )
 
 
 # UI ----------------------------------------------------------------------
@@ -296,7 +309,8 @@ ui = dashboardPage(
                  fluidRow(
                    # Allele frequency
                    column(3, W_afreq),
-                   column(3, W_mode)
+                   column(4, offset = 1, W_lclass_mode),
+                   column(4, W_sexspec_mode)
                  ),
                  
                  dropdownMenu = boxDropdown(
@@ -386,6 +400,7 @@ ui = dashboardPage(
                  title = "FLB",
                  collapsible = TRUE,
                  verbatimTextOutput("flb_main"),
+                 # W_flb_show,
                  # HTML("<br><br><br><br><br><br>"),
                  plotOutput(outputId = "flb_colorbar", height = "55px"),
                  HTML("<br><br><br>"),
@@ -460,13 +475,11 @@ server = function(input, output, session) {
   observeEvent(priority = 2, ignoreNULL = FALSE, c(input$lclass_mode, values[["pheno_vector"]]), {
     req(values[["peddata"]])
     message("Update phenotype selection")
-    print(input$lclass_mode)
     temp = if(input$lclass_mode) factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", "aff", values[["pheno_vector"]]),
                                  labels = c("", "nonaff", rep("aff", 1+length(values[["pheno_vector"]]))))
     else factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", values[["pheno_vector"]]))
     temp[is.na(temp)] = ""
     values[["peddata"]]["phenotype"] = temp
-    print(temp)
   })
   
   
@@ -519,12 +532,12 @@ server = function(input, output, session) {
   
   
   
-  # Change mode for example pedigrees (higher priority)
-  observeEvent(priority = 1000, ignoreInit = TRUE, ignoreNULL = TRUE, input$input_example, {
-    req(input$input_example != "")
-    if(input$input_example == "Example 1")
-      updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
-  })
+  # # Change mode for example pedigrees (higher priority)
+  # observeEvent(priority = 1000, ignoreInit = TRUE, ignoreNULL = TRUE, input$input_example, {
+  #   req(input$input_example != "")
+  #   if(input$input_example == "Example 1")
+  #     updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
+  # })
   
   
   # Example pedigree (+ factors)
@@ -563,11 +576,14 @@ server = function(input, output, session) {
                updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
                freezeReactiveValue(input, "lclass_mode")
              }
+             if(input$sexspec_mode){
+               updateCheckboxInput(inputId = "sexspec_mode", value = FALSE)
+             }
              
              # Update UI
              if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
              if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
-             add_pheno(values, "pheno1", params = c(0, 1, 200, 1, 50))
+             add_pheno(values, "pheno1", params = c(0, 1, 200, 1, 50), sexspec = FALSE)
              
              temp = data.frame(
                nuclearPed(nch = 2),
@@ -681,7 +697,7 @@ server = function(input, output, session) {
     values[["lclassdata"]] = temp
     
     # Update sensitivity analysis choices
-    to_keep = grep("_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$", values[["flb_v"]], value = TRUE)
+    to_keep = grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$|_risk$", values[["flb_v"]], value = TRUE)
     values[["flb_v"]] = c("afreq", paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("_f0", "_f1", "_f2"), paste0)))), to_keep)
     
   })
@@ -720,23 +736,43 @@ server = function(input, output, session) {
   observe({
     
     req(!input$lclass_mode, values[["pheno_total"]]>0)
-    
     # Validate that all neccesary UI inputs are created
-    validate(need(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]], ""))
+    if(values[["sexspec_vector"]][values[["pheno_total"]]] == TRUE)
+      req(input[[paste0("pheno", values[["pheno_total"]], "_f1v_f")]])
+    else
+      req(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]])
     if(values[["factor_total"]] > 0)
-      validate(need(input[[paste0("factor", values[["factor_total"]], "_risk")]], ""))
+      req(input[[paste0("factor", values[["factor_total"]], "_risk")]])
     
     message("Update penetrances")
     
-    # Collect inputs
     inputs = sapply(c("afreq", "pheno_dist",
-                        if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
-                        if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
-                      function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
-    inputs = as.data.frame(inputs)
+                      grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$", names(input), value = TRUE),
+                      if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+                    function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+    # M (collect inputs + get penetrance values)
+    # inputs_m = sapply(c("afreq", "pheno_dist",
+    #                   grep("_f0a(_m)?$|_f0b(_m)?$|_f2a(_m)?$|_f2b(_m)?$|_f1v(_m)?$", names(input), value = TRUE),
+    #                   if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+    #                 function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+    inputs_m = inputs
+    names(inputs_m) = gsub("_m$", "", names(inputs_m))
+    f_m = get_f(x, values, inputs_m)
     
-    # Get penetrance values and indexes
-    get_f(x, values, inputs)
+    # F (collect inputs + get penetrance values)
+    # inputs_f = sapply(c("afreq", "pheno_dist",
+    #                     grep("_f0a(_f)?$|_f0b(_f)?$|_f2a(_f)?$|_f2b(_f)?$|_f1v(_f)?$", names(input), value = TRUE),
+    #                     if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+    #                   function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+    inputs_f = inputs
+    names(inputs_f) = gsub("_f$", "", names(inputs_f))
+    f_f = get_f(x, values, inputs_f)
+    
+    # Join
+    values[["f"]] = dplyr::bind_rows(f_m, f_f)
+    values[["f_idx"]] = array(1:nrow(values[["f"]]),
+                              dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]], 2),
+                              dimnames = list(x, c(values[["pheno_vector"]], "nonaff"), seq(2^values[["factor_total"]]), c("1", "2")))
   })
   
   
@@ -760,15 +796,16 @@ server = function(input, output, session) {
     new_j[new_j == ""] = "nonaff"
     
     # Set liability classes
-    values[["lclass"]] = mapply(function(i,j,l) values[["f_idx"]][i,j,l],
+    values[["lclass"]] = mapply(function(i,j,k,l) values[["f_idx"]][i,j,k,l],
                                 i = values[["peddata"]][["age"]],
                                 j = new_j,
-                                l = lclass_idx)
+                                k = lclass_idx,
+                                l = values[["peddata"]][["sex"]])
   })
   
   
   
-  # Penetrance plots
+  # # Penetrance plots
   # output$hazardPlot = renderPlot({
   #   req(values[["h_0"]], values[["h_1"]], values[["pheno_total"]]>0)
   #     dat = cbind(
@@ -782,18 +819,18 @@ server = function(input, output, session) {
   #       geom_line(aes(x = age, y = f1, color = "f1", group = 1)) +
   #       facet_wrap(~ phenotype, scales = 'free_y')
   # })
-  output$CRPlot = renderPlot({
-    req(values[["CR"]], values[["pheno_total"]]>0)
-    dat = values[["CR"]]
-    dat$phenotype = gsub('nonaff', 'total', dat$phenotype)
-    dat$phenotype = factor(dat$phenotype, levels = c(values[["pheno_vector"]], 'total'))
-    ggplot(dat) +
-      geom_line(aes(x = age, y = f0, color = "f0", group = 1)) +
-      geom_line(aes(x = age, y = f1, color = "f1", group = 1)) +
-      geom_line(aes(x = age, y = f2, color = "f2", group = 1)) +
-      facet_wrap(~ phenotype, scales = 'free_y') +
-      theme_classic()
-  })
+  # output$CRPlot = renderPlot({
+  #   req(values[["CR"]], values[["pheno_total"]]>0)
+  #   dat = values[["CR"]]
+  #   dat$phenotype = gsub('nonaff', 'total', dat$phenotype)
+  #   dat$phenotype = factor(dat$phenotype, levels = c(values[["pheno_vector"]], 'total'))
+  #   ggplot(dat) +
+  #     geom_line(aes(x = age, y = f0, color = "f0", group = 1)) +
+  #     geom_line(aes(x = age, y = f1, color = "f1", group = 1)) +
+  #     geom_line(aes(x = age, y = f2, color = "f2", group = 1)) +
+  #     facet_wrap(~ phenotype, scales = 'free_y') +
+  #     theme_classic()
+  # })
   # output$SPPlot = renderPlot({
   #   req(values[["SP_0"]], values[["SP_1"]], values[["pheno_total"]]>0)
   #     dat = cbind(
@@ -846,13 +883,10 @@ server = function(input, output, session) {
   })
   
   
-  # FLB calculation
+  # FLB calculation (show if not null)
   output$flb_main = renderText({
-    
     req(values[["flb"]])
-    
     values[["flb"]]
-    
   })
   
   
@@ -921,20 +955,29 @@ server = function(input, output, session) {
     
     else {
       # Collect inputs
-      fullgrid = sapply(c("afreq", "pheno_dist",
-                          if(values[["pheno_total"]] > 0) paste0("pheno", as.vector(t(outer(seq(values[["pheno_total"]]), c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"), paste0)))),
+      fullgrid = sapply(c("afreq", "pheno_dist", grep("_f0a(_[m,f])?$|_f0b(_[m,f])?$|_f2a(_[m,f])?$|_f2b(_[m,f])?$|_f1v(_[m,f])?$", names(input), value = TRUE),
                           if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                         function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
       fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
       fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
       fullgrid = as.data.frame(fullgrid)
-      
+
       
       # Calculate FLB
       values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
         
-        # Get penetrance values
-        f = get_f(x, values, fullgrid[i,], sensitivity = TRUE)
+        # M (collect inputs + get penetrance values)
+        inputs_m = fullgrid[i,]
+        names(inputs_m) = gsub("_m$", "", names(inputs_m))
+        f_m = get_f(x, values, inputs_m)
+        
+        # F (collect inputs + get penetrance values)
+        inputs_f = fullgrid[i,]
+        names(inputs_f) = gsub("_f$", "", names(inputs_f))
+        f_f = get_f(x, values, inputs_f)
+        
+        # Join
+        f = dplyr::bind_rows(f_m, f_f)
         
         # Calculate BF
         tryCatch(
@@ -967,7 +1010,7 @@ server = function(input, output, session) {
     req(values[["pheno_total"]] < 9,
         !grepl("^\\s*$", input$pheno_name),
         !input$pheno_name %in% c(values[["pheno_vector"]], "nonaff"))
-    add_pheno(values, input$pheno_name, c(0, 1, 50, 1, 50))
+    add_pheno(values, input$pheno_name, c(0, 1, 50, 1, 50), sexspec = input$sexspec_mode)
     updateTextInput(inputId = "pheno_name", value = "")
   })
   observeEvent(input$pheno_rmv, {
@@ -1002,32 +1045,32 @@ server = function(input, output, session) {
   observeEvent(ignoreInit = TRUE, c(values[["flb_v"]], input$lclass_mode), {
     # observe({
     allvars = values[["flb_v"]]
-    names(allvars) = c("log10(afreq)",
-                          if(nrow(values[["lclassdata"]])>=1) paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("f0", "f1", "f2"), paste)))),
-                          if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "log(f1 coef)"), paste))),
-                          if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)")
-    )
-    to_keep = ifelse(input$lclass_mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a$|_f0b$|_f2a$|_f2b$|_f1v$|_risk$"))
+    # names(allvars) = c("log10(afreq)",
+    #                       if(nrow(values[["lclassdata"]])>=1) paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("f0", "f1", "f2"), paste)))),
+    #                       if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "log(f1 coef)"), paste))),
+    #                       if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)")
+    # )
+    to_keep = ifelse(input$lclass_mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$|_risk$"))
     flb_choices = allvars[grep(to_keep, allvars)]
     updateSelectInput(inputId = "flb_v1", choices = flb_choices, selected = values[["flb_v1"]])
     updateSelectInput(inputId = "flb_v2", choices = flb_choices, selected = values[["flb_v2"]])
     values[["flb_choices"]] = flb_choices
-    
-    # fhelp transfer options
-    if(!input$lclass_mode & values[["pheno_total"]]>0) {
-      # newvars = flb_choices[1 + rep(c(1,3,5), values[["pheno_total"]]) + rep(seq(0, 5*(values[["pheno_total"]]-1), 5), each = 3)]
-      # values[["fhelp_choices"]] = c("", newvars)
-      fhelp_choices = c("", paste0("pheno", as.vector(t(outer(1:values[["pheno_total"]], c("_f0", "_f2"), paste0)))))
-      names(fhelp_choices) = c("", as.vector(t(outer(values[["pheno_vector"]], c("f0", "f2"), paste))))
-      values[["fhelp_choices"]] = fhelp_choices
-    }
-    else 
-      values[["fhelp_choices"]] = ""
+
+    # # fhelp transfer options
+    # if(!input$lclass_mode & values[["pheno_total"]]>0) {
+    #   # newvars = flb_choices[1 + rep(c(1,3,5), values[["pheno_total"]]) + rep(seq(0, 5*(values[["pheno_total"]]-1), 5), each = 3)]
+    #   # values[["fhelp_choices"]] = c("", newvars)
+    #   fhelp_choices = c("", paste0("pheno", as.vector(t(outer(1:values[["pheno_total"]], c("_f0", "_f2"), paste0)))))
+    #   names(fhelp_choices) = c("", as.vector(t(outer(values[["pheno_vector"]], c("f0", "f2"), paste))))
+    #   values[["fhelp_choices"]] = fhelp_choices
+    # }
+    # else
+    #   values[["fhelp_choices"]] = ""
   })
   
   # Update sliders
   observeEvent(input$flb_v1, {
-    slidervals = switch(gsub(".*_", "", input$flb_v1),
+    slidervals = switch(gsub(".*_", "", gsub("(.*)_[m,f]$", "\\1", input$flb_v1)),
                         "afreq" = c(-5, -1),
                         "f0a" = c(1, 5),
                         "f2a" = c(1, 5),
@@ -1042,7 +1085,7 @@ server = function(input, output, session) {
     updateSliderInput(inputId = "flb_s1", min = slidervals[1], max = slidervals[2], step = stepsize, value = slidervals)
   })
   observeEvent(input$flb_v2, {
-    slidervals = switch(gsub(".*_", "", input$flb_v2),
+    slidervals = switch(gsub(".*_", "", gsub("(.*)_[m,f]$", "\\1", input$flb_v2)),
                         "afreq" = c(-5, -1),
                         "f0a" = c(1, 5),
                         "f2a" = c(1, 5),
@@ -1055,15 +1098,15 @@ server = function(input, output, session) {
                         "f2" = c(0.001, 0.999))
     stepsize = (slidervals[2]-slidervals[1])/100
     updateSliderInput(inputId = "flb_s2", min = slidervals[1], max = slidervals[2], step = stepsize, value = slidervals)
-  }) 
+  })
   
   
   # fhelp values
   observe({
     values[["fhelp_p"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "quantile"]
     values[["fhelp_q"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "age"]
-    
-    values[["fhelp_sol"]] = 
+
+    values[["fhelp_sol"]] =
       tryCatch(
         switch(input$fhelp_dist,
                "Weibull" = optim(par = c(0, 1), function(params) {
@@ -1076,10 +1119,10 @@ server = function(input, output, session) {
                  method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000))),
         error = function(err) NULL)
   })
-  
+
   output$fhelp_plot = renderPlot({
     req(values[["fhelp_sol"]])
-    
+
     fit = switch(input$fhelp_dist,
                  "Weibull" = pweibull(x, shape = values[["fhelp_sol"]]$par[1], scale = values[["fhelp_sol"]]$par[2]),
                  "Log-logist" = pllogis(x, shape = values[["fhelp_sol"]]$par[1], scale = values[["fhelp_sol"]]$par[2]))
@@ -1093,10 +1136,10 @@ server = function(input, output, session) {
   output$fhelp_text = renderText({
     paste0("Shape: ", round(values[["fhelp_sol"]]$par[1], 4), "\nScale: ",  round(values[["fhelp_sol"]]$par[2], 4))
   })
-  
-  
+
+
   output$flb_colorbar = renderPlot({
-    
+
     # require(values[["flb"]])
 
     BFplot(values[["flb"]])
@@ -1108,7 +1151,7 @@ server = function(input, output, session) {
     showModal(modalDialog(
       # h5("Data Guidelines"),
       # tags$ol(
-      #   tags$li("Must have Resp_ID as the first column, occasion_ID as second and dependent variable as the third"), 
+      #   tags$li("Must have Resp_ID as the first column, occasion_ID as second and dependent variable as the third"),
       #   tags$li("Must have no missing value in any fields")
       # ),
       fluidRow(
@@ -1117,18 +1160,18 @@ server = function(input, output, session) {
                  W_fhelp_dist,
                  div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
                      verbatimTextOutput("fhelp_text")),
-                 rHandsontableOutput("fhelpTable")
+                 rHandsontableOutput("fhelpTable"),
+                 # selectInput(inputId = "fhelp_transfer", label = "Transfer to", choices = values[["fhelp_choices"]])
                )
         ),
-        column(7, plotOutput(outputId = "fhelp_plot", height = "350px")),
-        selectInput(inputId = "fhelp_transfer", label = "Transfer to", choices = values[["fhelp_choices"]])
+        column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
       ),
       easyClose = TRUE, footer = NULL, size = "m")
     )
   })
-  
-  
-  
+
+
+
   # fhelp table
   output$fhelpTable = renderRHandsontable({
     req(values[["fhelpdata"]])
@@ -1137,32 +1180,32 @@ server = function(input, output, session) {
                   manualColumnResize = TRUE,
                   # rowHeaders = NULL,
                   height = if(nrow(values[["fhelpdata"]])> 12) 300 else NULL) %>%
-      hot_validate_numeric(col = 'quantile', min = 0, max = 1, allowInvalid = FALSE) %>% 
-      hot_validate_numeric(col = 'age', min = 0, max = 100, allowInvalid = FALSE) %>% 
+      hot_validate_numeric(col = 'quantile', min = 0, max = 1, allowInvalid = FALSE) %>%
+      hot_validate_numeric(col = 'age', min = 0, max = 100, allowInvalid = FALSE) %>%
       hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
   })
-  
-  
-  
+
+
+
   # Update fhelp data from table edits (this runs twice...)
   observe(priority = 1, {
     req(!is.null(input$fhelpTable))
     message("Update fhelp from table edits (this runs twice)")
-    
+
     temp = hot_to_r(input$fhelpTable)
     values[["fhelpdata"]] = temp
-    
+
   })
-  
-  
-  # Transfer parameters (selection inside modal)
-  observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
-    req(input$fhelp_transfer != "")
-    message("Transfering parameters")
-    updateNumericInput(inputId = paste0(input$fhelp_transfer, "a"), value = values[["fhelp_sol"]]$par[1])
-    updateNumericInput(inputId = paste0(input$fhelp_transfer, "b"), value = values[["fhelp_sol"]]$par[2])
-    updateSelectInput(inputId = "fhelp_transfer", selected = "")
-  })
+  # 
+  # 
+  # # Transfer parameters (selection inside modal)
+  # observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
+  #   req(input$fhelp_transfer != "")
+  #   message("Transfering parameters")
+  #   updateNumericInput(inputId = paste0(input$fhelp_transfer, "a"), value = values[["fhelp_sol"]]$par[1])
+  #   updateNumericInput(inputId = paste0(input$fhelp_transfer, "b"), value = values[["fhelp_sol"]]$par[2])
+  #   updateSelectInput(inputId = "fhelp_transfer", selected = "")
+  # })
 
 }
 

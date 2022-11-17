@@ -79,17 +79,17 @@ get_f = function(x, values, inputs, sensitivity = FALSE) {
   })
   f = dplyr::bind_rows(f, .id = 'comb')
   
-  # Returns
-  if(!sensitivity) {
-    values[["f"]] = f
-    values[["CR"]] =
-      cbind(reshape2::melt(f_0_all[["CR"]][[1]], varnames = c("age", "phenotype"), value.name = "f0"),
-            f1 = as.vector(f_1_all[["CR"]][[1]]),
-            f2 = as.vector(f_2_all[["CR"]][[1]]))
-    values[["f_idx"]] = array(1:nrow(f),
-                              dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]]),
-                              dimnames = list(x, colnames(f_0_all[["SP"]][[1]]), seq(2^values[["factor_total"]])))
-  }
-  else
+  # # Returns
+  # if(!sensitivity) {
+  #   values[["f"]] = f
+  #   values[["CR"]] =
+  #     cbind(reshape2::melt(f_0_all[["CR"]][[1]], varnames = c("age", "phenotype"), value.name = "f0"),
+  #           f1 = as.vector(f_1_all[["CR"]][[1]]),
+  #           f2 = as.vector(f_2_all[["CR"]][[1]]))
+  #   values[["f_idx"]] = array(1:nrow(f),
+  #                             dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]]),
+  #                             dimnames = list(x, colnames(f_0_all[["SP"]][[1]]), seq(2^values[["factor_total"]])))
+  # }
+  # else
     return(f)
 }
