@@ -27,6 +27,7 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
+#   BUG: FLB = 1 in Example 1 if there are (or were) sex-specific phenotypes
 
 
 # Input widgets -----------------------------------------------------------------
@@ -168,6 +169,12 @@ W_sexspec_mode =
     value = FALSE
   )
 
+W_xr_mode = 
+  checkboxInput(
+    inputId = "xr_model",
+    label = "XR model",
+    value = FALSE
+  )
 
 # UI ----------------------------------------------------------------------
 
@@ -309,8 +316,9 @@ ui = dashboardPage(
                  fluidRow(
                    # Allele frequency
                    column(3, W_afreq),
-                   column(4, offset = 1, W_lclass_mode),
-                   column(4, W_sexspec_mode)
+                   column(3, W_lclass_mode),
+                   column(3, W_sexspec_mode),
+                   column(3, W_xr_mode)
                  ),
                  
                  dropdownMenu = boxDropdown(
@@ -532,12 +540,17 @@ server = function(input, output, session) {
   
   
   
-  # # Change mode for example pedigrees (higher priority)
-  # observeEvent(priority = 1000, ignoreInit = TRUE, ignoreNULL = TRUE, input$input_example, {
-  #   req(input$input_example != "")
-  #   if(input$input_example == "Example 1")
-  #     updateCheckboxInput(inputId = "lclass_mode", value = FALSE)
-  # })
+  # XR model changes
+  observeEvent(priority = 2, ignoreInit = TRUE, c(values[["peddata"]][["carrier"]], input$xr_model), {
+    req(values[["peddata"]], input$xr_model)
+    message("XR model changes")
+    # Remove homozygous males
+    to_change = which(values[["peddata"]][["carrier"]] == "hom" & values[["peddata"]][["sex"]] == 1)
+    newcarrier = values[["peddata"]][["carrier"]]
+    newcarrier[to_change] = "het"
+    values[["peddata"]][["carrier"]] = newcarrier
+  })
+  
   
   
   # Example pedigree (+ factors)
@@ -579,6 +592,8 @@ server = function(input, output, session) {
              if(input$sexspec_mode){
                updateCheckboxInput(inputId = "sexspec_mode", value = FALSE)
              }
+             if(input$xr_model)
+               updateCheckboxInput(inputId = "xr_model", value = FALSE)
              
              # Update UI
              if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
@@ -601,14 +616,16 @@ server = function(input, output, session) {
              #   carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
              #   proband = c(FALSE, FALSE, FALSE, TRUE),
              #   age = c(40, 40, 10, 10))
+             x = nuclearPed(3, sex = c(1, 1, 2))
+             x = addChildren(x, mo = 5, sex = 1:2, verbose = FALSE)
              temp = data.frame(
-               nuclearPed(nch = 2),
+               x,
                phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
                proband = FALSE,
-               age = as.integer(c(40, 40, 10, 10)),
-               lclass = as.integer(rep(1, 4)))
+               age = as.integer(50),
+               lclass = as.integer(1))
            }
     )
     
@@ -751,28 +768,28 @@ server = function(input, output, session) {
                       if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                     function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     # M (collect inputs + get penetrance values)
-    # inputs_m = sapply(c("afreq", "pheno_dist",
-    #                   grep("_f0a(_m)?$|_f0b(_m)?$|_f2a(_m)?$|_f2b(_m)?$|_f1v(_m)?$", names(input), value = TRUE),
-    #                   if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
-    #                 function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     inputs_m = inputs
     names(inputs_m) = gsub("_m$", "", names(inputs_m))
     f_m = get_f(x, values, inputs_m)
     
     # F (collect inputs + get penetrance values)
-    # inputs_f = sapply(c("afreq", "pheno_dist",
-    #                     grep("_f0a(_f)?$|_f0b(_f)?$|_f2a(_f)?$|_f2b(_f)?$|_f1v(_f)?$", names(input), value = TRUE),
-    #                     if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
-    #                   function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     inputs_f = inputs
     names(inputs_f) = gsub("_f$", "", names(inputs_f))
     f_f = get_f(x, values, inputs_f)
     
     # Join
-    values[["f"]] = dplyr::bind_rows(f_m, f_f)
-    values[["f_idx"]] = array(1:nrow(values[["f"]]),
-                              dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]], 2),
-                              dimnames = list(x, c(values[["pheno_vector"]], "nonaff"), seq(2^values[["factor_total"]]), c("1", "2")))
+    if(!input$xr_model){
+      values[["f"]] = dplyr::bind_rows(f_m[,c("f0", "f1", "f2")], f_f[,c("f0", "f1", "f2")])
+      values[["f_idx"]] = array(1:nrow(values[["f"]]),
+                                dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]], 2),
+                                dimnames = list(x, c(values[["pheno_vector"]], "nonaff"), seq(2^values[["factor_total"]]), c("1", "2")))
+    }
+    else {
+      values[["f"]] = list("male" = f_m[,c("f0", "f1")], "female" = f_f[,c("f0", "f1", "f2")])
+      values[["f_idx"]] = array(1:nrow(values[["f"]][[1]]),
+                                dim = c(length(x), values[["pheno_total"]]+1, 2^values[["factor_total"]]),
+                                dimnames = list(x, c(values[["pheno_vector"]], "nonaff"), seq(2^values[["factor_total"]])))
+    }
   })
   
   
@@ -804,14 +821,32 @@ server = function(input, output, session) {
     new_j[new_j == ""] = "nonaff"
     
     # Set liability classes
-    values[["lclass"]] = mapply(function(i,j,k,l) values[["f_idx"]][i,j,k,l],
-                                i = values[["peddata"]][["age"]],
-                                j = new_j,
-                                k = lclass_idx,
-                                l = values[["peddata"]][["sex"]])
+    if(!input$xr_model)
+      values[["lclass"]] = mapply(function(i,j,k,l) values[["f_idx"]][i,j,k,l],
+                                  i = values[["peddata"]][["age"]],
+                                  j = new_j,
+                                  k = lclass_idx,
+                                  l = values[["peddata"]][["sex"]])
+    else
+      values[["lclass"]] = mapply(function(i,j,k) values[["f_idx"]][i,j,k],
+                                  i = values[["peddata"]][["age"]],
+                                  j = new_j,
+                                  k = lclass_idx)
   })
   
   
+  
+  # Update penetrances (liabclass mode)
+  observe({
+    req(input$lclass_mode, nrow(values[["lclassdata"]]>0))
+    if(!input$xr_model){
+      values[["f"]] = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")]
+    }
+    else {
+      values[["f"]] = list("male" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1")],
+                           "female" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")])
+    }
+  })
   
   # # Penetrance plots
   # output$hazardPlot = renderPlot({
@@ -872,8 +907,9 @@ server = function(input, output, session) {
             if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
             if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
             freq = 10^input$afreq,
-            penetrances = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")],
+            penetrances = values[["f"]],
             liability = values[["peddata"]][["lclass"]],
+            Xchrom = ifelse(input$xr_model, TRUE, FALSE),
             details = FALSE)
       else
         FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
@@ -884,8 +920,9 @@ server = function(input, output, session) {
             if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
             if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
             freq = 10^input$afreq,
-            penetrances = values[["f"]][,c("f0", "f1", "f2")],
+            penetrances = values[["f"]],
             liability = values[["lclass"]],
+            Xchrom = ifelse(input$xr_model, TRUE, FALSE),
             details = FALSE),
       error = function(err) NULL)
   })
