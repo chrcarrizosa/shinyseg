@@ -1045,11 +1045,23 @@ server = function(input, output, session) {
   observeEvent(ignoreInit = TRUE, c(values[["flb_v"]], input$lclass_mode), {
     # observe({
     allvars = values[["flb_v"]]
-    # names(allvars) = c("log10(afreq)",
-    #                       if(nrow(values[["lclassdata"]])>=1) paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("f0", "f1", "f2"), paste)))),
-    #                       if(values[["pheno_total"]] > 0) as.vector(t(outer(values[["pheno_vector"]], c("f0 shape", "f0 scale", "f2 shape", "f2 scale", "log(f1 coef)"), paste))),
-    #                       if(values[["factor_total"]] > 0) paste(values[["factor_vector"]], "log(risk)")
-    # )
+    
+    # fix names
+    names(allvars) = allvars
+    # afreq
+    names(allvars) = gsub("^afreq$", "log10(afreq)", names(allvars))
+    # phenotype names
+    if(values[["pheno_total"]] > 0)
+      names(allvars) = stringr::str_replace_all(names(allvars), setNames(values[["pheno_vector"]], paste0("^(pheno", seq(values[["pheno_total"]]), ")")))
+    # risk factor names
+    if(values[["factor_total"]] > 0)
+      names(allvars) = stringr::str_replace_all(names(allvars), setNames(values[["factor_vector"]], paste0("^(factor", seq(values[["factor_total"]]), ")")))
+    # sex-specific parameters
+    names(allvars) = gsub("(.*)_([m,f])$", "(\\2) \\1", names(allvars))
+    # parameter name
+    names(allvars) = stringr::str_replace_all(names(allvars), setNames(c(" f0", " f1", " f2", " f0 shape", " f0 scale", " f2 shape", " f2 scale", " f1 log(coef)", " log(risk)"),
+                                                                       c("_f0$", "_f1$", "_f2$", "_f0a$", "_f0b$", "_f2a$", "_f2b$", "_f1v$", "_risk")))
+    
     to_keep = ifelse(input$lclass_mode, c("^afreq$|_f0$|_f1$|_f2$"), c("^afreq$|_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$|_risk$"))
     flb_choices = allvars[grep(to_keep, allvars)]
     updateSelectInput(inputId = "flb_v1", choices = flb_choices, selected = values[["flb_v1"]])
