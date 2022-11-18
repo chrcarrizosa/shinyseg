@@ -27,7 +27,6 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
-#   BUG: crash Example 1 + sex-specific parameters
 
 
 # Input widgets -----------------------------------------------------------------
@@ -435,7 +434,7 @@ server = function(input, output, session) {
                                       f1 = 0.8,
                                       f2 = 0.8)
   values[["fhelpdata"]] = data.frame(quantile = c(0.25, 0.50, 0.75),
-                                      age = as.integer(c(20, 40, 60)))
+                                     age = as.integer(c(20, 40, 60)))
   # values[["fhelp_choices"]] = ""
   
   
@@ -463,12 +462,12 @@ server = function(input, output, session) {
   
   # Store phenorisk selection (rough)
   observeEvent(priority = 2,
-    c(input$factor1_pheno, input$factor2_pheno, input$factor3_pheno), {
-      message("Store phenorisk selection (rough)")
-      values[["factor1_pheno"]] = input$factor1_pheno
-      values[["factor2_pheno"]] = input$factor2_pheno
-      values[["factor3_pheno"]] = input$factor3_pheno
-    })
+               c(input$factor1_pheno, input$factor2_pheno, input$factor3_pheno), {
+                 message("Store phenorisk selection (rough)")
+                 values[["factor1_pheno"]] = input$factor1_pheno
+                 values[["factor2_pheno"]] = input$factor2_pheno
+                 values[["factor3_pheno"]] = input$factor3_pheno
+               })
   
   
   
@@ -477,7 +476,7 @@ server = function(input, output, session) {
     req(values[["peddata"]])
     message("Update phenotype selection")
     temp = if(input$lclass_mode) factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", "aff", values[["pheno_vector"]]),
-                                 labels = c("", "nonaff", rep("aff", 1+length(values[["pheno_vector"]]))))
+                                        labels = c("", "nonaff", rep("aff", 1+length(values[["pheno_vector"]]))))
     else factor(values[["peddata"]][["phenotype"]], levels = c("", "nonaff", values[["pheno_vector"]]))
     temp[is.na(temp)] = ""
     values[["peddata"]]["phenotype"] = temp
@@ -618,7 +617,7 @@ server = function(input, output, session) {
       temp[, values[["factor_vector"]]] = FALSE
     
     values[["peddata"]] = temp
-
+    
     updateSelectInput(inputId = "input_example", selected = "")
   })
   
@@ -651,7 +650,7 @@ server = function(input, output, session) {
     message("Update data from table edits (this runs twice)")
     
     temp_full = hot_to_r(input$pedTable)
-
+    
     temp =
       within(
         temp_full[,1:9], {
@@ -736,7 +735,8 @@ server = function(input, output, session) {
   observe({
     
     req(!input$lclass_mode, values[["pheno_total"]]>0)
-    # Validate that all neccesary UI inputs are created
+    
+    # Validate that all necessary UI inputs are created
     if(values[["sexspec_vector"]][values[["pheno_total"]]] == TRUE)
       req(input[[paste0("pheno", values[["pheno_total"]], "_f1v_f")]])
     else
@@ -779,10 +779,18 @@ server = function(input, output, session) {
   
   # Update liability class groups (problem with double run)
   observe(priority = -1, {
-    req(!input$lclass_mode, values[["peddata"]])
+    req(!input$lclass_mode, values[["pheno_total"]]>0, values[["peddata"]])
+    
+    # Validate that all necessary UI inputs are created
+    if(values[["sexspec_vector"]][values[["pheno_total"]]] == TRUE)
+      req(input[[paste0("pheno", values[["pheno_total"]], "_f1v_f")]])
+    else
+      req(input[[paste0("pheno", values[["pheno_total"]], "_f1v")]])
+    if(values[["factor_total"]] > 0)
+      req(input[[paste0("factor", values[["factor_total"]], "_risk")]])
     
     message("Update liability class groups (problem with double run)")
-
+    
     if(values[["factor_total"]] > 0){
       # validate(need(values[["peddata"]][,values[["factor_vector"]]], ""))
       lclass_idx = apply(as.matrix(values[["peddata"]][,values[["factor_vector"]]]), 1,
@@ -890,15 +898,15 @@ server = function(input, output, session) {
   })
   
   
-
+  
   output$testplot = renderPlot({
-
+    
     req(values[["flb_vals"]])
-
+    
     # ggplot() +
     #   geom_contour_filled(aes(x = values[["grid"]][,1], y = values[["grid"]][,2], z = values[["flb_vals"]]))
     contourplot(values[["grid"]], round(values[["flb_vals"]], 7), values[["flb"]])
-
+    
   })
   
   observeEvent(input$flb_run, {
@@ -914,7 +922,7 @@ server = function(input, output, session) {
       c(names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v1)],
         names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v2)])
     )
-
+    
     
     if(input$lclass_mode) {
       
@@ -961,7 +969,7 @@ server = function(input, output, session) {
       fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
       fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
       fullgrid = as.data.frame(fullgrid)
-
+      
       
       # Calculate FLB
       values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
@@ -1067,7 +1075,7 @@ server = function(input, output, session) {
     updateSelectInput(inputId = "flb_v1", choices = flb_choices, selected = values[["flb_v1"]])
     updateSelectInput(inputId = "flb_v2", choices = flb_choices, selected = values[["flb_v2"]])
     values[["flb_choices"]] = flb_choices
-
+    
     # fhelp transfer options
     if(!input$lclass_mode & values[["pheno_total"]]>0) {
       fhelp_choices = grep("^pheno[[:digit:]]+_f[0,2]", flb_choices, value = TRUE)
@@ -1115,7 +1123,7 @@ server = function(input, output, session) {
   observe({
     values[["fhelp_p"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "quantile"]
     values[["fhelp_q"]] = values[["fhelpdata"]][complete.cases(values[["fhelpdata"]]), "age"]
-
+    
     values[["fhelp_sol"]] =
       tryCatch(
         switch(input$fhelp_dist,
@@ -1129,10 +1137,10 @@ server = function(input, output, session) {
                  method = "L-BFGS-B", lower = c(0.001, 0.001), upper = c(10000, 10000))),
         error = function(err) NULL)
   })
-
+  
   output$fhelp_plot = renderPlot({
     req(values[["fhelp_sol"]])
-
+    
     fit = switch(input$fhelp_dist,
                  "Weibull" = pweibull(x, shape = values[["fhelp_sol"]]$par[1], scale = values[["fhelp_sol"]]$par[2]),
                  "Log-logist" = pllogis(x, shape = values[["fhelp_sol"]]$par[1], scale = values[["fhelp_sol"]]$par[2]))
@@ -1142,16 +1150,16 @@ server = function(input, output, session) {
       scale_y_continuous(limits = c(0,1)) +
       theme_classic()
   })
-
+  
   output$fhelp_text = renderText({
     paste0("Shape: ", round(values[["fhelp_sol"]]$par[1], 4), "\nScale: ",  round(values[["fhelp_sol"]]$par[2], 4))
   })
-
-
+  
+  
   output$flb_colorbar = renderPlot({
-
+    
     # require(values[["flb"]])
-
+    
     BFplot(values[["flb"]])
   })
   
@@ -1179,9 +1187,9 @@ server = function(input, output, session) {
       easyClose = TRUE, footer = NULL, size = "m")
     )
   })
-
-
-
+  
+  
+  
   # fhelp table
   output$fhelpTable = renderRHandsontable({
     req(values[["fhelpdata"]])
@@ -1194,20 +1202,20 @@ server = function(input, output, session) {
       hot_validate_numeric(col = 'age', min = 0, max = 100, allowInvalid = FALSE) %>%
       hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
   })
-
-
-
+  
+  
+  
   # Update fhelp data from table edits (this runs twice...)
   observe(priority = 1, {
     req(!is.null(input$fhelpTable))
     message("Update fhelp from table edits (this runs twice)")
-
+    
     temp = hot_to_r(input$fhelpTable)
     values[["fhelpdata"]] = temp
-
+    
   })
-
-
+  
+  
   # Transfer parameters (selection inside modal)
   observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
     req(input$fhelp_transfer != "")
@@ -1216,7 +1224,7 @@ server = function(input, output, session) {
     updateNumericInput(inputId = gsub("(f[0,2])a(_[m,f])?$", "\\1b\\2", input$fhelp_transfer), value = values[["fhelp_sol"]]$par[2])
     updateSelectInput(inputId = "fhelp_transfer", selected = "")
   })
-
+  
 }
 
 
