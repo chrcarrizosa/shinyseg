@@ -27,6 +27,7 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
+#   BUG: crash Example 1 + sex-specific parameters
 
 
 # Input widgets -----------------------------------------------------------------
@@ -699,7 +700,6 @@ server = function(input, output, session) {
     # Update sensitivity analysis choices
     to_keep = grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$|_risk$", values[["flb_v"]], value = TRUE)
     values[["flb_v"]] = c("afreq", paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("_f0", "_f1", "_f2"), paste0)))), to_keep)
-    
   })
   
   
@@ -1068,16 +1068,14 @@ server = function(input, output, session) {
     updateSelectInput(inputId = "flb_v2", choices = flb_choices, selected = values[["flb_v2"]])
     values[["flb_choices"]] = flb_choices
 
-    # # fhelp transfer options
-    # if(!input$lclass_mode & values[["pheno_total"]]>0) {
-    #   # newvars = flb_choices[1 + rep(c(1,3,5), values[["pheno_total"]]) + rep(seq(0, 5*(values[["pheno_total"]]-1), 5), each = 3)]
-    #   # values[["fhelp_choices"]] = c("", newvars)
-    #   fhelp_choices = c("", paste0("pheno", as.vector(t(outer(1:values[["pheno_total"]], c("_f0", "_f2"), paste0)))))
-    #   names(fhelp_choices) = c("", as.vector(t(outer(values[["pheno_vector"]], c("f0", "f2"), paste))))
-    #   values[["fhelp_choices"]] = fhelp_choices
-    # }
-    # else
-    #   values[["fhelp_choices"]] = ""
+    # fhelp transfer options
+    if(!input$lclass_mode & values[["pheno_total"]]>0) {
+      fhelp_choices = grep("^pheno[[:digit:]]+_f[0,2]", flb_choices, value = TRUE)
+      names(fhelp_choices) = gsub("^(.*) ([[:alnum:]]+)$", "\\1", names(fhelp_choices))
+      values[["fhelp_choices"]] = c("", fhelp_choices[!duplicated(names(fhelp_choices))])
+    }
+    else
+      values[["fhelp_choices"]] = ""
   })
   
   # Update sliders
@@ -1173,7 +1171,7 @@ server = function(input, output, session) {
                  div(style = "margin-top:-10px;margin-bottom:20px;margin-right:20px;",
                      verbatimTextOutput("fhelp_text")),
                  rHandsontableOutput("fhelpTable"),
-                 # selectInput(inputId = "fhelp_transfer", label = "Transfer to", choices = values[["fhelp_choices"]])
+                 selectInput(inputId = "fhelp_transfer", label = "Transfer to", choices = values[["fhelp_choices"]])
                )
         ),
         column(7, plotOutput(outputId = "fhelp_plot", height = "350px"))
@@ -1208,16 +1206,16 @@ server = function(input, output, session) {
     values[["fhelpdata"]] = temp
 
   })
-  # 
-  # 
-  # # Transfer parameters (selection inside modal)
-  # observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
-  #   req(input$fhelp_transfer != "")
-  #   message("Transfering parameters")
-  #   updateNumericInput(inputId = paste0(input$fhelp_transfer, "a"), value = values[["fhelp_sol"]]$par[1])
-  #   updateNumericInput(inputId = paste0(input$fhelp_transfer, "b"), value = values[["fhelp_sol"]]$par[2])
-  #   updateSelectInput(inputId = "fhelp_transfer", selected = "")
-  # })
+
+
+  # Transfer parameters (selection inside modal)
+  observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, input$fhelp_transfer, {
+    req(input$fhelp_transfer != "")
+    message("Transfering parameters")
+    updateNumericInput(inputId = input$fhelp_transfer, value = values[["fhelp_sol"]]$par[1])
+    updateNumericInput(inputId = gsub("(f[0,2])a(_[m,f])?$", "\\1b\\2", input$fhelp_transfer), value = values[["fhelp_sol"]]$par[2])
+    updateSelectInput(inputId = "fhelp_transfer", selected = "")
+  })
 
 }
 
