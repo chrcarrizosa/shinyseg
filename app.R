@@ -27,7 +27,6 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
-#   BUG: FLB = 1 in Example 1 if there are (or were) sex-specific phenotypes
 
 
 # Input widgets -----------------------------------------------------------------
@@ -141,9 +140,9 @@ W_flb_s2 =
     value = c(-5,-1)
   )
 
-# W_flb_show = 
+# W_flb_calc =
 #   actionButton(
-#     inputId = "flb_show",
+#     inputId = "flb_calc",
 #     label = "Calculate",
 #     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
 #   )
@@ -408,7 +407,7 @@ ui = dashboardPage(
                  title = "FLB",
                  collapsible = TRUE,
                  verbatimTextOutput("flb_main"),
-                 # W_flb_show,
+                 # W_flb_calc,
                  # HTML("<br><br><br><br><br><br>"),
                  plotOutput(outputId = "flb_colorbar", height = "55px"),
                  HTML("<br><br><br>"),
@@ -507,6 +506,9 @@ server = function(input, output, session) {
   
   # Only one proband
   observeEvent(priority = 2, values[["peddata"]][["proband"]], {
+    req(any(values[["peddata"]][["proband"]]))
+    req(input$input_example == "") # avoids updating twice...
+    
     message("Only one proband")
     currentproband = values[["peddata"]][["proband"]]
     if(!is.null(values[["lastproband"]]) & sum(currentproband)>1)
@@ -591,15 +593,18 @@ server = function(input, output, session) {
              }
              if(input$sexspec_mode){
                updateCheckboxInput(inputId = "sexspec_mode", value = FALSE)
+               # freezeReactiveValue(input, "sexspec_mode")
              }
-             if(input$xr_model)
+             if(input$xr_model) {
                updateCheckboxInput(inputId = "xr_model", value = FALSE)
+               # freezeReactiveValue(input, "xr_model")
+             }
              
              # Update UI
              if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
              if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
              add_pheno(values, "pheno1", params = c(0, 1, 200, 1, 50), sexspec = FALSE)
-             
+
              temp = data.frame(
                nuclearPed(nch = 2),
                phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
@@ -665,9 +670,9 @@ server = function(input, output, session) {
   observe(priority = 1, {
     req(!is.null(input$pedTable))
     message("Update data from table edits (this runs twice)")
-    
+
     temp_full = hot_to_r(input$pedTable)
-    
+
     temp =
       within(
         temp_full[,1:9], {
@@ -683,10 +688,10 @@ server = function(input, output, session) {
         }
       )
     # temp = temp_full
-    
+
     # print(runif(1))
     values[["peddata"]] = temp
-    
+
   })
   
   
@@ -707,7 +712,7 @@ server = function(input, output, session) {
   
   # Update lclass data from table edits (this runs twice...)
   observe(priority = 1, {
-    req(!is.null(input$lclassTable))
+    req(!is.null(input$lclassTable), input$lclass_mode)
     message("Update liability classes from table edits (this runs twice)")
     
     temp = hot_to_r(input$lclassTable)
@@ -722,6 +727,7 @@ server = function(input, output, session) {
   
   # Update FLB indexes
   observe({
+    req(values[["peddata"]], input$input_example == "") # avoids updating twice...
     message("Update FLB indexes")
     values[["affected"]] = which(values[["peddata"]][["phenotype"]] != "" & values[["peddata"]][["phenotype"]] != "nonaff")
     values[["unknown"]] = which(values[["peddata"]][["phenotype"]] == "")
@@ -735,7 +741,7 @@ server = function(input, output, session) {
   
   # Segregation plot
   output$pedPlot = renderPlot({
-    req(values[["peddata"]])
+    req(values[["peddata"]], input$input_example == "")
     plotSegregation(as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
                     affected = values[["affected"]],
                     unknown = values[["unknown"]],
@@ -763,8 +769,16 @@ server = function(input, output, session) {
     
     message("Update penetrances")
     
+    # Select relevant inputs (because they are NOT removed by removeUI())
+    pheno_inputs = lapply(seq(values[["pheno_total"]]), function(i) {
+        temp = paste0("pheno", i,  c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"))
+        if(values[["sexspec_vector"]][i])
+          temp = outer(temp, c("_m", "_f"), paste0)
+        return(temp)
+    })
     inputs = sapply(c("afreq", "pheno_dist",
-                      grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$", names(input), value = TRUE),
+                      unlist(pheno_inputs),
+                      # grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$", names(input), value = TRUE),
                       if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                     function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
     # M (collect inputs + get penetrance values)
@@ -839,6 +853,9 @@ server = function(input, output, session) {
   # Update penetrances (liabclass mode)
   observe({
     req(input$lclass_mode, nrow(values[["lclassdata"]]>0))
+    
+    message("Update penetrances (liabclass mode)")
+    
     if(!input$xr_model){
       values[["f"]] = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")]
     }
@@ -1061,6 +1078,11 @@ server = function(input, output, session) {
   observeEvent(input$pheno_rmv, {
     req(values[["pheno_total"]] > 0)
     rmv_pheno(values)
+    # inputs = sapply(c("afreq", "pheno_dist",
+    #                   grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$", names(input), value = TRUE),
+    #                   if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
+    #                 function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
+    # print(names(inputs))
   })
   
   
