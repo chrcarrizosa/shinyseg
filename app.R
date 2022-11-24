@@ -727,7 +727,7 @@ server = function(input, output, session) {
   
   # Update lclass data from table edits (this runs twice...)
   observe({
-    req(!is.null(input$lclassTable), input$lclass_mode, input$input_example == "")
+    req(!is.null(input$lclassTable)) # input$lclass_mode, input$input_example == ""
     
     message("Update liability classes from table edits (this runs twice)")
 
@@ -877,8 +877,9 @@ server = function(input, output, session) {
     }
     else {
       temp = list("male" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1")],
-                           "female" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")])
-      temp[["female"]][is.na(temp[["female"]][, "f2"]), "f2"] = temp[["female"]][is.na(temp[["female"]][, "f2"]), "f1"]
+                  "female" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")])
+      if(length(temp[["female"]])>3) # if there are 2+ rows, in females, substitutes missing f2 values with f1 (because those lclasses SHOULD BE only for males)
+        temp[["female"]][is.na(temp[["female"]][,"f2"]), "f2"] = temp[["female"]][is.na(temp[["female"]][, "f2"]), "f1"]
       values[["f"]] = temp
     }
   })
@@ -930,7 +931,7 @@ server = function(input, output, session) {
     req(values[["peddata"]])
     
     message("FLB calculation")
-    
+
     # Calculate BF
     values[["flb"]] = tryCatch(
       if(input$lclass_mode)
@@ -1022,7 +1023,8 @@ server = function(input, output, session) {
         else {
           f = list("male" = data.matrix(f)[1:nrow(f),c("f0", "f1")],
                    "female" = data.matrix(f)[1:nrow(f),c("f0", "f1", "f2")])
-          f[["female"]][is.na(f[["female"]][, "f2"]), "f2"] = f[["female"]][is.na(f[["female"]][, "f2"]), "f1"]
+          if(length(f[["female"]])>3) # if there are 2+ rows, in females, substitutes missing f2 values with f1 (because those lclasses SHOULD BE only for males)
+            f[["female"]][is.na(f[["female"]][,"f2"]), "f2"] = f[["female"]][is.na(f[["female"]][, "f2"]), "f1"]
         }
         
         # Calculate BF
