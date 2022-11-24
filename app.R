@@ -786,14 +786,14 @@ server = function(input, output, session) {
     message("Update penetrances")
     
     # Select relevant inputs (because they are NOT removed by removeUI())
-    pheno_inputs = lapply(seq(values[["pheno_total"]]), function(i) {
-        temp = paste0("pheno", i,  c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"))
-        if(values[["sexspec_vector"]][i])
-          temp = outer(temp, c("_m", "_f"), paste0)
-        return(temp)
+    values[["pheno_inputs"]] = lapply(seq(values[["pheno_total"]]), function(i) {
+      temp = paste0("pheno", i,  c("_f0a", "_f0b", "_f2a", "_f2b", "_f1v"))
+      if(values[["sexspec_vector"]][i])
+        temp = outer(temp, c("_m", "_f"), paste0)
+      return(temp)
     })
     inputs = sapply(c("afreq", "pheno_dist",
-                      unlist(pheno_inputs),
+                      unlist(values[["pheno_inputs"]]),
                       # grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$", names(input), value = TRUE),
                       if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                     function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
@@ -927,7 +927,7 @@ server = function(input, output, session) {
   
   # FLB calculation
   observe(priority = -2, {
-    req(values[["peddata"]], any(values[["proband"]]))
+    req(values[["peddata"]])
     
     message("FLB calculation")
     
@@ -1014,7 +1014,16 @@ server = function(input, output, session) {
           f[gsub("\\D+(\\d+)_.*", "\\1", input$flb_v1), gsub(".*_", "", input$flb_v1)] = values[["grid"]][i,1]
         if(grepl("_f[0-2]$", input$flb_v2))
           f[gsub("\\D+(\\d+)_.*", "\\1", input$flb_v2), gsub(".*_", "", input$flb_v2)] = values[["grid"]][i,2]
-        f = data.matrix(f)[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")]
+        
+        # XR model?
+        if(!input$xr_model){
+          f = data.matrix(f)[1:nrow(f),c("f0", "f1", "f2")]
+        }
+        else {
+          f = list("male" = data.matrix(f)[1:nrow(f),c("f0", "f1")],
+                   "female" = data.matrix(f)[1:nrow(f),c("f0", "f1", "f2")])
+          f[["female"]][is.na(f[["female"]][, "f2"]), "f2"] = f[["female"]][is.na(f[["female"]][, "f2"]), "f1"]
+        }
         
         # Calculate BF
         tryCatch(
@@ -1028,6 +1037,7 @@ server = function(input, output, session) {
               freq = 10^fullgrid[i, "afreq"],
               penetrances = f,
               liability = values[["peddata"]][["lclass"]],
+              Xchrom = ifelse(input$xr_model, TRUE, FALSE),
               details = FALSE),
           error = function(err) NULL)
       })
@@ -1035,7 +1045,9 @@ server = function(input, output, session) {
     
     else {
       # Collect inputs
-      fullgrid = sapply(c("afreq", "pheno_dist", grep("_f0a(_[m,f])?$|_f0b(_[m,f])?$|_f2a(_[m,f])?$|_f2b(_[m,f])?$|_f1v(_[m,f])?$", names(input), value = TRUE),
+      fullgrid = sapply(c("afreq", "pheno_dist",
+                          unlist(values[["pheno_inputs"]]),
+                          # grep("_f0a(_[m,f])?$|_f0b(_[m,f])?$|_f2a(_[m,f])?$|_f2b(_[m,f])?$|_f1v(_[m,f])?$", names(input), value = TRUE),
                           if(values[["factor_total"]] > 0) paste0("factor", seq(values[["factor_total"]]), "_risk")),
                         function(x) input[[x]], simplify = FALSE, USE.NAMES = TRUE)
       fullgrid[[input$flb_v1]] = values[["grid"]][, 1]
@@ -1056,8 +1068,13 @@ server = function(input, output, session) {
         names(inputs_f) = gsub("_f$", "", names(inputs_f))
         f_f = get_f(x, values, inputs_f)
         
-        # Join
-        f = dplyr::bind_rows(f_m, f_f)
+        # XR model?
+        if(!input$xr_model){
+          f = dplyr::bind_rows(f_m[,c("f0", "f1", "f2")], f_f[,c("f0", "f1", "f2")])
+        }
+        else {
+          f = list("male" = f_m[,c("f0", "f1")], "female" = f_f[,c("f0", "f1", "f2")])
+        }
         
         # Calculate BF
         tryCatch(
@@ -1069,8 +1086,9 @@ server = function(input, output, session) {
               if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
               if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
               freq = 10^fullgrid[i, "afreq"],
-              penetrances = f[,c("f0", "f1", "f2")],
+              penetrances = f,
               liability = values[["lclass"]],
+              Xchrom = ifelse(input$xr_model, TRUE, FALSE),
               details = FALSE),
           error = function(err) NULL)
       })
