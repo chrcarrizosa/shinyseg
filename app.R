@@ -10,6 +10,7 @@ library(pedsuite, quietly = TRUE)
 library(segregatr, quietly = TRUE)
 # library(flexsurv, quietly = TRUE)
 library(ggplot2, quietly = TRUE)
+# library(reactlog)
 
 # Age
 x = seq(1:100)
@@ -43,7 +44,7 @@ W_input_example =
   selectInput(
     inputId = "input_example",
     label = "Load example",
-    choices = list("", "Clear pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2 (TODO)")),
+    choices = list("", "Clear pedigrees" = c("Trio", "Full siblings"), "Worked examples" = c("Example 1", "Example 2")),
     selected = ""
     )
 
@@ -614,23 +615,37 @@ server = function(input, output, session) {
                lclass = as.integer(rep(1, 4)))
            },
            
-           "Example 2 (TODO)" = {
-             # temp = data.frame(
-             #   nuclearPed(nch = 2),
-             #   phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
-             #   carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
-             #   proband = c(FALSE, FALSE, FALSE, TRUE),
-             #   age = c(40, 40, 10, 10))
+           "Example 2" = {
+             if(!input$lclass_mode){
+               updateCheckboxInput(inputId = "lclass_mode", value = TRUE)
+               # freezeReactiveValue(input, "lclass_mode")
+             }
+             if(input$sexspec_mode){
+               updateCheckboxInput(inputId = "sexspec_mode", value = FALSE)
+               # freezeReactiveValue(input, "sexspec_mode")
+             }
+             if(!input$xr_model) {
+               updateCheckboxInput(inputId = "xr_model", value = TRUE)
+               # freezeReactiveValue(input, "xr_model")
+             }
+             
+             # Update UI
+             # if(values[["factor_total"]]>0) rmv_factor(values, all = TRUE)
+             # if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
+             values[["lclassdata"]] = data.frame(id = as.character(1:2),
+                                                 f0 = c(0.001, 0.001),
+                                                 f1 = c(0.999, 0.001),
+                                                 f2 = c(NA, 0.999))
+
              x = nuclearPed(3, sex = c(1, 1, 2))
              x = addChildren(x, mo = 5, sex = 1:2, verbose = FALSE)
              temp = data.frame(
                x,
-               phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
-               else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
-               carrier = factor(NA_character_, levels = c("", "no", "het", "hom")),
-               proband = FALSE,
+               phenotype = factor(c("", "", "aff", "nonaff", "nonaff", "nonaff", "aff", "nonaff"), levels = c("", "nonaff", "aff")),
+               carrier = factor(c("", "", "het", "no", "", "", "het", ""), levels = c("", "no", "het", "hom")),
+               proband = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE),
                age = as.integer(50),
-               lclass = as.integer(1))
+               lclass = as.integer(x$SEX))
            }
     )
     
@@ -711,16 +726,17 @@ server = function(input, output, session) {
   
   
   # Update lclass data from table edits (this runs twice...)
-  observe(priority = 1, {
-    req(!is.null(input$lclassTable), input$lclass_mode)
-    message("Update liability classes from table edits (this runs twice)")
+  observe({
+    req(!is.null(input$lclassTable), input$lclass_mode, input$input_example == "")
     
+    message("Update liability classes from table edits (this runs twice)")
+
     temp = hot_to_r(input$lclassTable)
     values[["lclassdata"]] = temp
     
     # Update sensitivity analysis choices
     to_keep = grep("_f0a(_[f,m])?$|_f0b(_[f,m])?$|_f2a(_[f,m])?$|_f2b(_[f,m])?$|_f1v(_[f,m])?$|_risk$", values[["flb_v"]], value = TRUE)
-    values[["flb_v"]] = c("afreq", paste0("lclass", as.vector(t(outer(seq(nrow(values[["lclassdata"]])), c("_f0", "_f1", "_f2"), paste0)))), to_keep)
+    values[["flb_v"]] = c("afreq", paste0("lclass", as.vector(t(outer(seq(nrow(temp)), c("_f0", "_f1", "_f2"), paste0)))), to_keep)
   })
   
   
@@ -810,7 +826,7 @@ server = function(input, output, session) {
   
   # Update liability class groups (problem with double run)
   observe(priority = -1, {
-    req(!input$lclass_mode, values[["pheno_total"]]>0, values[["peddata"]])
+    req(!input$lclass_mode, values[["pheno_total"]]>0, values[["peddata"]], input$input_example == "")
     
     # Validate that all necessary UI inputs are created
     if(values[["sexspec_vector"]][values[["pheno_total"]]] == TRUE)
@@ -860,8 +876,10 @@ server = function(input, output, session) {
       values[["f"]] = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")]
     }
     else {
-      values[["f"]] = list("male" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1")],
+      temp = list("male" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1")],
                            "female" = data.matrix(values[["lclassdata"]])[1:nrow(values[["lclassdata"]]),c("f0", "f1", "f2")])
+      temp[["female"]][is.na(temp[["female"]][, "f2"]), "f2"] = temp[["female"]][is.na(temp[["female"]][, "f2"]), "f1"]
+      values[["f"]] = temp
     }
   })
   
@@ -909,7 +927,7 @@ server = function(input, output, session) {
   
   # FLB calculation
   observe(priority = -2, {
-    req(values[["peddata"]])
+    req(values[["peddata"]], any(values[["proband"]]))
     
     message("FLB calculation")
     
@@ -1292,3 +1310,5 @@ server = function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+# shiny::reactlogShow()
