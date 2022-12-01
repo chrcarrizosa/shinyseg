@@ -28,6 +28,7 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
+#   Add remove ped
 
 
 # Input widgets -----------------------------------------------------------------
@@ -176,6 +177,13 @@ W_xr_mode =
     value = FALSE
   )
 
+# W_ped_rmv = 
+#   actionButton(
+#     inputId = "ped_rmv",
+#     label = "Remove",
+#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+#   )
+
 # UI ----------------------------------------------------------------------
 
 # Define UI
@@ -317,7 +325,6 @@ ui = dashboardPage(
                    # Allele frequency
                    column(3, W_afreq),
                    column(3, W_lclass_mode),
-                   column(3, W_sexspec_mode),
                    column(3, W_xr_mode)
                  ),
                  
@@ -336,8 +343,9 @@ ui = dashboardPage(
                  title = "Phenotypes",
                  collapsible = TRUE,
                  fluidRow(id = "pheno0",
-                          column(6, W_pheno_name),
-                          column(2, offset = 2, W_pheno_add),
+                          column(5, W_pheno_name),
+                          column(3, W_sexspec_mode),
+                          column(2, offset = 0, W_pheno_add),
                           column(2, W_pheno_rmv)
                  ),
                  actionLink(inputId = "link1", label = "Help"),
@@ -398,10 +406,12 @@ ui = dashboardPage(
                  title = "Plot",
                  collapsible = TRUE,
                  plotOutput("pedPlot", height = "350px"),
-                 label = boxLabel(
-                   text = 1,
-                   status = "danger",
-                   style = "circle"
+                 tags$table(
+                   tags$tr(
+                     tags$td(actionLink("ped_prev", NULL, icon("arrow-left"))),
+                     tags$td(uiOutput('ped_current')),
+                     tags$td(actionLink("ped_next", NULL, icon("arrow-right")))
+                   )
                  )
              ),
              box(width = 6,
@@ -443,7 +453,8 @@ server = function(input, output, session) {
                                       f2 = 0.8)
   values[["fhelpdata"]] = data.frame(quantile = c(0.25, 0.50, 0.75),
                                      age = as.integer(c(20, 40, 60)))
-  # values[["fhelp_choices"]] = ""
+  values[["ped_total"]] = 0
+  values[["ped_current"]] = 0
   
   
   # Reset session
@@ -511,13 +522,16 @@ server = function(input, output, session) {
     req(input$input_example == "") # avoids updating twice...
     
     message("Only one proband")
-    currentproband = values[["peddata"]][["proband"]]
-    if(!is.null(values[["lastproband"]]) & sum(currentproband)>1)
-      newproband = values[["lastproband"]] != currentproband
-    else
-      newproband = currentproband
-    values[["lastproband"]] = newproband
-    values[["peddata"]][["proband"]] = newproband
+    lapply(1:values[["ped_total"]], function(pedid) {
+      idxs = which(values[["peddata"]][["ped"]] == pedid)
+      currentproband = values[["peddata"]][["proband"]][idxs]
+      if(!is.null(values[["lastproband"]][idxs]) & sum(currentproband)>1)
+        newproband = values[["lastproband"]][idxs] != currentproband
+      else
+        newproband = currentproband
+      values[["lastproband"]][idxs] = newproband
+      values[["peddata"]][["proband"]][idxs] = newproband
+    })
   })
   
   
@@ -525,7 +539,9 @@ server = function(input, output, session) {
   # Load pedigree from file
   observeEvent(input$input_pedigree, {
     message("Load pedigree from file")
+    values[["ped_total"]] = as.integer(values[["ped_total"]] + 1)
     temp = data.frame(
+      ped = values[["ped_total"]],
       readRDS(input$input_pedigree$datapath),
       phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
       else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
@@ -538,7 +554,8 @@ server = function(input, output, session) {
     if(!is.null(values[["factor_vector"]])) # not needed...
       temp[, values[["factor_vector"]]] = FALSE
     
-    values[["peddata"]] = temp
+    values[["peddata"]] = rbind(values[["peddata"]], temp)
+    values[["ped_current"]] = values[["ped_total"]]
   })
   
   
@@ -565,7 +582,9 @@ server = function(input, output, session) {
     switch(input$input_example,
            
            "Trio" = {
+             values[["ped_total"]] = as.integer(values[["ped_total"]] + 1)
              temp = data.frame(
+               ped = values[["ped_total"]],
                nuclearPed(),
                phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
@@ -576,7 +595,9 @@ server = function(input, output, session) {
            },
            
            "Full siblings" = {
+             values[["ped_total"]] = as.integer(values[["ped_total"]] + 1)
              temp = data.frame(
+               ped = values[["ped_total"]],
                nuclearPed(nch = 2),
                phenotype = if(input$lclass_mode) factor("", levels = c("", "nonaff", "aff"))
                else factor("", levels = c("", "nonaff", values[["pheno_vector"]])),
@@ -606,7 +627,9 @@ server = function(input, output, session) {
              if(values[["pheno_total"]]>0) rmv_pheno(values, all = TRUE)
              add_pheno(values, "pheno1", params = c(0, 1, 200, 1, 50), sexspec = FALSE)
 
+             values[["ped_total"]] = as.integer(1)
              temp = data.frame(
+               ped = values[["ped_total"]],
                nuclearPed(nch = 2),
                phenotype = factor(c("", "pheno1", "nonaff", "pheno1"), levels = c("", "nonaff", values[["pheno_vector"]])),
                carrier = factor(c("no", "het", "no", "het"), levels = c("", "no", "het", "hom")),
@@ -639,7 +662,9 @@ server = function(input, output, session) {
 
              x = nuclearPed(3, sex = c(1, 1, 2))
              x = addChildren(x, mo = 5, sex = 1:2, verbose = FALSE)
+             values[["ped_total"]] = as.integer(1)
              temp = data.frame(
+               ped = values[["ped_total"]],
                x,
                phenotype = factor(c("", "", "aff", "nonaff", "nonaff", "nonaff", "aff", "nonaff"), levels = c("", "nonaff", "aff")),
                carrier = factor(c("", "", "het", "no", "", "", "het", ""), levels = c("", "no", "het", "hom")),
@@ -653,8 +678,12 @@ server = function(input, output, session) {
     if(!is.null(values[["factor_vector"]])) # not needed...
       temp[, values[["factor_vector"]]] = FALSE
     
-    values[["peddata"]] = temp
-    
+    if(input$input_example %in% c("Trio", "Full siblings"))
+      values[["peddata"]] = rbind(values[["peddata"]], temp)
+    else
+      values[["peddata"]] = temp
+    values[["ped_current"]] = values[["ped_total"]]
+
     updateSelectInput(inputId = "input_example", selected = "")
   })
   
@@ -690,7 +719,7 @@ server = function(input, output, session) {
 
     temp =
       within(
-        temp_full[,1:9], {
+        temp_full[,c("ped", "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age", "lclass")], {
           if(!is.null(values[["factor_vector"]])){ # values[["factor_vector"]] != ''
             for(i in rev(values[["factor_vector"]])){
               if(!is.null(temp_full[[i]]))
@@ -724,13 +753,13 @@ server = function(input, output, session) {
   })
   
   
-  
+    
   # Update lclass data from table edits (this runs twice...)
   observe({
     req(!is.null(input$lclassTable)) # input$lclass_mode, input$input_example == ""
     
     message("Update liability classes from table edits (this runs twice)")
-
+    
     temp = hot_to_r(input$lclassTable)
     values[["lclassdata"]] = temp
     
@@ -745,12 +774,12 @@ server = function(input, output, session) {
   observe({
     req(values[["peddata"]], input$input_example == "") # avoids updating twice...
     message("Update FLB indexes")
-    values[["affected"]] = which(values[["peddata"]][["phenotype"]] != "" & values[["peddata"]][["phenotype"]] != "nonaff")
-    values[["unknown"]] = which(values[["peddata"]][["phenotype"]] == "")
-    values[["proband"]] = which(values[["peddata"]][["proband"]] == 1)
-    values[["carriers"]] = which(values[["peddata"]][["carrier"]] == "het")
-    values[["homozygous"]] = which(values[["peddata"]][["carrier"]] == "hom")
-    values[["noncarriers"]] = which(values[["peddata"]][["carrier"]] == "no")
+    values[["affected"]] = values[["peddata"]][["phenotype"]] != "" & values[["peddata"]][["phenotype"]] != "nonaff"
+    values[["unknown"]] = values[["peddata"]][["phenotype"]] == ""
+    values[["proband"]] = values[["peddata"]][["proband"]] == 1
+    values[["carriers"]] = values[["peddata"]][["carrier"]] == "het"
+    values[["homozygous"]] = values[["peddata"]][["carrier"]] == "hom"
+    values[["noncarriers"]] = values[["peddata"]][["carrier"]] == "no"
   })
   
   
@@ -758,13 +787,14 @@ server = function(input, output, session) {
   # Segregation plot
   output$pedPlot = renderPlot({
     req(values[["peddata"]], input$input_example == "")
-    plotSegregation(as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-                    affected = values[["affected"]],
-                    unknown = values[["unknown"]],
-                    proband = values[["proband"]],
-                    if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-                    if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-                    if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]]
+    idxs = which(values[["peddata"]][["ped"]] == values[["ped_current"]])
+    plotSegregation(as.ped(values[["peddata"]][idxs, c("id", "fid", "mid", "sex")]),
+                    affected = which(values[["affected"]][idxs]),
+                    unknown = which(values[["unknown"]][idxs]),
+                    proband = which(values[["proband"]][idxs]),
+                    if(length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                    if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                    if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs])
     )
   })
   
@@ -931,43 +961,51 @@ server = function(input, output, session) {
     req(values[["peddata"]])
     
     message("FLB calculation")
-
+    
     # Calculate BF
-    values[["flb"]] = tryCatch(
-      if(input$lclass_mode)
-        FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-            affected = values[["affected"]],
-            unknown = values[["unknown"]],
-            proband = values[["proband"]],
-            if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-            if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-            freq = 10^input$afreq,
-            penetrances = values[["f"]],
-            liability = values[["peddata"]][["lclass"]],
-            Xchrom = ifelse(input$xr_model, TRUE, FALSE),
-            details = FALSE)
-      else
-        FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-            affected = values[["affected"]],
-            unknown = values[["unknown"]],
-            proband = values[["proband"]],
-            if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-            if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-            if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-            freq = 10^input$afreq,
-            penetrances = values[["f"]],
-            liability = values[["lclass"]],
-            Xchrom = ifelse(input$xr_model, TRUE, FALSE),
-            details = FALSE),
-      error = function(err) NULL)
+    values[["flb"]] = 
+      sapply(1:values[["ped_total"]], function(pedid) {
+        idxs = which(values[["peddata"]][["ped"]] == pedid)
+        tryCatch(
+          if(input$lclass_mode)
+            FLB(x = as.ped(values[["peddata"]][idxs, c("id", "fid", "mid", "sex")]),
+                affected = which(values[["affected"]][idxs]),
+                unknown = which(values[["unknown"]][idxs]),
+                proband = which(values[["proband"]][idxs]),
+                if(length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+                freq = 10^input$afreq,
+                penetrances = values[["f"]],
+                liability = values[["peddata"]][["lclass"]][idxs],
+                Xchrom = ifelse(input$xr_model, TRUE, FALSE),
+                details = FALSE)
+          else
+            FLB(x = as.ped(values[["peddata"]][idxs, c("id", "fid", "mid", "sex")]),
+                affected = which(values[["affected"]][idxs]),
+                unknown = which(values[["unknown"]][idxs]),
+                proband = which(values[["proband"]][idxs]),
+                if(length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+                freq = 10^input$afreq,
+                penetrances = values[["f"]],
+                liability = values[["lclass"]][idxs],
+                Xchrom = ifelse(input$xr_model, TRUE, FALSE),
+                details = FALSE),
+          error = function(err) NA)
+      })
+    
   })
   
   
   # FLB calculation (show if not null)
   output$flb_main = renderText({
-    req(values[["flb"]])
-    values[["flb"]]
+    res = prod(values[["flb"]])
+    if(!is.na(res) & !is.null(values[["flb"]]))
+      res
+    else
+      " "
   })
   
   
@@ -995,7 +1033,7 @@ server = function(input, output, session) {
       c(names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v1)],
         names(values[["flb_choices"]])[which(values[["flb_choices"]] == input$flb_v2)])
     )
-    
+
     
     if(input$lclass_mode) {
       
@@ -1028,20 +1066,25 @@ server = function(input, output, session) {
         }
         
         # Calculate BF
-        tryCatch(
-          FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-              affected = values[["affected"]],
-              unknown = values[["unknown"]],
-              proband = values[["proband"]],
-              if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-              if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-              if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-              freq = 10^fullgrid[i, "afreq"],
-              penetrances = f,
-              liability = values[["peddata"]][["lclass"]],
-              Xchrom = ifelse(input$xr_model, TRUE, FALSE),
-              details = FALSE),
-          error = function(err) NULL)
+        prod(
+          sapply(1:values[["ped_total"]], function(pedid) {
+            idxs = which(values[["peddata"]][["ped"]] == pedid)
+            tryCatch(
+              FLB(x = as.ped(values[["peddata"]][idxs, c("id", "fid", "mid", "sex")]),
+                  affected = which(values[["affected"]][idxs]),
+                  unknown = which(values[["unknown"]][idxs]),
+                  proband = which(values[["proband"]][idxs]),
+                  if(length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                  if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                  if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+                  freq = 10^fullgrid[i, "afreq"],
+                  penetrances = f,
+                  liability = values[["peddata"]][["lclass"]][idxs],
+                  Xchrom = ifelse(input$xr_model, TRUE, FALSE),
+                  details = FALSE),
+              error = function(err) NA)
+          })
+        )
       })
     }
     
@@ -1056,7 +1099,7 @@ server = function(input, output, session) {
       fullgrid[[input$flb_v2]] = values[["grid"]][, 2]
       fullgrid = as.data.frame(fullgrid)
       
-      
+
       # Calculate FLB
       values[["flb_vals"]] = sapply(seq(nrow(fullgrid)), function(i) {
         
@@ -1079,25 +1122,30 @@ server = function(input, output, session) {
         }
         
         # Calculate BF
-        tryCatch(
-          FLB(x = as.ped(values[["peddata"]][, c("id", "fid", "mid", "sex")]),
-              affected = values[["affected"]],
-              unknown = values[["unknown"]],
-              proband = values[["proband"]],
-              if(length(values[["carriers"]] > 0)) carriers = values[["carriers"]],
-              if(length(values[["homozygous"]] > 0)) homozygous = values[["homozygous"]],
-              if(length(values[["noncarriers"]] > 0)) noncarriers = values[["noncarriers"]],
-              freq = 10^fullgrid[i, "afreq"],
-              penetrances = f,
-              liability = values[["lclass"]],
-              Xchrom = ifelse(input$xr_model, TRUE, FALSE),
-              details = FALSE),
-          error = function(err) NULL)
+        prod(
+          sapply(1:values[["ped_total"]], function(pedid) {
+            idxs = which(values[["peddata"]][["ped"]] == pedid)
+            tryCatch(
+              FLB(x = as.ped(values[["peddata"]][idxs, c("id", "fid", "mid", "sex")]),
+                  affected = which(values[["affected"]][idxs]),
+                  unknown = which(values[["unknown"]][idxs]),
+                  proband = which(values[["proband"]][idxs]),
+                  if(length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                  if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                  if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+                  freq = 10^fullgrid[i, "afreq"],
+                  penetrances = f,
+                  liability = values[["lclass"]][idxs],
+                  Xchrom = ifelse(input$xr_model, TRUE, FALSE),
+                  details = FALSE),
+              error = function(err) NA)
+          })
+        )
       })
     }
     
     
-    # Show if not null
+    # Show if not NULL
     if(!is.null(values[["flb_vals"]]))
       showModal(modalDialog(plotOutput("testplot", height = "550px"), size = "m"))
     
@@ -1129,7 +1177,7 @@ server = function(input, output, session) {
   observeEvent(input$factor_add, {
     req(values[["factor_total"]] < 3,
         !grepl("^\\s*$", input$factor_name),
-        !input$factor_name %in% c(values[["factor_vector"]], "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age"))
+        !input$factor_name %in% c(values[["factor_vector"]], "ped", "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age", "lclass"))
     add_factor(values, input$factor_name, 0)
     updateTextInput(inputId = "factor_name", value = "")
   })
@@ -1257,7 +1305,7 @@ server = function(input, output, session) {
     
     # require(values[["flb"]])
     
-    BFplot(values[["flb"]])
+    BFplot(prod(values[["flb"]]))
   })
   
   
@@ -1322,9 +1370,23 @@ server = function(input, output, session) {
     updateSelectInput(inputId = "fhelp_transfer", selected = "")
   })
   
+  
+  
+  # Pedigree plot selector
+  observeEvent(input$ped_prev, {
+    req(values[["ped_current"]]>1)
+    values[["ped_current"]] = values[["ped_current"]] - 1
+  })
+  observeEvent(input$ped_next, {
+    req(values[["ped_current"]]<values[["ped_total"]])
+    values[["ped_current"]] = values[["ped_current"]] + 1
+  })
+  output$ped_current = renderUI({
+    helpText(paste0("Pedigree ", values[["ped_current"]], "/", values[["ped_total"]]))
+  })
+  
+  
 }
-
-
 
 # End ---------------------------------------------------------------------
 
