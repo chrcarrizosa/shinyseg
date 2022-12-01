@@ -749,7 +749,14 @@ server = function(input, output, session) {
                   # rowHeaders = NULL,
                   height = if(nrow(values[["lclassdata"]])> 12) 300 else NULL) %>%
       hot_validate_numeric(col = c('f0', 'f1', 'f2'), min = 0, max = 1, allowInvalid = FALSE) %>% 
-      hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
+      hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE,
+                       customOpts = list(
+                         remove_row = list(
+                           name = 'Remove row',
+                           hidden = htmlwidgets::JS("function() {
+                             return this.getSelectedLast()[0] === 0;
+                           }")
+                         )))
   })
   
   
