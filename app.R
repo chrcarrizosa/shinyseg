@@ -701,7 +701,7 @@ server = function(input, output, session) {
       hot_validate_numeric(col = 'age', min = 1, max = 100, allowInvalid = FALSE) %>%
       hot_validate_numeric(col = 'lclass', min = 1, max = nrow(values[["lclassdata"]]), allowInvalid = FALSE) %>%
       hot_table(highlightRow = TRUE) %>%
-      hot_col(1:4, renderer = "function(instance, td, row, col, prop, value, cellProperties) {
+      hot_col(c("ped", "id", "fid", "mid", "sex"), renderer = "function(instance, td, row, col, prop, value, cellProperties) {
                               Handsontable.renderers.NumericRenderer.apply(this, arguments);
                               td.style.background = '#FCFCFC';
                               cellProperties.readOnly = true;}") %>%
