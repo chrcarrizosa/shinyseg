@@ -192,7 +192,8 @@ ui = dashboardPage(
   
   # Application title
   dashboardHeader(
-    title = "shinyseg"#,
+    title = "shinyseg",
+    dropdownMenuOutput("info_menu")
     # dropdownMenu(type = "tasks", badgeStatus = "success",
     #              taskItem(value = 90, color = "green",
     #                       "Documentation"
@@ -211,6 +212,7 @@ ui = dashboardPage(
   
   # Sidebar
   dashboardSidebar(disable = TRUE, width = 0, minified = FALSE),
+  # dashboardSidebar(disable = FALSE, minified = FALSE, menuItemOutput("item1")),
   
   # Main panel
   dashboardBody(
@@ -1403,6 +1405,43 @@ server = function(input, output, session) {
     
     values[["ped_current"]] = values[["ped_total"]] - 1
     values[["ped_total"]] = values[["ped_total"]] - 1
+  })
+  
+  
+  
+  output$info_menu <- renderMenu({
+    # items <- lapply(tasks, function(el) {
+    #   taskItem(value = el$value, color = el$color, text = el$text)
+    # })
+    # dropdownMenu(
+    #   type = "tasks", badgeStatus = "danger",
+    #   .list = items
+    # )
+    
+    items = within(list(), {
+      # Check pedigree
+      if(is.null(values[["peddata"]]))
+        aa=notificationItem(text = paste0("No pedigree loaded"),
+                         status = "danger", icon = icon("warning"))
+      
+      else
+        aa=notificationItem(text = paste0("You have loaded ", values[["ped_total"]], " pedigrees"),
+                         status = "success", icon = icon("check"))
+      
+      # Check proband
+      if(!is.null(values[["peddata"]]) & sum(values[["proband"]])!=values[["ped_total"]])
+        bb=notificationItem(text = paste0("Some pedigrees do not contain a proband"),
+                         status = "danger", icon = icon("warning"))
+      
+      # Check phenotypes
+      
+      # Check unassigned 
+    })
+    
+    dropdownMenu(
+      type = "tasks", badgeStatus = "success",
+      .list = items
+    )
   })
   
   
