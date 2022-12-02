@@ -1401,7 +1401,7 @@ server = function(input, output, session) {
       temp = NULL
     values[["peddata"]] = temp
     
-    values[["ped_current"]] = values[["ped_current"]] - 1
+    values[["ped_current"]] = values[["ped_total"]] - 1
     values[["ped_total"]] = values[["ped_total"]] - 1
   })
   
