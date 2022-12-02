@@ -28,7 +28,6 @@ x = seq(1:100)
 #   Age groups and custom penetrances
 #   FLB = f(x)
 #   Notifications
-#   Add remove ped
 
 
 # Input widgets -----------------------------------------------------------------
@@ -177,12 +176,12 @@ W_xr_mode =
     value = FALSE
   )
 
-# W_ped_rmv = 
-#   actionButton(
-#     inputId = "ped_rmv",
-#     label = "Remove",
-#     style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
-#   )
+W_ped_rmv =
+  actionButton(
+    inputId = "ped_rmv",
+    label = "Remove",
+    style = "padding-top:4px;padding-bottom:4px;margin-top:6px;color:#007BA7;border:1px solid #007BA7;font-size:90%"
+  )
 
 # UI ----------------------------------------------------------------------
 
@@ -410,7 +409,8 @@ ui = dashboardPage(
                    tags$tr(
                      tags$td(actionLink("ped_prev", NULL, icon("arrow-left"))),
                      tags$td(uiOutput('ped_current')),
-                     tags$td(actionLink("ped_next", NULL, icon("arrow-right")))
+                     tags$td(actionLink("ped_next", NULL, icon("arrow-right"))),
+                     tags$td(W_ped_rmv)
                    )
                  )
              ),
@@ -1390,6 +1390,19 @@ server = function(input, output, session) {
   })
   output$ped_current = renderUI({
     helpText(paste0("Pedigree ", values[["ped_current"]], "/", values[["ped_total"]]))
+  })
+  observeEvent(input$ped_rmv, {
+    req(values[["peddata"]], values[["ped_total"]]>=1)
+    temp = values[["peddata"]]
+    temp = temp[temp$ped != values[["ped_current"]], ]
+    if(nrow(temp)>0)
+      temp$ped = as.integer(as.factor(temp$ped))
+    else
+      temp = NULL
+    values[["peddata"]] = temp
+    
+    values[["ped_current"]] = values[["ped_current"]] - 1
+    values[["ped_total"]] = values[["ped_total"]] - 1
   })
   
   
