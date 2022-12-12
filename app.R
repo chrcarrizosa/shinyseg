@@ -805,10 +805,10 @@ server = function(input, output, session) {
                     if(length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
                     if(length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs])
     )
-  })
-  
-  
-  
+  }, execOnResize = TRUE)
+
+
+
   # Update penetrances
   observe({
     
