@@ -1,0 +1,12 @@
+This panel contains the tools for specifying the penetrance function. The options depend on the mode (relative risk / liability class), which you can change using the toggle in the header.<br>
+<br>
+<b>Relative risk</b><br>
+TODO<br>
+<br>
+<b>Liability class</b><br>
+The liability class table contains the probability of observing a given phenotype conditionally on the presence of 0, 1 or 2 copies of the variant (f0, f1 and f2 columns). This is by default a single vector that would apply to all cases, but a specification dependent on sex, phenotype and age can also be made. This can be done by loading an external file through <span style='color:#3a4e69;font-weight:900;'><i class='fa-solid fa-file-import fa-fw'></i>Load file</span> or by adding new rows with <span style='color:#3a4e69;font-weight:900;'><i class='fa-solid fa-plus fa-fw'></i>ADD</span> and filling in the necessary information in such a way that there are no overlaps between the three subsequent columns:
+<ul>
+  <li><b>sex:</b> <i>male</i>, <i>female</i> or <i>both</i> for classes that refer to males, females or both sexes, respectively.</li>
+  <li><b>phenotype:</b> a free-text field whose values should match the phenotypes specified in the pedigree table. Note that <i>nonaff</i> is another phenotype whose classes must be also specified (unless there are no unaffected cases); leaving this cell empty indicates that the class apply to all phenotypes(s).</li>
+  <li><b>ages:</b> an integer from 1 to 100, or ranges between these values (e.g. 10-20, 30-100...) that indicate the ages to which the class applies; leaving this cell empty is the same as specifying a range 1-100 (i.e. the class applies to all ages).</li>
+</ul>

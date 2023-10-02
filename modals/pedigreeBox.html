@@ -1,0 +1,13 @@
+Here you can add pedigrees and fill in relevant information for the calculations.<br>
+<br>
+<b>Adding a pedigree</b><br>
+You can upload a pedigree by clicking on <span style='color:#3a4e69;font-weight:900;'><i class='fa-solid fa-file-import fa-fw'></i>Add pedfile</span> and selecting a file with a suitable format*; if you need help creating such a file, you can <span style='color:#3a4e69;font-weight:900;'><i class='fa-solid fa-globe fa-fw'></i>Use QuickPed</span>! You may also select an example from the dropdown menu on the left and modify it at will using the various options within <span style='color:#3a4e69;font-weight:900;'><i class='fa-solid fa-person-digging fa-fw'></i>Modify</span>. This process can be repeated to add more families; they will appear concatenated in the table below and indexed by the 'id' column.<br>
+<br>
+<b>Filling in the data</b><br>
+The first four columns within the pedigree table are not directly editable, as they refer to the identifiers of each pedigree and its members. Conversely, the rest require user input to calculate the Bayes factor, and a <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> symbol will appear in their header if some information is still missing (you can find more information in the notification menu):
+<ul>
+  <li><b>phenotype:</b> this is a free-text field where you can specify the phenotypes relevant to your analysis (i.e. those for which the association with the variant is to be evaluated). The <i>nonaff</i> value is reserved for individuals known not to have the phenotype(s); leaving this cell empty indicates that the phenotype is unknown.</li>
+  <li><b>carrier:</b> <i>neg</i> for non-carriers, <i>het</i> for heterozygous (or hemizygous) carriers, and <i>hom</i> for homozygous carriers; leaving this cell empty indicates that the carriership state is unknown.</li>
+  <li><b>proband:</b> indicates the proband or index case of each pedigree.</li>
+  <li><b>age:</b> an integer between 1 and 100 specifying the age of onset of the phenotype for those affected, and the age of censoring for those not affected (usually, this refers to the current age or the age of death). This information may be necessary depending on the options chosen for the analysis.</li>
+</ul>

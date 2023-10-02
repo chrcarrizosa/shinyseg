@@ -1,0 +1,256 @@
+/*navigation bar*/
+.navbar-primary {
+  background-color: #024378;
+  height: 3rem;
+}
+.apptitle {
+  font-size: 0.9rem;
+  font-family: monospace;
+  color: white;
+  margin: 0rem 0rem 0rem 0.75rem;
+}
+.bttn-jelly.bttn:focus {
+  background-color: transparent;
+  box-shadow: none;
+  transform: scale(1);
+}
+.bttn-jelly.bttn-primary {
+  background-color: transparent;
+  margin-top: 0.5rem;
+}
+.bttn-jelly.bttn-primary:hover {
+  box-shadow: none;
+  transform: scale(1);
+}
+.bttn-jelly.bttn-primary::before {
+  background-color: #023865;
+}
+.bttn-jelly.bttn-primary:hover::before {
+  opacity: 1;
+  transform: scale(1);
+  background-color: #023865;
+}
+.fileinput_2 {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+.inline input {
+  display: inline-block;
+}
+.inline label {
+  display: table-cell;
+  text-align: left;
+  font-weight: 500!important;
+  font-size: 1rem;
+}
+.inline .form-group {
+  display: table-row;
+  white-space: nowrap;
+}
+.inlinenumeric input, .form-control:focus {
+  background: #023865;
+  color: white;
+  height: 1.5rem;
+  padding-right: 0rem;
+  margin-left: -0.5rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+}
+.inlinenumeric .form-control:focus {
+  border-color: #80bdff;
+}
+.inlinenumeric label{
+  width: 55%;
+  color: white;
+  vertical-align: bottom;
+}
+
+/*pedigree table*/
+.card-header {
+  padding: 0.4rem 0.75rem 0.75rem 0.5rem;
+  height: 2.5rem; /*height: 3em;*/
+}
+.card-title {
+  font-size: 1.2rem;
+  color: #024378;
+  font-weight: 700;
+  width: 100%;
+}
+.card-body {
+  border-right: 2px solid #e7f3ff;
+}
+.dropdown-toggle::after {
+  color: #4e4e4e;
+}
+.bttn-jelly.bttn-warning {
+  color: #a3a3a3;
+  background-color: transparent;
+}
+.bttn-jelly.bttn-warning:hover {
+  box-shadow: none;
+  transform: scale(1);
+  color: #4e4e4e;
+}
+.bttn-jelly.bttn-warning::before {
+  background-color: transparent;
+}
+.bttn-jelly.bttn-warning:hover::before {
+  transform: scale(1);
+  background-color: transparent;
+}
+.bttn-jelly.bttn-default {
+  color: #4e4e4e;
+  background-color: transparent;
+}
+.bttn-jelly.bttn-default:hover {
+  box-shadow: none;
+  transform: scale(1);
+}
+.bttn-jelly.bttn-default::before {
+  background-color: #f4f6f9;
+}
+.bttn-jelly.bttn-default:hover::before {
+  opacity: 1;
+  transform: scale(1);
+  background-color: #f4f6f9;
+}
+.leftcolumn {
+  float: left;
+}
+.rightcolumn {
+  float: right;
+}
+.sweet-alert p {
+  color: #4e4e4e!important;
+}
+.helpbox {
+  padding-top: 0rem!important;
+  padding-bottom: 0rem!important;
+}
+.helpbox p {
+  font-size: .95rem!important;
+  font-weight: 500!important;
+  text-align: justify!important;
+  line-height: 1.5rem!important;
+}
+.flexcontainer {
+  display: flex;
+}
+.bootstrap-select .dropdown-toggle, .bootstrap-select .dropdown-toggle:focus, .bootstrap-select>select.mobile-device:focus+.dropdown-toggle {
+  background-color: #f4f6f9;
+  border-radius: 50px;
+  outline: transparent!important;
+}
+.sw-dropdown-in {
+  padding: 0px;
+}
+.sw-dropdown-content {
+  border-radius: 3px;
+  position: absolute;
+  z-index: 200; /* avoids getting behind the table*/
+}
+.dropdown-item:active {
+  text-decoration: none;
+  background-color: #e4e9f0;
+}
+.sweet-alert {
+  text-align: right!important; /*cancel/confirm to the right*/
+}
+.sweet-alert button.cancel, .sweet-alert button.confirm {
+  box-shadow: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 5px;
+  margin: 1.5rem 0.15rem 0.15rem 0.15rem;
+  cursor: pointer;
+  border: solid 1px #a3a3a3;
+  width: 4rem;
+  padding: 0.1rem 0.25rem;
+}
+.sweet-alert button.cancel {
+  color: #999;
+  background-color: #f4f6f9!important;
+}
+.sweet-alert button.confirm {
+  color: white;
+}
+.handsontable th {
+  vertical-align: middle;
+  background-color: #f4f6f9;
+}
+.handsontable {
+  text-align: right;
+}
+.flexcontainer {
+  display: flex;
+}
+
+/*penetrance*/
+.btn-gray {
+  background-color: white;
+  color: #c9c9c9;
+  font-weight: 500;
+  line-height: 0.35rem;
+  font-size: 0.9rem!important;
+  white-space: nowrap;
+  margin-top: 0.1rem;
+  padding: 0.35rem;
+  border-radius: 5px;
+}
+.btn-gray.active {
+  color: #4e4e4e;
+  font-weight: 700;
+  background-color:#f4f6f9;
+}
+.btn-gray:hover {
+  color: #4e4e4e;
+}
+.inlinetext .filter-option {
+  width: 150px!important;
+}
+.inlinetext label{
+  color: #4e4e4e;
+  vertical-align: middle;
+  padding-right: 0.35rem;
+}
+
+/*flb*/
+#bayes-flb {
+  background-color: #f4f6f9;
+  border-radius: 20px;
+  height: 2rem;
+  width: 7rem;
+  overflow: hidden;
+  padding-top: 0.5rem;
+  padding-left: 1rem;
+}
+.irs--flat .irs-bar, .irs--flat .irs-from, .irs--flat .irs-to, .irs--flat .irs-single {
+  background-color: #a3a3a3;
+}
+.irs-handle>i:first-child {
+  background-color: #a3a3a3!important;
+}
+.irs--flat .irs-single:before, .irs--flat .irs-from:before, .irs--flat .irs-to:before {
+  border-top-color: #a3a3a3;
+}
+#bayes-sensitivity {
+  animation: pulse 1s 4;
+}
+#bayes-plot {
+  animation: pulse 1s 4;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
