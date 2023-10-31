@@ -415,12 +415,12 @@ bayesBoxServer = function(id, values) {
           rriskPlot[sex == "both", sexList := .(list(list("male", "female")))]
           rriskPlot = rriskPlot[, .(sex = unlist(sexList)), by = .(phenotype, age, f0Hz, f2Hz)]
           # Back to long format
-          fBase = melt(rriskPlot, measure.vars = c("f0Hz", "f2Hz"), value.name = "ir")
+          fBase = melt(rriskPlot, measure.vars = c("f0Hz", "f2Hz"), value.name = "Hz")
           fBase[, variable := factor(variable, levels = c("f0Hz", "f2Hz"), labels = c("f0", "f2"))]
           # Survival penetrances
-          fBase[, nonaff := sum(ir), by = .(age, sex, variable)]
+          fBase[, nonaff := sum(Hz), by = .(age, sex, variable)]
           fBase[, nonaff := 1-exp(-cumsum(nonaff)), by = .(sex, phenotype, variable)]
-          fBase[, sp := shift(1 - nonaff, fill = 1) * ir, by = .(sex, phenotype, variable)]
+          fBase[, sp := shift(1 - nonaff, fill = 1) * Hz, by = .(sex, phenotype, variable)]
           faff = dcast(fBase, sex + phenotype + age ~ variable, value.var = "sp")
           faff[f0 > f2, f2 := f0] # fix phi > beta
           fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))

@@ -444,13 +444,13 @@ penetranceBoxServer = function(id, values) {
         hideElement("message8", asis = TRUE)
         fBase = melt(rriskPlot,
                      measure.vars = list(c("f0Hz", "f2Hz"), c("f0CI", "f2CI")),
-                     value.name = c("ir", "ci"))
+                     value.name = c("Hz", "CI"))
         fBase[, variable := factor(variable, levels = 1:2, labels = c("f0", "f2"))]
         
         # Survival penetrances
-        fBase[, nonaff := sum(ir), by = .(age, sex, variable)]
+        fBase[, nonaff := sum(Hz), by = .(age, sex, variable)]
         fBase[, nonaff := 1-exp(-cumsum(nonaff)), by = .(sex, phenotype, variable)]
-        fBase[, sp := shift(1 - nonaff, fill = 1) * ir, by = .(sex, phenotype, variable)]
+        fBase[, sp := shift(1 - nonaff, fill = 1) * Hz, by = .(sex, phenotype, variable)]
         faff = dcast(fBase, sex + phenotype + age ~ variable, value.var = "sp")
         faff[f0 > f2, f2 := f0] # fix phi > beta
         fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))
