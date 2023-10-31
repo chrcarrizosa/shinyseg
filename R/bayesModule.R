@@ -405,7 +405,7 @@ bayesBoxServer = function(id, values) {
           for(v in vars)
             rriskPlot[rowid == idx[[v]]$row, idx[[v]]$col] = grid2[i, v]
           # Compute hazards
-          rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "logis", location = f0mu, scale = sqrt(3) * f0sigma / pi, a = 0, b = 100))), by = .(rowid)]
+          rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
           rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
           rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, df, unlist(coefs)))), by = .(rowid)]
           rriskPlot = rriskPlot[, list(age = 1:100, f0Hz = unlist(f0Hz), f2Hz = unlist(f2Hz)), by = .(sex, phenotype)]

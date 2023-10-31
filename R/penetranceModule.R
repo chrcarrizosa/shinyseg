@@ -412,8 +412,7 @@ penetranceBoxServer = function(id, values) {
       # Compute incidences
       if (rowBase > 0) {
         rriskPlot = copy(fBase)
-        # rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
-        rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "logis", location = f0mu, scale = sqrt(3) * f0sigma / pi, a = 0, b = 100))), by = .(rowid)]
+        rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
         rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
         rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, df, unlist(coefs)))), by = .(rowid)]
         rriskPlot[, f2CI := list(list(1 - exp(-cumsum(unlist(f2Hz))))), by = .(rowid)]
