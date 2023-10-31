@@ -176,7 +176,7 @@ penetranceBoxServer = function(id, values) {
     })
     
     # Mode changes
-    observeEvent(priority = 1, input$mode, {
+    observeEvent(priority = 2, input$mode, {
       
       toggleElement("lclassBox")
       toggleElement("rriskBox")
