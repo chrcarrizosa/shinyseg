@@ -13,22 +13,37 @@ hjts = c(rep(0.15, 5), 0.5, rep(0.85, 4))
 # The colour bar itself
 colbar =
   ggplot(dat) +
-  geom_tile(aes(x = 0.5, y = BF, fill = BF), width = 1, show.legend = FALSE) +
-  scale_x_continuous(breaks = NULL,
-                     expand = expansion(0))  +
-  scale_y_continuous(limits = range(dat$BF),
-                     trans = "log2",
-                     breaks = thresh,
-                     labels = c("", "", "", "", "1", "4", "8", "16", "32"),
-                     expand = expansion(0),
-                     oob = scales::squish) +
-  labs(x = NULL, y = NULL) +
-  scale_fill_fermenter(palette = "RdYlBu",
-                       breaks = thresh,
-                       limits = range(dat$BF),
-                       oob = scales::squish,
-                       trans = "log2") +
-  coord_flip(clip = "off", xlim = c(0, 1.3)) +
+  geom_tile(
+    aes(x = 0.5, y = BF, fill = BF),
+    width = 1,
+    show.legend = FALSE) +
+  scale_x_continuous(
+    breaks = NULL,
+    expand = expansion(0)
+  )  +
+  scale_y_continuous(
+    limits = range(dat$BF),
+    trans = "log2",
+    breaks = thresh,
+    labels = c("", "", "", "", "1", "4", "8", "16", "32"),
+    expand = expansion(0),
+    oob = scales::squish
+  ) +
+  labs(
+    x = NULL,
+    y = NULL
+  ) +
+  scale_fill_fermenter(
+    palette = "RdBu",
+    breaks = thresh,
+    limits = range(dat$BF),
+    oob = scales::squish,
+    trans = "log2"
+  ) +
+  coord_flip(
+    clip = "off",
+    xlim = c(0, 1.3)
+  ) +
   theme_minimal() +
   theme(
     plot.margin = margin(t = 2.5, unit = "lines"),
@@ -52,10 +67,18 @@ BFplot = function(value, nfam) {
     labs = c(rep("Benign", 5), "No evidence", "Pathogenic supporting", "Pathogenic moderate", rep("Pathogenic strong", 2))
   
   colbar +
-    annotate("segment",
-             x = 1.08, xend = 1.07, y = value, yend = value, linewidth = 0.35,
-             arrow = arrow(type = "closed", length = unit(1, "npc")),
-             arrow.fill = cols[idx]) +
-    annotate("text",
-             x = 3.5, y = value, label = labs[idx], hjust = hjts[idx], size = 4)
+    annotate(
+      "segment",
+      x = 1.08, xend = 1.07, y = value, yend = value, linewidth = 0.35,
+      arrow = arrow(type = "closed", length = unit(1, "npc")),
+      arrow.fill = cols[idx]
+    ) +
+    annotate(
+      "text",
+      x = 3.5,
+      y = value,
+      label = labs[idx],
+      hjust = hjts[idx],
+      size = 4
+    )
 }
