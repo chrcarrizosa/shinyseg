@@ -179,7 +179,7 @@ bayesBoxServer = function(id, values) {
               if (length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
               if (length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
               if (length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
-              freq = 10^values[["afreq"]],
+              freq = values[["afreq"]],
               penetrances = values[["f"]],
               liability = values[["liability"]][idxs],
               Xchrom = ifelse(values[["chrom"]] == "x", TRUE, FALSE),
@@ -234,7 +234,7 @@ bayesBoxServer = function(id, values) {
     # Sensitivity analysis choices
     observeEvent(input$sensitivity, {
       choiceList = "afreq"
-      nameList = "log10(MAF)"
+      nameList = "allele frequency"
       if (values[["mode"]] == "lclass") {
         lclassData = copy(values[["lclassData"]])
         lclassData[, rowid := seq(.N)]
@@ -280,7 +280,7 @@ bayesBoxServer = function(id, values) {
         senV1 = gsub("(.)|_.*", "\\1", input$senV1)
         slidervals = switch(
           senV1,
-          "afreq" = c(-5, -1),
+          "afreq" = c(0.00001, 0.10),
           "f0R" = c(0.0001, 0.50),
           "f0mu" = c(0.0001, 1000),
           "f0sigma" = c(5, 1000),
@@ -322,7 +322,7 @@ bayesBoxServer = function(id, values) {
         senV2 = gsub("(.)|_.*", "\\1", input$senV2)
         slidervals = switch(
           senV2,
-          "afreq" = c(-5, -1),
+          "afreq" = c(0.00001, 0.10),
           "f0R" = c(0.0001, 0.50),
           "f0mu" = c(0.0001, 1000),
           "f0sigma" = c(5, 1000),
@@ -485,7 +485,7 @@ bayesBoxServer = function(id, values) {
                 if (length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
                 if (length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
                 if (length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
-                freq = 10^afreq[i],
+                freq = afreq[i],
                 penetrances = f[[i]],
                 liability = values[["liability"]][idxs],
                 Xchrom = ifelse(values[["chrom"]] == "x", TRUE, FALSE),

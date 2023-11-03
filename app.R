@@ -70,14 +70,14 @@ w_afreq =
   popover(
     numericInputIcon(
       inputId = "afreq",
-      label = HTML("<i class='fa fa-dna'></i> log<sub>10</sub>(MAF)"),
-      value = -3,
-      min = -5,
-      max = -1,
-      step = 0.1
+      label = HTML("<i class='fa fa-dna'></i> Allele frequency"),
+      value = 0.001,
+      min = 0.00001,
+      max = 0.1,
+      step = 0.00001
     ),
     title = NULL,
-    content = "Select a value for the frequency of the minor allele (rare variant) on the log10 scale. The default is 10^(-3) = 0.001.",
+    content = "Select the frequency of the rare variant in the population.",
     placement = "right"
   )
 
@@ -370,8 +370,8 @@ server = function(input, output, session) {
             
             # Parameters
             parameters = html_text(html_elements(report, "#parameters"))
-            afreq = gsub(".*Minor allele frequency: (\\S+)\\..*", "\\1", parameters)
-            afreq = log10(as.numeric(afreq))
+            afreq = gsub(".*Allele frequency: (\\S+)\\..*", "\\1", parameters)
+            afreq = as.numeric(afreq)
             table = str_extract(parameters, "\\[\\{.*?\\}\\]") # non-greedy match for JSON
             if (!is.na(table)) {
               mode = gsub(".*Mode:\\s*([^\\.]+)\\..*", "\\1", parameters)
@@ -485,7 +485,7 @@ server = function(input, output, session) {
             
             `1` = {
               # UI changes
-              afreq = -3
+              afreq = 0.001
               mode = "rrisk" # values[["mode"]]
               inheritance = "AD"
               
