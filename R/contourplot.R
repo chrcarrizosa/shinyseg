@@ -43,26 +43,47 @@ scale_fill_craftfermenter <- function(..., type = "seq", palette = 1, direction 
 # Contour plot
 contourplot = function(grid, values) {
   
-  ggplot(mapping = aes(x = grid[,1], y = grid[,2], z = log2(values))) +
-    metR::geom_contour_fill() +
-    metR::geom_contour2(aes(label = formatC(2^after_stat(level), digits = 3, format = "f"))) +
+  # Baseline plot
+  g = ggplot(mapping = aes(x = grid[,1], y = grid[,2], z = log2(values))) +
+    metR::geom_contour_fill(breaks = c(-1e+8, -5, -4, -3, -2, 0, 2, 3, 4, 5, 1e+8)) +
     scale_x_continuous(expand = expansion(0)) +
     scale_y_continuous(expand = expansion(0)) +
-    labs(x = names(grid)[1], y = names(grid)[2]) +
+    labs(
+      x = names(grid)[1],
+      y = names(grid)[2]
+    ) +
     scale_fill_craftfermenter(
-      breaks = c(-5, -4, -3, -2, 0, 2, 3, 4, 5), 
+      breaks = c(-5, -4, -3, -2, 0, 2, 3, 4, 5),
       labels = c("", "", "", "", "1", "4", "8", "16", "32"),
-      palette = "RdBu", 
-      limits = c(-6, +6),
-      # oob = scales::squish,
-      guide = guide_colorsteps(
-        even.steps = FALSE,
-        # frame.colour = "black", 
-        ticks.colour = "black", # you can also remove the ticks with NA
-        barwidth = 20)
+      palette = "RdBu",
+      limits = c(-6, +6)
     ) +
     theme_classic() +
     theme(legend.position = "none")
-  # geom_point(data = data.frame(x = 3, y = 70),
-  #            mapping = aes(x, y), shape = 25, size = 4, fill = "gold")
+  
+  # Check if there are values > 64
+  highvalues = values[values > 64]
+  if(length(highvalues) > 1) {
+    extrabreaks = unique(floor(log2(highvalues)))
+    for(eb in extrabreaks) {
+      g = g +
+        metR::geom_contour2(
+          label = NA,
+          breaks = eb,
+          linetype = "dotted",
+          size = .4,
+          color = "white"
+        ) +
+        metR::geom_text_contour(
+          label = paste(2^eb, ".00"),
+          breaks = eb,
+          label.placer = label_placer_fraction(frac = 0.4),
+          color = "white",
+          stroke = 0.1,
+          stroke.color = "#67001F")
+    }
+  }
+  
+  # Return final plot
+  g
 }
