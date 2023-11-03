@@ -218,6 +218,33 @@
   padding-right: 0.35rem;
 }
 
+/*assistant*/
+.modal-header {
+  padding: 0.4rem 0.75rem 0.75rem 0.5rem;
+  height: 2.5rem; /*height: 3em;*/
+}
+.modal-title {
+  font-size: 1.2rem;
+  color: #024378;
+  font-weight: 700;
+  width: 100%;
+}
+.modal-body {
+  border-right: 2px solid #e7f3ff;
+  padding-bottom: 0rem;
+}
+.heading {
+  font-size: 1.05rem;
+  color: #4e4e4e;
+  font-weight: 500;
+}
+#assistant-assisSol {
+  font-size: 0.9rem;
+  background-color: #f4f6f9;
+  border-radius: 20px;
+  font-family: helvetica;
+}
+
 /*flb*/
 #bayes-flb {
   background-color: #f4f6f9;

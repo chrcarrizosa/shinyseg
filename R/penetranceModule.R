@@ -65,18 +65,18 @@ w_rmvLclass = function(id)
     content = "Delete the last liability class."
   )
 
-# w_assistant = function(id)
-#   popover(
-#     actionBttn(
-#       inputId = NS(id, "assistant"),
-#       label = "Assistant",
-#       style = "jelly",
-#       size = "s",
-#       icon = icon("circle-info")
-#     ),
-#     title = NULL,
-#     content = "Use assistant."
-#   )
+w_assistant = function(id)
+  popover(
+    actionBttn(
+      inputId = NS(id, "assistant"),
+      label = "Assistant",
+      style = "jelly",
+      size = "s",
+      icon = icon("circle-info")
+    ),
+    title = NULL,
+    content = "Use assistant."
+  )
 
 w_plotType = function(id)
   popover(
@@ -121,7 +121,7 @@ penetranceBoxUI = function(id) {
         div(
           id = NS(id, "rriskBox"),
           fluidRow(
-            # div(w_assistant(id)),
+            div(w_assistant(id)),
             div(
               class = "inline inlinetext",
               style = "margin-left: 1rem;",
@@ -148,6 +148,10 @@ penetranceBoxUI = function(id) {
 }
 
 penetranceBoxServer = function(id, values) {
+  
+  # Nested modules
+  assistantModalServer("assistant", values)
+  
   moduleServer(id, function(input, output, session) {
     
     # Default values
@@ -505,6 +509,23 @@ penetranceBoxServer = function(id, values) {
         # layout(hovermode = "x unified") %>%
         highlight(on = "plotly_click", off = "plotly_doubleclick") %>%
         config(displayModeBar = FALSE)
+    })
+    
+    #  (rrisk) Assistant pop-up
+    observeEvent(input$assistant, {
+      
+      # Update choice list
+      values[["assisChoices"]] = NULL
+      choiceList = seq(nrow(values[["phenoData"]]))
+      nameList = apply(values[["phenoData"]][, .(sex, phenotype)], 1, paste, collapse = " | ")
+      names(choiceList) = nameList
+      values[["assisChoices"]] = choiceList
+      
+      # Pop-up
+      showModal(
+        assistantModalUI("assistant")
+      )
+      
     })
     
     # (lclass) Lclass table
