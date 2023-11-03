@@ -1,10 +1,10 @@
 optimHR = function(f0Hz, f2R, df, w) {
   spl = bs(1:100, df = df, intercept = TRUE)
-  opt = optim(1, fn = function(x) {(sum((1 + spl %*% (x*w)) * f0Hz) + log(1 - f2R))^2},
+  opt = optim(1, fn = function(x) {(sum(exp(spl %*% (x*w)) * f0Hz) + log(1 - f2R))^2},
               method = "L-BFGS-B", lower = 0)
   
   # Return f2Hz
-  (1 + spl %*% (opt$par*w)) * f0Hz
+  exp(spl %*% (opt$par*w)) * f0Hz
 }
 
 # https://stackoverflow.com/questions/40620176/getting-rid-of-the-status-bar-in-file-upload-in-shiny
