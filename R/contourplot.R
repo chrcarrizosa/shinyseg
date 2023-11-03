@@ -41,7 +41,7 @@ scale_fill_craftfermenter = function(..., type = "seq", palette = 1, direction =
 
 
 # Contour plot
-contourplot = function(grid, values) {
+contourplot = function(grid, current, values) {
   
   # Baseline plot
   g = ggplot(mapping = aes(x = grid[,1], y = grid[,2], z = log2(values))) +
@@ -83,6 +83,20 @@ contourplot = function(grid, values) {
           stroke.color = "#67001F")
     }
   }
+  
+  # Add current selection
+  if(current[1] >= min(grid[, 1]) && current[1] <= max(grid[, 1]) &&
+     current[2] >= min(grid[, 2]) && current[2] <= max(grid[, 2]))
+    g = g +
+    annotate(
+      "point",
+      x = current[1],
+      y = current[2],
+      shape = 4,
+      size = 3,
+      stroke = 1,
+      color = "black"
+    )
   
   # Return final plot
   g

@@ -360,12 +360,16 @@ bayesBoxServer = function(id, values) {
       newNames = gsub("\n", " ", names(values[["senChoices"]]))
       newNames = setNames(newNames, values[["senChoices"]])[vars]
       
+      # Store current selection (placeholder)
+      gridCurrent = setNames(c(NA, NA), vars)
+      
       # Remove afreq from internal grid
       isAfreq = which("afreq" == vars)
       if (length(isAfreq) > 0) {
         afreq = values[["grid"]][[isAfreq]]
         grid2 = values[["grid"]][-isAfreq]
         vars = vars[-isAfreq]
+        gridCurrent["afreq"] = values[["afreq"]]
       }
       else {
         afreq = rep(values[["afreq"]], nrow(values[["grid"]]))
@@ -383,7 +387,13 @@ bayesBoxServer = function(id, values) {
       
       # Base penetrances
       if (values[["mode"]] == "lclass") {
+        
+        # Prepare data
         temp = copy(values[["fBase"]])
+        
+        # Store current selection
+        for(v in vars)
+          gridCurrent[v] = values[["lclassData"]][idx[[v]]$row, get(idx[[v]]$col)]
         
         # Substitute parameters
         fBase = lapply(seq(nrow(grid2)), function(i) {
@@ -394,10 +404,16 @@ bayesBoxServer = function(id, values) {
         })
       }
       else {
+      
+        # Prepare data
         temp = copy(values[["phenoData"]])
         temp[, rowid := seq(.N)]
         temp[, coefs := list(list(suppressWarnings(as.numeric(strsplit(f2coef, ",")[[1]])))), by = .(rowid)]
         temp[, df := length(unlist(coefs)), by = .(rowid)]
+        
+        # Store current selection
+        for(v in vars)
+          gridCurrent[v] = values[["phenoData"]][idx[[v]]$row, get(idx[[v]]$col)]
         
         # Substitute parameters and recalculate
         fBase = lapply(seq(nrow(grid2)), function(i) {
@@ -497,6 +513,7 @@ bayesBoxServer = function(id, values) {
       })
       
       if (!any(is.na(flbs))) {
+        values[["gridCurrent"]] = gridCurrent
         values[["flbs"]] = flbs
         showElement("contourplot")
       }
@@ -512,7 +529,11 @@ bayesBoxServer = function(id, values) {
     # Display contourplot
     output$contourplot = renderPlot({
       req(values[["flbs"]])
-      contourplot(values[["grid"]], round(values[["flbs"]], 7))
+      contourplot(
+        grid = values[["grid"]],
+        current = values[["gridCurrent"]],
+        values = round(values[["flbs"]], 7)
+      )
     })
     
   })
