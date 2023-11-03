@@ -216,7 +216,6 @@ bayesBoxServer = function(id, values) {
         values[["lclassData"]],
         values[["updateSession"]]), # needed in case the same example/report is reloaded
       handlerExpr = {
-        req(values[["flb"]])
         values[["flb"]] = NULL
         hideElement("sensitivity")
         hideElement("plot")
