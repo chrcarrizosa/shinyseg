@@ -353,8 +353,8 @@ bayesBoxServer = function(id, values) {
       vars = c(input$senV1, input$senV2)
       values[["grid"]] = 
         expand.grid(
-          seq(input$senX1[1], input$senX1[2], l = 10),
-          seq(input$senX2[1], input$senX2[2], l = 10)
+          seq(input$senX1[1], input$senX1[2], l = 15),
+          seq(input$senX2[1], input$senX2[2], l = 15)
         )
       names(values[["grid"]]) = vars
       newNames = gsub("\n", " ", names(values[["senChoices"]]))
