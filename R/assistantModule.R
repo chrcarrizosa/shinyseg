@@ -92,7 +92,7 @@ assistantModalServer = function(id, values) {
   moduleServer(id, function(input, output, session) {
     
     # Default values
-    values[["spl5"]] = bs(1:100, df = 5, intercept = TRUE)
+    values[["assisSpl"]] = bs(1:100, df = 6, intercept = TRUE)
     values[["assisData"]] =
       data.table(
         age = c(30L, 40L, 50L, 60L, 70L, 80L, rep(NA_integer_, 4)),
@@ -196,15 +196,15 @@ assistantModalServer = function(id, values) {
       
       # Variant-associated rates
       optf2 =
-        optim(par = rep(0, 5), function(params) {
-          fitted = cumsum(exp(values[["spl5"]] %*% (as.vector(params))) * values[["OptPar"]][["f0Hz"]])[values[["OptPar"]][["data"]][["f2"]][["age"]]]
+        optim(par = rep(0, 6), function(params) {
+          fitted = cumsum(exp(values[["assisSpl"]] %*% (as.vector(params))) * values[["OptPar"]][["f0Hz"]])[values[["OptPar"]][["data"]][["f2"]][["age"]]]
           sum((fitted + log(1 - values[["OptPar"]][["data"]][["f2"]][["f2CI"]]))^2)
         },
         method = "L-BFGS-B",
-        lower = rep(0, 5), upper = rep(100, 5),
+        lower = rep(0, 6), upper = rep(100, 6),
         control = list(factr = 1e6))
       values[["OptPar"]][["f2"]] = round(optf2$par, 2) # round
-      values[["OptPar"]][["f2Hz"]] = exp(values[["spl5"]] %*% as.vector(values[["OptPar"]][["f2"]])) * values[["OptPar"]][["f0Hz"]]
+      values[["OptPar"]][["f2Hz"]] = exp(values[["assisSpl"]] %*% as.vector(values[["OptPar"]][["f2"]])) * values[["OptPar"]][["f0Hz"]]
       values[["OptPar"]][["f2CI"]] = 1 - exp(-cumsum(values[["OptPar"]][["f2Hz"]]))
       
     })
