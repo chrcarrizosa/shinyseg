@@ -107,8 +107,9 @@ plotBoxServer = function(id, values) {
       message("Updating pedigree plot")
       par(family = "helvetica")
       
-      # Color palette
-      pal = c("gray90", rep(c("#E64B35FF", "#4DBBD5FF", "#00A087FF", "#3C5488FF", "#F39B7FFF"), ceiling(values[["phenoTotal"]]/5)))
+      # Color palette (Okabe-Ito colors, without black)
+      pal = c("white", rep(c("#0072B2", "#D55E00", "#56B4E9", "#E69F00", "#009E73", "#F0E442", "#CC79A7"), ceiling(values[["phenoTotal"]]/8)))
+      # pal = c("white", palette.colors(n = values[["phenoTotal"]], "Okabe-Ito", recycle = TRUE))
       names(pal) = c("nonaff", values[["phenoVector"]])
       fillcols = pal[as.character(values[["pedData"]][["phenotype"]])]
       
