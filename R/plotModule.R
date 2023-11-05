@@ -123,6 +123,7 @@ plotBoxServer = function(id, values) {
         if (length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
         if (length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
         if (length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+        labs = setNames(seq_along(idxs), str_replace_na(values[["lclasses"]][["age"]][idxs], " ")),
         margins = c(2 + 3, 2, 2, 2)
       )
       legend(
