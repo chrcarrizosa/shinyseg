@@ -455,7 +455,6 @@ penetranceBoxServer = function(id, values) {
         fBase[, nonaff := 1-exp(-cumsum(nonaff)), by = .(sex, phenotype, variable)]
         fBase[, sp := shift(1 - nonaff, fill = 1) * Hz, by = .(sex, phenotype, variable)]
         faff = dcast(fBase, sex + phenotype + age ~ variable, value.var = "sp")
-        faff[f0 > f2, f2 := f0] # fix phi > beta
         fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))
         fnonaff[, phenotype := "nonaff"]
         fBase = rbind(faff, fnonaff)
