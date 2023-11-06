@@ -103,7 +103,7 @@ w_example1 =
 w_examples =
   dropdown(
     label = "Examples",
-    icon = icon("github"),
+    icon = icon("person-chalkboard"),
     style = "jelly",
     size = "s",
     width = "210px",
