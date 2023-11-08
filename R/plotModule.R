@@ -128,7 +128,7 @@ plotBoxServer = function(id, values) {
       )
       legend(
         "bottomright",
-        inset = c(-0.15, -0.15),
+        inset = c(-0.1, -0.15),
         legend = c("nonaff", values[["phenoVector"]]),
         fill = pal,
         ncol = values[["phenoTotal"]] + 1,
