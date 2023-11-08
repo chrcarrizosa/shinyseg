@@ -105,7 +105,7 @@ assistantModalServer = function(id, values) {
       shinyalert(
         className = "helpbox",
         html = TRUE,
-        text = read_file("modals/assistantModal.html"),
+        text = read_file("help/assistantModal.html"),
         animation = "slide-from-bottom",
         showConfirmButton = FALSE,
         closeOnClickOutside = TRUE,

@@ -156,7 +156,7 @@ bayesBoxServer = function(id, values) {
       shinyalert(
         className = "helpbox",
         html = TRUE,
-        text = read_file("modals/bayesBox.html"),
+        text = read_file("help/bayesBox.html"),
         animation = "slide-from-bottom",
         showConfirmButton = FALSE,
         closeOnClickOutside = TRUE,

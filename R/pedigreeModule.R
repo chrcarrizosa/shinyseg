@@ -148,7 +148,7 @@ pedigreeBoxServer = function(id, values) {
       shinyalert(
         className = "helpbox",
         html = TRUE,
-        text = read_file("modals/pedigreeBox.html"),
+        text = read_file("help/pedigreeBox.html"),
         animation = "slide-from-bottom",
         showConfirmButton = FALSE,
         closeOnClickOutside = TRUE,
