@@ -100,6 +100,25 @@ w_example1 =
     id = "example1"
   )
 
+w_example2 = 
+  boxDropdownItem(
+    div(
+      style = "margin-bottom: 1.5rem; margin-left: -0.75rem; margin-right: -0.75rem;",
+      div(
+        class = "leftcolumn",
+        "Example 2"
+      ),
+      div(
+        class = "rightcolumn",
+        list(
+          suppressWarnings(boxLabel("Relative risk", status = "gray")),
+          boxLabel("AD", status = "gray")
+        )
+      )
+    ),
+    id = "example2"
+  )
+
 w_examples =
   dropdown(
     label = "Examples",
@@ -108,7 +127,8 @@ w_examples =
     size = "s",
     width = "210px",
     status = "primary",
-    w_example1
+    w_example1,
+    w_example2
   )
 
 
@@ -462,6 +482,9 @@ server = function(input, output, session) {
   observeEvent(input$example1, {
     values[["example"]] = 1
   })
+  observeEvent(input$example2, {
+    values[["example"]] = 2
+  })
   observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["example"]], {
     shinyalert(
       type = "warning",
@@ -542,7 +565,67 @@ server = function(input, output, session) {
                   phenotype = NA_character_,
                   ages = NA_character_
                 )
+            },
+            
+            `2` = {
+              # UI changes
+              afreq = 0.001
+              mode = "rrisk" # values[["mode"]]
+              inheritance = "AD"
+              
+              # Pedigree table
+              # Family and indexes
+              pedTotal = as.integer(1)
+              pedToAdd = nuclearPed(nch = 3, sex = 2) |>
+                addChildren(mo = 4, nch = 1, sex = 1, verbose = FALSE) |>
+                addChildren(mo = 5, nch = 2, sex = c(2,1), verbose = FALSE) |>
+                relabel("asPlot")
+              affected = c(3, 5, 7, 8, 10)
+              unknown = c(1:2)
+              carriers = c(5, 7, 8, 10)
+              noncarriers = c(3, 9)
+              proband = 8
+              age = c(80, 80, 80, 80, 50, 80, 50, 40, 40, 40)
+              # Full vectors and data
+              vecPheno = rep("nonaff", pedsize(pedToAdd))
+              vecPheno[affected] = "affected"
+              vecPheno[unknown] = ""
+              vecCarrier = rep("", pedsize(pedToAdd))
+              vecCarrier[carriers] = "het"
+              vecCarrier[noncarriers] = "neg"
+              lastProband = rep(FALSE, pedsize(pedToAdd))
+              lastProband[proband] = TRUE
+              pedData = data.table(
+                ped = as.integer(1),
+                as.data.frame(pedToAdd),
+                phenotype = factor(vecPheno, levels = unique(c("", "nonaff", "aff", vecPheno))),
+                carrier = factor(vecCarrier, levels = c("", "neg", "het", "hom")),
+                proband = lastProband,
+                age = as.integer(age)
+              )
+              
+              # Penetrance
+              phenoData = 
+                data.table(
+                  sex = c("both"),
+                  phenotype = c("affected"),
+                  f0R = 0.001,
+                  f0mu = 60,
+                  f0sigma = 15,
+                  f2R = 0.90,
+                  f2HR = "proportional",
+                  f2coef = "1,1,1,1"
+                )
+              lclassData = 
+                data.table(
+                  f0 = 0.001,
+                  f2 = 0.90,
+                  sex = NA_character_,
+                  phenotype = NA_character_,
+                  ages = NA_character_
+                )
             }
+            
           )
           
           values[["pedData"]] = NULL
