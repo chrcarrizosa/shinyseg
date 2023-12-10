@@ -67,7 +67,7 @@ rhandsontable(
   manualColumnResize = FALSE,
   rowHeaders = NULL,
   height = 39 + 23 * nrow(params$values[["phenoData"]]),
-  colHeaders = c("sex", "phenotype", params$values[["rriskNames"]], "spline\ncoefs"),
+  colHeaders = c("sex", "phenotype", params$values[["rriskNames"]], "hazard ratio(s)"),
   readOnly = TRUE
 ) %>%
   hot_col(1, type = "dropdown", source = c("both", "male", "female"), allowInvalid = FALSE, colWidths = "75px") %>%
@@ -76,8 +76,7 @@ rhandsontable(
   hot_validate_numeric(c(3, 6), min = 0.0001, max = 0.9999, allowInvalid = FALSE) %>%
   hot_validate_numeric(4, min = 0.0001, max = 1000, allowInvalid = FALSE) %>%
   hot_validate_numeric(5, min = 5, max = 1000, allowInvalid = FALSE) %>%
-  hot_col(7, type = "dropdown", source = c("proportional", "converging", "diverging", "custom"), allowInvalid = FALSE) %>%
-  hot_col(8, type = "autocomplete", colWidths = "90px") %>%
+  hot_col(7, type = "autocomplete", colWidths = "130px") %>%
   hot_table(highlightRow = TRUE, contextMenu = FALSE)
 ```
 

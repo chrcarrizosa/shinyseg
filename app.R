@@ -23,7 +23,7 @@ library(jsonlite, quietly = TRUE)
   # Reset session button?
   # Assistant
   # Add figures and FLB to report, S.analyses
-  # Give some indication if nonaff is not specified in lclass table? (it is also message9)
+  # Give some indication if nonaff is not specified in lclass table? (it is also message8)
   # Load lclass file
 
 ##### TODO (other)
@@ -193,8 +193,7 @@ ui = dashboardPage(
                 notificationItem(inputId = "message5", status = "danger", text = "Missing ages"),
                 notificationItem(inputId = "message6", status = "danger", text = "Liability class ages"),
                 notificationItem(inputId = "message7", status = "danger", text = "Overlapping classes"),
-                notificationItem(inputId = "message8", status = "danger", text = "Misspecified splines"),
-                notificationItem(inputId = "message9", status = "danger", text = "Missing parameters")
+                notificationItem(inputId = "message8", status = "danger", text = "Missing parameters")
               )
             ),
             title = NULL,
@@ -555,8 +554,7 @@ server = function(input, output, session) {
                   f0mu = 60,
                   f0sigma = 15,
                   f2R = 0.90,
-                  f2HR = "proportional",
-                  f2coef = "1,1,1,1"
+                  HR = "2301.43"
                 )
               lclassData = 
                 data.table(
@@ -614,8 +612,7 @@ server = function(input, output, session) {
                   f0mu = 60,
                   f0sigma = 15,
                   f2R = 0.90,
-                  f2HR = "proportional",
-                  f2coef = "1,1,1,1"
+                  HR = "2301.43"
                 )
               lclassData = 
                 data.table(

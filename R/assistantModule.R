@@ -182,29 +182,25 @@ assistantModalServer = function(id, values) {
       values[["OptPar"]][["data"]][["f2"]] = values[["assisData"]][complete.cases(values[["assisData"]][, .(age, f2CI)]), .(age, f2CI)]
       
       # Baseline rates
-      optf0 =
-        optim(par = c(0.5, 50, 20), function(params) {
-          fitted = params[1]*ptrunc(values[["OptPar"]][["data"]][["f0"]][["age"]], "norm", mean = params[2], sd = params[3], a = 0, b = 100)
-          sum((fitted - values[["OptPar"]][["data"]][["f0"]][["f0CI"]])^2)
-        },
-        method = "L-BFGS-B",
-        lower = c(0.001, 0.001, 0.001), upper = c(0.999, 1000, 1000),
-        control = list(factr = 1e6))
-      values[["OptPar"]][["f0"]] = round(optf0$par, 4) # round
+      optf0 = 
+        optimf0(
+          ages = values[["OptPar"]][["data"]][["f0"]][["age"]],
+          f0CI = values[["OptPar"]][["data"]][["f0"]][["f0CI"]]
+        )
+      values[["OptPar"]][["f0"]] = round(optf0, 4) # round
       values[["OptPar"]][["f0CI"]] = values[["OptPar"]][["f0"]][1]*ptrunc(1:100, "norm", mean = values[["OptPar"]][["f0"]][2], sd = values[["OptPar"]][["f0"]][3], a = 0, b = 100)
       values[["OptPar"]][["f0Hz"]] = diff(c(0, -log(1 - values[["OptPar"]][["f0CI"]])))
       
       # Variant-associated rates
       optf2 =
-        optim(par = rep(0, 6), function(params) {
-          fitted = cumsum(exp(values[["assisSpl"]] %*% (as.vector(params))) * values[["OptPar"]][["f0Hz"]])[values[["OptPar"]][["data"]][["f2"]][["age"]]]
-          sum((fitted + log(1 - values[["OptPar"]][["data"]][["f2"]][["f2CI"]]))^2)
-        },
-        method = "L-BFGS-B",
-        lower = rep(0, 6), upper = rep(100, 6),
-        control = list(factr = 1e6))
-      values[["OptPar"]][["f2"]] = round(optf2$par, 2) # round
-      values[["OptPar"]][["f2Hz"]] = exp(values[["assisSpl"]] %*% as.vector(values[["OptPar"]][["f2"]])) * values[["OptPar"]][["f0Hz"]]
+        optimf2(
+          ages = values[["OptPar"]][["data"]][["f2"]][["age"]],
+          f0Hz = values[["OptPar"]][["f0Hz"]],
+          f2CI = values[["OptPar"]][["data"]][["f2"]][["f2CI"]],
+          df = 6
+        )
+      values[["OptPar"]][["f2"]] = round(optf2, 2) # round
+      values[["OptPar"]][["f2Hz"]] = exp(values[["assisSpl"]] %*% as.vector(log(values[["OptPar"]][["f2"]]))) * values[["OptPar"]][["f0Hz"]]
       values[["OptPar"]][["f2CI"]] = 1 - exp(-cumsum(values[["OptPar"]][["f2Hz"]]))
       
     })
@@ -219,7 +215,7 @@ assistantModalServer = function(id, values) {
         rriskNames[2], ": ", values[["OptPar"]][["f0"]][2],
         rriskNames[3], ": ", values[["OptPar"]][["f0"]][3],
         rriskNames[4], ": ", round(values[["OptPar"]][["f2CI"]][100], 4),
-        "\nspline coefs: ", paste(values[["OptPar"]][["f2"]], collapse = ",")
+        "\nhazard ratio(s): ", paste(values[["OptPar"]][["f2"]], collapse = ",")
       )
     })
     
@@ -263,13 +259,12 @@ assistantModalServer = function(id, values) {
     # Transfer parameters
     observeEvent(input$transfer, {
       message("Transfering parameters")
-      values[["phenoData"]][as.numeric(input$transfer), 3:8] = 
+      values[["phenoData"]][as.numeric(input$transfer), 3:7] = 
         data.table(
           values[["OptPar"]][["f0"]][1], 
           values[["OptPar"]][["f0"]][2],
           values[["OptPar"]][["f0"]][3],
           round(values[["OptPar"]][["f2CI"]][100], 4),
-          "custom",
           paste(values[["OptPar"]][["f2"]], collapse = ",")
         )
       updatePickerInput(

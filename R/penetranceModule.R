@@ -211,7 +211,7 @@ penetranceBoxServer = function(id, values) {
         input$inheritance,
         "AD" = {
           values[["chrom"]] = "auto"
-          values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk", "het/hom\nHR")
+          values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk")
           values[["lclassNames"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk", "sex", "phenotype", "ages")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
@@ -222,7 +222,7 @@ penetranceBoxServer = function(id, values) {
         },
         "XD" = {
           values[["chrom"]] = "x"
-          values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk", "het/hom\nHR")
+          values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk")
           values[["lclassNames"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk", "sex", "phenotype", "ages")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
@@ -233,7 +233,7 @@ penetranceBoxServer = function(id, values) {
         },
         "AR" = {
           values[["chrom"]] = "auto"
-          values[["rriskNames"]] = c("neg/het\nrisk", "neg/het\nmean", "neg/het\nSD", "hom\nrisk", "hom\nHR")
+          values[["rriskNames"]] = c("neg/het\nrisk", "neg/het\nmean", "neg/het\nSD", "hom\nrisk")
           values[["lclassNames"]] = c("f0" = "neg/het\nrisk", "f2" = "hom\nrisk", "sex", "phenotype", "ages")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
@@ -244,7 +244,7 @@ penetranceBoxServer = function(id, values) {
         },
         "XR" = {
           values[["chrom"]] = "x"
-          values[["rriskNames"]] = c("neg/♀het\nrisk", "neg/♀het\nmean", "neg/♀het\nSD", "♂het/hom\nrisk", "♂het/hom\nHR")
+          values[["rriskNames"]] = c("neg/♀het\nrisk", "neg/♀het\nmean", "neg/♀het\nSD", "♂het/hom\nrisk")
           values[["lclassNames"]] = c("f0" = "neg/♀het\nrisk", "f2" = "♂het/hom\nrisk", "sex", "phenotype", "ages")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
@@ -302,7 +302,7 @@ penetranceBoxServer = function(id, values) {
         manualColumnResize = TRUE,
         rowHeaders = NULL,
         height = if (nrow(values[["phenoData"]]) > 6) 175 else NULL,
-        colHeaders = c("sex", "phenotype", values[["rriskNames"]], "spline\ncoefs"),
+        colHeaders = c("sex", "phenotype", values[["rriskNames"]], "hazard ratio(s)"),
         overflow = "visible"
       ) %>%
         hot_col(1, type = "dropdown", source = c("both", "male", "female"), allowInvalid = FALSE, colWidths = "75px") %>%
@@ -311,8 +311,7 @@ penetranceBoxServer = function(id, values) {
         hot_validate_numeric(c(3, 6), min = 0.0001, max = 0.9999, allowInvalid = FALSE) %>%
         hot_validate_numeric(4, min = 0.0001, max = 1000, allowInvalid = FALSE) %>%
         hot_validate_numeric(5, min = 5, max = 1000, allowInvalid = FALSE) %>%
-        hot_col(7, type = "dropdown", source = c("proportional", "converging", "diverging", "custom"), allowInvalid = FALSE) %>%
-        hot_col(8, type = "autocomplete", colWidths = "90px") %>%
+        hot_col(7, type = "autocomplete", colWidths = "130px") %>%
         hot_table(highlightRow = TRUE, contextMenu = FALSE) %>%
         onRender(
           "function(el) {
@@ -330,10 +329,10 @@ penetranceBoxServer = function(id, values) {
         message("Update phenotype data from table edits")
         temp = hot_to_r(input$rrisktable)
         
-        # Check for modified column
+        # Check for modified row/column
+        row_index = input$rrisktable$changes$changes[[1]][[1]] + 1
         col_index = input$rrisktable$changes$changes[[1]][[2]]
         if (col_index == 0) { # sex
-          row_index = input$rrisktable$changes$changes[[1]][[1]] + 1
           pheno = as.character(temp[row_index, "phenotype"])
           
           if (after == "both") # removes the other sex
@@ -342,27 +341,51 @@ penetranceBoxServer = function(id, values) {
             if (before == "both") { # expands
               temp[, sexList := .(list(list(as.character(sex)))), by = 1:nrow(temp)]
               temp[phenotype == pheno, sexList := .(list(list("male", "female")))]
-              temp = temp[, .(sex = unlist(sexList)), by = .(phenotype, f0R, f0mu, f0sigma, f2R, f2HR, f2coef)]
-              setcolorder(temp, c("sex", "phenotype", "f0R", "f0mu", "f0sigma", "f2R", "f2HR", "f2coef"))
+              temp = temp[, .(sex = unlist(sexList)), by = .(phenotype, f0R, f0mu, f0sigma, f2R, HR)]
+              setcolorder(temp, c("sex", "phenotype", "f0R", "f0mu", "f0sigma", "f2R", "HR"))
             }
             else { # swap values
               swap = copy(temp[phenotype == pheno, ])
               temp[phenotype == pheno, ] = swap[2:1, ][, sex := factor(c("female", "male"), levels = c("both", "male", "female"))]
             }
           }
-        } 
-        if (col_index == 6) # hazard ratios
-          temp[input$rrisktable$changes$changes[[1]][[1]] + 1,
-               f2coef := fcase(after == "proportional", "1,1,1,1",
-                               after == "diverging", "0,0,1,1",
-                               after == "converging", "1,1,0,0",
-                               default = f2coef)]
-        if (col_index == 7) # basis coefficients
-          temp[input$rrisktable$changes$changes[[1]][[1]] + 1,
-               f2HR := fcase(after == "1,1,1,1", "proportional",
-                             after == "0,0,1,1", "diverging",
-                             after == "1,1,0,0", "converging",
-                             default = "custom")]
+        }
+        else if (col_index %in% 2:5) { # f0R, f0mu, f0sigma, f2R -> re-adjust HRs
+          with(temp[row_index, ], {
+            if (is.na(f2R) || f0R >= f2R) # set HR to 1
+              temp[row_index, HR := "1"]
+            
+            else if (!is.na(f0R) && !is.na(f0mu) && !is.na(f0sigma)) { # recalculate HRs
+              f0CI = f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100)
+              f0Hz = diff(c(0, -log(1 - unlist(f0CI))))
+              logHR = log(as.numeric(strsplit(HR, ",")[[1]]))
+              if (all(logHR == 0) || length(logHR) == 0)
+                logHR = rep(1, 4)
+              else if (length(logHR) == 1)
+                logHR = rep(logHR, 4)
+              scaledHR = optimHR(f0Hz, f2R, logHR)
+
+              if (diff(range(scaledHR)) == 0)
+                temp[row_index, HR := as.character(round(scaledHR[1], 2))]
+              else
+                temp[row_index, HR := paste(round(scaledHR, 2), collapse = ",")]
+            }
+          })
+        }
+        else if (col_index == 6) { # HRs -> check input validity
+          scaledHR = as.numeric(strsplit(temp[row_index, HR], ",")[[1]])
+          scaledHR = ifelse(scaledHR >= 1, scaledHR, NA)
+          df = length(scaledHR)
+          values[["phenoData"]][row_index, HR := NA_character_] # re-render table
+          if (df == 0) # set to 1 if deleted
+            scaledHR = 1
+          else if (df > 10 || any(is.na(scaledHR))) # undo if wrongly specified
+            scaledHR = before
+          else if (df %in% 2:3) # re-adjust if length is 2 or 3
+            scaledHR = rep(scaledHR, each = 2)
+          
+          temp[row_index, HR := paste(scaledHR, collapse = ",")]
+        }
         
         values[["phenoData"]] = temp
       }
@@ -371,7 +394,7 @@ penetranceBoxServer = function(id, values) {
     # (rrisk) Update phenotype table
     observeEvent(ignoreNULL = FALSE, values[["phenoVector"]], {
       message("Update phenotype table")
-      if(!is.null(values[["phenoVector"]])) {
+      if (!is.null(values[["phenoVector"]])) {
         phenoDataOld = values[["phenoData"]]
         phenotypesOld = intersect(phenoDataOld$phenotype, values[["phenoVector"]])
         phenoDataNew = phenoDataOld[phenoDataOld$phenotype %in% phenotypesOld, ] # keep current
@@ -381,7 +404,7 @@ penetranceBoxServer = function(id, values) {
             sex = factor(rep(c("male", "female"), each = length(phenotypesNew)), levels = c("both", "male", "female")),
             phenotype = rep(phenotypesNew, 2),
             f0R = 0.5, f0mu = 50, f0sigma = 10,
-            f2R = 0.5, f2HR = "proportional", f2coef = "1,1,1,1"
+            f2R = 0.5, HR = "1"
           )
           phenoDataNew = rbind(phenoDataNew, new_rows)
         }
@@ -403,28 +426,26 @@ penetranceBoxServer = function(id, values) {
       
       fBase = copy(values[["phenoData"]])
       fBase[, rowid := seq(.N)]
-      rowTotal = nrow(fBase)
-      
-      # Get spline coefficients, removing missing or invalid
-      fBase[, coefs := list(list(suppressWarnings(as.numeric(strsplit(f2coef, ",")[[1]])))), by = .(rowid)]
-      fBase[, coefs := lapply(fBase[["coefs"]], function(i) if (any(is.na(i) | i < 0)) NA else i)]
-      fBase = na.omit(fBase)
-      fBase[, df := length(unlist(coefs)), by = .(rowid)]
-      fBase = fBase[df >= 4 & df <= 10, ]
-      rowBase = nrow(fBase)
+      notNA = complete.cases(fBase[, !"f2R"])
+      fBase = fBase[notNA, ]
       
       # Compute incidences
-      if (rowBase > 0) {
+      if (any(notNA)) {
+        fBase[, logHR := list(list(log(as.numeric(strsplit(HR, ",")[[1]])))), by = .(rowid)]
+        fBase[, logHR := lapply(fBase[["logHR"]], function(i) if (length(i) == 1) rep(i, 4) else i)] 
         rriskPlot = copy(fBase)
         rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
         rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
-        rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, df, unlist(coefs)))), by = .(rowid)]
+        rriskPlot[, f2Hz := list(list(getf2Hz(unlist(f0Hz), unlist(logHR)))), by = .(rowid)]
         rriskPlot[, f2CI := list(list(1 - exp(-cumsum(unlist(f2Hz))))), by = .(rowid)]
         rriskPlot = rriskPlot[, list(age = 1:100,
                                      f0Hz = unlist(f0Hz),
                                      f2Hz = unlist(f2Hz),
                                      f0CI = unlist(f0CI),
                                      f2CI = unlist(f2CI)), by = .(sex, phenotype)]
+        
+        # Re-adjust f2 lifetime risks
+        values[["phenoData"]][rriskPlot[age == 100, ], f2R := round(i.f2CI, 4), on = c("sex", "phenotype")]
         
         # Expand sex (here so the plot can be faceted)
         rriskPlot[, sex := as.character(sex)]
@@ -438,9 +459,8 @@ penetranceBoxServer = function(id, values) {
         fBase = NULL
       }
       
-      if (rowBase < rowTotal) {
+      if (!all(notNA)) {
         showElement("message8", asis = TRUE)
-        hideElement("message9", asis = TRUE)
         fBase = NULL
       }
       else {
