@@ -399,6 +399,7 @@ server = function(input, output, session) {
               if (mode == "Relative risk") {
                 mode = "rrisk"
                 phenoData = setDT(fromJSON(table))
+                phenoData[, c("f0mu", "f0sigma") := lapply(.SD, as.numeric), .SDcols = c("f0mu", "f0sigma")]
                 lclassData =
                   data.table(
                     f0 = 0.1,
