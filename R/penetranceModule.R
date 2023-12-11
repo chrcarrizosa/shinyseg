@@ -714,7 +714,7 @@ penetranceBoxServer = function(id, values) {
       if (!(all(unlist(fBase[, c("minAge", "maxAge")]) %in% 1:100) & all(fBase$minAge <= fBase$maxAge))) {
         showElement("message6", asis = TRUE)
         hideElement("message7", asis = TRUE)
-        hideElement("message9", asis = TRUE)
+        hideElement("message8", asis = TRUE)
         values[["lclassNames"]][["other"]][3] = "<i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i>ages"
         fBase = NULL
       }
@@ -740,11 +740,10 @@ penetranceBoxServer = function(id, values) {
         # Check for class overlaps
         if (any(table(fBase[, .(sex, phenotype, age)]) > 1)) {
           showElement("message7", asis = TRUE)
-          hideElement("message9", asis = TRUE)
           fBase = NULL
         }
         else
-          hideElement("message7")
+          hideElement("message7", asis = TRUE)
       }
       
       values[["fBase"]] = fBase
@@ -794,11 +793,11 @@ penetranceBoxServer = function(id, values) {
       
       # Check if there is any NA in f (ages in the pedTable take precedence)
       if (any(is.na(unlist(f))) & values[["okAge"]]) {
-        showElement("message9", asis = TRUE)
+        showElement("message8", asis = TRUE)
         f = NULL
       }
       else
-        hideElement("message9", asis = TRUE)
+        hideElement("message8", asis = TRUE)
       
       values[["f"]] = f
       values[["liability"]] = fSubset[["liability"]]

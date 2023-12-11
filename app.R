@@ -19,9 +19,7 @@ library(rvest, quietly = TRUE)
 library(jsonlite, quietly = TRUE)
 
 ##### TODO (priority)
-  # Missing values in phenoData trigger the message for misspecified splines
   # Reset session button?
-  # Assistant
   # Add figures and FLB to report, S.analyses
   # Give some indication if nonaff is not specified in lclass table? (it is also message8)
 
@@ -185,14 +183,14 @@ ui = dashboardPage(
               badgeStatus = "danger",
               icon = icon("bell"),
               .list = list(
-                notificationItem(inputId = "message1", status = "danger", text = "Adding families"),
-                notificationItem(inputId = "message2", status = "danger", text = "Specifying phenotypes"),
-                notificationItem(inputId = "message3", status = "danger", text = "Carriership status"),
-                notificationItem(inputId = "message4", status = "danger", text = "A proband for the analysis"),
-                notificationItem(inputId = "message5", status = "danger", text = "Missing ages"),
-                notificationItem(inputId = "message6", status = "danger", text = "Liability class ages"),
-                notificationItem(inputId = "message7", status = "danger", text = "Overlapping classes"),
-                notificationItem(inputId = "message8", status = "danger", text = "Missing parameters")
+                notificationItem(inputId = "message1", status = "danger", text = "No families added yet"),
+                notificationItem(inputId = "message2", status = "danger", text = "1+ phenotype per family required"),
+                notificationItem(inputId = "message3", status = "danger", text = "1+ carrier per family required"),
+                notificationItem(inputId = "message4", status = "danger", text = "1 proband per family required"),
+                notificationItem(inputId = "message5", status = "danger", text = "Some members have missing age"),
+                notificationItem(inputId = "message6", status = "danger", text = "Misspecified liability class ages"),
+                notificationItem(inputId = "message7", status = "danger", text = "Overlapping liability classes"),
+                notificationItem(inputId = "message8", status = "danger", text = "Missing penetrance parameters")
               )
             ),
             title = NULL,
