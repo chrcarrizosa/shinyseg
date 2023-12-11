@@ -24,7 +24,6 @@ library(jsonlite, quietly = TRUE)
   # Assistant
   # Add figures and FLB to report, S.analyses
   # Give some indication if nonaff is not specified in lclass table? (it is also message8)
-  # Load lclass file
 
 ##### TODO (other)
   # Modify ped functions

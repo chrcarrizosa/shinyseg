@@ -30,14 +30,14 @@ w_inheritance = function(id)
     status = "gray"
   )
 
-# w_loadLclass = function(id)
-#   fileInput2(
-#     inputId = NS(id, "loadLclass"),
-#     label = "Load file",
-#     labelIcon = "file-import",
-#     progress = FALSE,
-#     divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
-#   )
+w_loadLclass = function(id)
+  fileInput2(
+    inputId = NS(id, "loadLclass"),
+    label = "Load file",
+    labelIcon = "file-import",
+    progress = FALSE,
+    divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+  )
 
 w_addLclass = function(id)
   popover(
@@ -136,7 +136,7 @@ penetranceBoxUI = function(id) {
       div(
         id = NS(id, "lclassBox"),
         fluidRow(
-          # div(w_loadLclass(id)),
+          div(w_loadLclass(id)),
           div(w_addLclass(id), style = "margin-top: 0.2rem;"),
           div(w_rmvLclass(id), style = "margin-top: 0.2rem;")
         ),
@@ -611,6 +611,87 @@ penetranceBoxServer = function(id, values) {
     observeEvent(input$rmvLclass, {
       req(nrow(values[["lclassData"]]) > 1)
       values[["lclassData"]] = values[["lclassData"]][1:(nrow(values[["lclassData"]]) - 1),]
+    })
+    
+    # (lclass) Read table from file
+    observeEvent(input$loadLclass, {
+      lclassToAdd = 
+        suppressWarnings(
+          tryCatch(
+            {
+              lclassToAdd = read.table(input$loadLclass$datapath, header = FALSE)
+              if(values[["lclassCols"]] == 2) {
+                lclassToAdd = as.data.table(lclassToAdd[, 1:5])
+                colnames(lclassToAdd) = c("f0", "f2", "sex", "phenotype", "ages")
+                lclassToAdd[, c("f0", "f2") := lapply(.SD, as.numeric), .SDcols = c("f0", "f2")]
+                lclassToAdd[, f1 := NULL] # required
+              }
+              else {
+                lclassToAdd = as.data.table(lclassToAdd[, 1:6])
+                colnames(lclassToAdd) = c("f0", "f1", "f2", "sex", "phenotype", "ages")
+                lclassToAdd[, c("f0", "f1", "f2") := lapply(.SD, as.numeric), .SDcols = c("f0", "f1", "f2")]
+              }
+              lclassToAdd[, sex := factor(sex, levels = c("", "both", "male", "female"))]
+            },
+            error = function(err) NULL
+          )
+        )
+      if (is.null(lclassToAdd))
+        showNotification(
+          HTML("<i class='fas fa-triangle-exclamation'></i> Invalid liability class file."),
+          type = "error",
+          duration = 3
+        )
+      
+      values[["lclassToAdd"]] = lclassToAdd
+    })
+    # (lclass) Display loaded table
+    output$lclassToAdd = renderRHandsontable({
+      req(values[["lclassToAdd"]])
+      rhandsontable(
+        values[["lclassToAdd"]],
+        digits = 14,
+        useTypes = TRUE,
+        manualColumnResize = TRUE,
+        rowHeaders = NULL,
+        height = if (nrow(values[["lclassToAdd"]]) > 6) 175 else NULL,
+        colHeaders = c(unname(values[["lclassNames"]][["param"]]), "sex", "phenotype", "ages"),
+        # overflow = "visible",
+        readOnly = TRUE
+      ) %>%
+        hot_table(colWidths = "75px") %>%
+        hot_col(1:values[["lclassCols"]], format = "0,0000000") %>%
+        # hot_validate_numeric(1:values[["lclassCols"]], min = 0, max = 1, allowInvalid = FALSE) %>%
+        hot_col("sex", type = "dropdown", source = c("", "both", "male", "female"), allowInvalid = FALSE) %>%
+        hot_col(values[["lclassCols"]] + 2, colWidths = "110px") %>% 
+        hot_context_menu(
+          highlightRow = TRUE,
+          allowColEdit = FALSE
+        )
+    })
+    # (lclass) Replace table
+    observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["lclassToAdd"]], {
+      shinyalert(
+        html = TRUE,
+        text = 
+          tagList(
+            div(
+              div("The liability class table will be replaced with the following:", style = "margin-bottom: 10px;"),
+              rHandsontableOutput(outputId = NS(id, "lclassToAdd"), height = "300px", width = "100%"),
+              align = "center"
+            )
+          ),
+        animation = "slide-from-bottom",
+        confirmButtonCol = "#39A0ED",
+        showCancelButton = TRUE,
+        size = "s",
+        callbackR = function(x) {
+          if (x) {
+            values[["lclassData"]] = values[["lclassToAdd"]]
+          }
+          values[["lclassToAdd"]] = NULL
+        }
+      )
     })
     
     # (lclass) Expand base table
