@@ -165,6 +165,11 @@ penetranceBoxServer = function(id, values) {
         ages = NA_character_
       )
     values[["lclassCols"]] = 3
+    values[["lclassNames"]] = 
+      list(
+        param = c("f0", "f1", "f2"),
+        other = c("sex", "phenotype", "ages")
+      )
     
     # Help
     observeEvent(input$help, {
@@ -212,7 +217,7 @@ penetranceBoxServer = function(id, values) {
         "AD" = {
           values[["chrom"]] = "auto"
           values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk")
-          values[["lclassNames"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
           updateRadioGroupButtons(
@@ -223,7 +228,7 @@ penetranceBoxServer = function(id, values) {
         "XD" = {
           values[["chrom"]] = "x"
           values[["rriskNames"]] = c("neg\nrisk", "neg\nmean", "neg\nSD", "het/hom\nrisk")
-          values[["lclassNames"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg\nrisk", "f2" = "het/hom\nrisk")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
           updateRadioGroupButtons(
@@ -234,7 +239,7 @@ penetranceBoxServer = function(id, values) {
         "AR" = {
           values[["chrom"]] = "auto"
           values[["rriskNames"]] = c("neg/het\nrisk", "neg/het\nmean", "neg/het\nSD", "hom\nrisk")
-          values[["lclassNames"]] = c("f0" = "neg/het\nrisk", "f2" = "hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg/het\nrisk", "f2" = "hom\nrisk")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
           updateRadioGroupButtons(
@@ -245,7 +250,7 @@ penetranceBoxServer = function(id, values) {
         "XR" = {
           values[["chrom"]] = "x"
           values[["rriskNames"]] = c("neg/♀het\nrisk", "neg/♀het\nmean", "neg/♀het\nSD", "♂het/hom\nrisk")
-          values[["lclassNames"]] = c("f0" = "neg/♀het\nrisk", "f2" = "♂het/hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg/♀het\nrisk", "f2" = "♂het/hom\nrisk")
           values[["lclassCols"]] = 2
           suppressWarnings(values[["lclassData"]][, f1 := NULL])
           updateRadioGroupButtons(
@@ -256,7 +261,7 @@ penetranceBoxServer = function(id, values) {
         "AI" = {
           values[["chrom"]] = "auto"
           values[["rriskNames"]] = NULL
-          values[["lclassNames"]] = c("f0" = "neg\nrisk", "f1" = "het\nrisk", "f2" = "hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg\nrisk", "f1" = "het\nrisk", "f2" = "hom\nrisk")
           if (values[["lclassCols"]] == 2) {
             values[["lclassCols"]] = 3
             setcolorder(values[["lclassData"]][, f1 := NA_real_], c("f0", "f1", "f2", "sex", "phenotype", "ages"))
@@ -269,7 +274,7 @@ penetranceBoxServer = function(id, values) {
         "XI" = {
           values[["chrom"]] = "x"
           values[["rriskNames"]] = NULL
-          values[["lclassNames"]] = c("f0" = "neg\nrisk", "f1" = "het\nrisk", "f2" = "hom\nrisk", "sex", "phenotype", "ages")
+          values[["lclassNames"]][["param"]] = c("f0" = "neg\nrisk", "f1" = "het\nrisk", "f2" = "hom\nrisk")
           if (values[["lclassCols"]] == 2) {
             values[["lclassCols"]] = 3
             setcolorder(values[["lclassData"]][, f1 := NA_real_], c("f0", "f1", "f2", "sex", "phenotype", "ages"))
@@ -558,7 +563,7 @@ penetranceBoxServer = function(id, values) {
         manualColumnResize = TRUE,
         rowHeaders = NULL,
         height = if (nrow(values[["lclassData"]]) > 6) 175 else NULL,
-        colHeaders = unname(values[["lclassNames"]]),
+        colHeaders = unname(unlist(values[["lclassNames"]])),
         overflow = "visible"
       ) %>%
         hot_table(colWidths = "75px") %>%
@@ -629,12 +634,12 @@ penetranceBoxServer = function(id, values) {
         showElement("message6", asis = TRUE)
         hideElement("message7", asis = TRUE)
         hideElement("message9", asis = TRUE)
-        values[["lclassNames"]][values[["lclassCols"]] + 3] = "<i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i>ages"
+        values[["lclassNames"]][["other"]][3] = "<i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i>ages"
         fBase = NULL
       }
       else {
         hideElement("message6", asis = TRUE)
-        values[["lclassNames"]][values[["lclassCols"]] + 3] = "ages"
+        values[["lclassNames"]][["other"]][3] = "ages"
         
         # Expand sex
         fBase[, sexList := .(list(list(as.character(sex)))), by = 1:nrow(fBase)]

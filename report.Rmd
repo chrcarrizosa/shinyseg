@@ -88,7 +88,7 @@ rhandsontable(
   manualColumnResize = FALSE,
   rowHeaders = NULL,
   height = 39 + 23 * nrow(params$values[["lclassData"]]),
-  colHeaders = unname(params$values[["lclassNames"]]),
+  colHeaders = unname(unlist(params$values[["lclassNames"]])),
   readOnly = TRUE
 ) %>%
   hot_table(colWidths = "75px") %>% 
