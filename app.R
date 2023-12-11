@@ -399,7 +399,6 @@ server = function(input, output, session) {
                 lclassData =
                   data.table(
                     f0 = 0.1,
-                    f1 = 0.8,
                     f2 = 0.8,
                     sex = NA_character_,
                     phenotype = NA_character_,
@@ -410,6 +409,10 @@ server = function(input, output, session) {
                 mode = "lclass"
                 phenoData = NULL
                 lclassData = setDT(fromJSON(table))
+                if (inheritance %in% c("AI", "XI"))
+                  lclassData[, c("f0", "f1", "f2") := lapply(.SD, as.numeric), .SDcols = c("f0", "f1", "f2")]
+                else
+                  lclassData[, c("f0", "f2") := lapply(.SD, as.numeric), .SDcols = c("f0", "f2")]
                 lclassData[, c("phenotype", "ages") := lapply(.SD, as.character), .SDcols = c("phenotype", "ages")]
               }
             }
