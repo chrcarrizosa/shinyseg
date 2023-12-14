@@ -108,8 +108,8 @@ w_example2 =
       div(
         class = "rightcolumn",
         list(
-          suppressWarnings(boxLabel("Relative risk", status = "gray")),
-          boxLabel("AD", status = "gray")
+          suppressWarnings(boxLabel("Liability class", status = "gray")),
+          boxLabel("XR", status = "gray")
         )
       )
     ),
@@ -569,22 +569,21 @@ server = function(input, output, session) {
             `2` = {
               # UI changes
               afreq = 0.001
-              mode = "rrisk" # values[["mode"]]
-              inheritance = "AD"
+              mode = "lclass" # values[["mode"]]
+              inheritance = "XR"
               
               # Pedigree table
               # Family and indexes
               pedTotal = as.integer(1)
-              pedToAdd = nuclearPed(nch = 3, sex = 2) |>
-                addChildren(mo = 4, nch = 1, sex = 1, verbose = FALSE) |>
-                addChildren(mo = 5, nch = 2, sex = c(2,1), verbose = FALSE) |>
+              pedToAdd = avuncularPed(type = "maternal") |>
+                addChildren(fa = 4, mo = 5, verbose = FALSE) |>
                 relabel("asPlot")
-              affected = c(3, 5, 7, 8, 10)
+              affected = c(3, 6, 7)
               unknown = c(1:2)
-              carriers = c(5, 7, 8, 10)
-              noncarriers = c(3, 9)
-              proband = 8
-              age = c(80, 80, 80, 80, 50, 80, 50, 40, 40, 40)
+              carriers = c(3, 5, 6, 7)
+              noncarriers = c(4)
+              proband = 6
+              age = c(80, 80, 40, 60, 60, 40, 40)
               # Full vectors and data
               vecPheno = rep("nonaff", pedsize(pedToAdd))
               vecPheno[affected] = "affected"
@@ -606,18 +605,18 @@ server = function(input, output, session) {
               # Penetrance
               phenoData = 
                 data.table(
-                  sex = c("both"),
-                  phenotype = c("affected"),
-                  f0R = 0.001,
-                  f0mu = 60,
+                  sex = "both",
+                  phenotype = "affected",
+                  f0R = 0.01,
+                  f0mu = 70,
                   f0sigma = 15,
-                  f2R = 0.90,
-                  HR = "2301.43"
+                  f2R = 0.75,
+                  HR = "137.93"
                 )
               lclassData = 
                 data.table(
-                  f0 = 0.001,
-                  f2 = 0.90,
+                  f0 = 0,
+                  f2 = 1,
                   sex = NA_character_,
                   phenotype = NA_character_,
                   ages = NA_character_
