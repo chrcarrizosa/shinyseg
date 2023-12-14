@@ -240,7 +240,7 @@ bayesBoxServer = function(id, values) {
         values[["lclassDataLong"]] = melt(lclassData, id.vars = c("rowid", "sex", "phenotype", "ages"), variable.name = "param")
         choiceList = c(choiceList, apply(values[["lclassDataLong"]][, c("param", "rowid")], 1, paste, collapse = "_"))
         nameList = c(nameList, apply(values[["lclassDataLong"]][, -c("rowid", "value"), with = FALSE], 1, function(x) paste(stri_remove_empty_na(x), collapse = " | ")))
-        nameList = str_replace_all(nameList, values[["lclassNames"]][1:values[["lclassCols"]]])
+        nameList = str_replace_all(nameList, values[["lclassNames"]][["param"]])
       }
       else {
         phenoData = copy(values[["phenoData"]][, .(sex, phenotype, f0R, f0mu, f0sigma, f2R)])
@@ -403,7 +403,6 @@ bayesBoxServer = function(id, values) {
         })
       }
       else {
-      
         # Prepare data
         temp = copy(values[["phenoData"]])
         temp[, rowid := seq(.N)]
@@ -456,33 +455,53 @@ bayesBoxServer = function(id, values) {
             f = fSubset[, c("f0", "f1", "f2")]
           })
         },
-        "XD" = {
-          lapply(seq(nrow(grid2)), function(i) {
-            fFull[, f1 := f2]
-            fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
-            fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
-            f = list(male = lclass_full[sex == "male", c("f0", "f1")],
-                     female = lclass_full[sex == "female", c("f0", "f1", "f2")])
-          })
-        },
         "AR" = {
           lapply(seq(nrow(grid2)), function(i) {
+            fFull = fBase[[i]]
             fFull[, f1 := f0]
             fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
             fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
             f = fSubset[, c("f0", "f1", "f2")]
           })
         },
-        "XR" = {
+        "AI" = {
           lapply(seq(nrow(grid2)), function(i) {
-            fFull[, f1 := f0]
-            fFull[sex == "male", f1 := f2]
-            fSubset = f_final[values[["lclasses"]], on = c("sex", "phenotype", "age")]
+            fFull = fBase[[i]]
+            fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
+            fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
+            f = fSubset[, c("f0", "f1", "f2")]
+          })
+        },
+        "XD" = {
+          lapply(seq(nrow(grid2)), function(i) {
+            fFull = fBase[[i]]
+            fFull[, f1 := f2]
+            fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
             fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
             f = list(male = fSubset[sex == "male", c("f0", "f1")],
                      female = fSubset[sex == "female", c("f0", "f1", "f2")])
           })
-        }
+        },
+        "XR" = {
+          lapply(seq(nrow(grid2)), function(i) {
+            fFull = fBase[[i]]
+            fFull[, f1 := f0]
+            fFull[sex == "male", f1 := f2]
+            fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
+            fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
+            f = list(male = fSubset[sex == "male", c("f0", "f1")],
+                     female = fSubset[sex == "female", c("f0", "f1", "f2")])
+          })
+        },
+        "XI" = {
+          lapply(seq(nrow(grid2)), function(i) {
+            fFull = fBase[[i]]
+            fSubset = fFull[values[["lclasses"]], on = c("sex", "phenotype", "age")]
+            fSubset[, c("f0", "f1", "f2") := lapply(.SD, function(x) fifelse(phenotype == "", 1, x)), .SDcols = c("f0", "f1", "f2")]
+            f = list(male = fSubset[sex == "male", c("f0", "f1")],
+                     female = fSubset[sex == "female", c("f0", "f1", "f2")])
+          })
+        },
       )
       
       # FLB
