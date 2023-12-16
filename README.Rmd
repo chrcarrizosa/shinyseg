@@ -10,62 +10,69 @@ library(segregatr)
 knitr::opts_chunk$set(
   echo = FALSE,
   dpi = 300,
-  comment = NA
+  comment = NA,
+  fig.align = "center"
 )
 ```
 
 # shinyseg
 
-> ***Try shinyseg here***: [https://chrcarrizosa.shinyapps.io/shinyseg](https://chrcarrizosa.shinyapps.io/shinyseg).
+> ***Try it here***: [https://chrcarrizosa.shinyapps.io/shinyseg](https://chrcarrizosa.shinyapps.io/shinyseg).
 
 ## What is shinyseg?
-shinyseg is an interactive web application for clinical cosegregation analysis, a method used to ascertain disease-associated genetic variants from family data. More specifically, shinyseg calculates the full-likelihood Bayes factor (FLB) for a variant's pathogenicity ([Thompson et al., 2003](https://doi.org/10.1086/378100)), which can be utilized within the ACMG-AMP framework for clinical variant interpretation ([Richards et al., 2015](https://doi.org/10.1038%2Fgim.2015.30)).
 
-Analyses with shinyseg are easy and highly flexible. All you need to do is upload a pedigree file, enter the genetic and clinical data, and specify a suitable penetrance model. The following sections briefly explain how to do so for an X-linked recessive case (`Example 2`), but you can find more detailed information and tips within the app.
+shinyseg is an interactive web application for clinical cosegregation analysis, a method used to ascertain disease-associated genetic variants from family data. More specifically, it calculates the full-likelihood Bayes factor (FLB) for a variant's pathogenicity ([Thompson et al., 2003](https://doi.org/10.1086/378100)), which can be readily used within the ACMG-AMP framework for clinical variant interpretation ([Richards et al., 2015](https://doi.org/10.1038%2Fgim.2015.30); [Jarvik and Browning, 2016](https://doi.org/10.1016%2Fj.ajhg.2016.04.003)).
 
-The application is powered by the [ped suite](https://magnusdv.github.io/pedsuite/), [Shiny](https://shiny.posit.co/), and [rhandsontable](https://CRAN.R-project.org/package=rhandsontable).
+Analyses with shinyseg are easy and highly flexible. All you need to do is upload a pedigree file, enter the genetic/clinical data, and specify a suitable penetrance model. The following sections briefly explain how to do so with an example case (`Example 2`), but you can find detailed guidance within the app.
+
+shinyseg is powered by the [ped suite](https://magnusdv.github.io/pedsuite/), [Shiny](https://shiny.posit.co/), and [rhandsontable](https://CRAN.R-project.org/package=rhandsontable).
 
 ## Uploading a pedigree
 
-shinyseg works with pedigree files in *ped* format, like those created by [QuickPed](https://magnusdv.shinyapps.io/quickped). Here is an example of such a file and the corresponding family:
+The application works with pedigree files in ped format, like those created by [QuickPed](https://magnusdv.shinyapps.io/quickped). Here is an example of such a file and the corresponding family:
 
-:::: {style="display:flex; height:250px;"}
-::: {style="width: 35%;"}
-```{r ped-empty, fig.height = 2.25, fig.width = 2.5, out.width="95%", out.height="100%", fig.align = "center"}
+```{r}
 x = avuncularPed(type = "maternal") |>
   addChildren(fa = 4, mo = 5, verbose = FALSE) |>
   relabel("asPlot")
+df = as.data.frame(x)
+print(df, row.names = FALSE)
+```
+
+```{r ped-empty, fig.height = 2.25, fig.width = 2.25, out.width="300px"}
 plot(
   x,
   symbolsize = .82,
   cex = 0.7
 )
 ```
-:::
-::: {style="width:65%; margin-left:1.5rem; margin-top:1.5rem;"}
-```{r}
-df = as.data.frame(x)
-print(df, row.names = FALSE)
-```
-:::
-::::
 
-Note that while other columns may be present, the application will only utilize: `id` (individual ID), `fid` (father's ID, 0 if not included in the pedigree), `mid` (mother's ID, 0 if not included in the pedigree) and `sex` (1 = male; 2 = female).
+Note that other columns may be present, but the app will only read: `id` (individual ID), `fid` (father's ID, 0 if not included in the pedigree), `mid` (mother's ID, 0 if not included in the pedigree), and `sex` (1 = male; 2 = female).
 
 ## Genetic and clinical data
 
-Once a pedigree is loaded, users are presented with a spreadsheet-like table where they can enter the analysis data. This includes four columns:
+Once a pedigree is loaded, users are presented with a table to enter the analysis data:
 
-* __phenotype:__ free-text field to specify disease phenotypes relevant to the analysis, e.g. `affected`, `breast cancer`, etc. The value `nonaff` is reserved for unaffected individuals. If empty, it indicates that the phenotype is unknown.
-* __carrier:__ `neg` for non-carriers, `het` for heterozygous (or hemizygous) carriers, `hom` for homozygous carriers. If empty, it indicates that the carriership state is unknown.
+* __phenotype:__ free-text field to specify disease phenotypes relevant to the analysis, e.g. `affected`, `breast cancer`, etc. `nonaff` for unaffected individuals, empty if unknown.
+* __carrier:__ `neg` for non-carriers, `het` for heterozygous (or hemizygous) carriers, `hom` for homozygous carriers. Empty if unknown.
 * __proband:__ checkbox indicating the proband or index case.
 * __age:__ integer between 1-100 specifying the age of disease onset or censoring.
 
-Using the same example from before:
+For instance:
 
-:::: {style="display:flex; height:250px;"}
-::: {style="width: 35%;"}
-```{r ped-filled, fig.height = 2.25, fig.width = 2.5, out.width="95%", out.height="100%", fig.align = "center"}
+```{r}
+df2 =
+  data.frame(
+    df,
+    phenotype = c("", "", "affected", "nonaff", "nonaff", "affected", "affected"),
+    carrier = c("", "", "het", "neg", "het", "het", "het"),
+    proband = c("", "", "", "", "", "X", ""),
+    age = c(80, 80, 40, 60, 60, 40, 40)
+  )
+print(df2, row.names = FALSE)
+```
+
+```{r ped-filled, fig.height = 2.25, fig.width = 2.25, out.width="300px"}
 plotSegregation(
   x,
   affected = c(3, 6, 7),
@@ -79,36 +86,21 @@ plotSegregation(
   cex = .7
 )
 ```
-:::
-::: {style="width:65%; margin-left:1.5rem; margin-top:1.5rem;"}
-```{r}
-df2 =
-  data.frame(
-    df,
-    phenotype = c("", "", "affected", "nonaff", "nonaff", "affected", "affected"),
-    carrier = c("", "", "het", "neg", "het", "het", "het"),
-    proband = c("", "", "", "", "", "X", ""),
-    age = c(80, 80, 40, 60, 60, 40, 40)
-  )
-print(df2, row.names = FALSE)
-```
-:::
-::::
 
 ## Penetrance model
 
-The inheritance pattern combines choices for chromosome (`A`: autosomal, `X`: X-linked) and dominance (`D`: dominant, `R`: recessive, `I`: incomplete). In this example, we select X-linked recessive (`XR`), which will adjust the next steps accordingly.
+The inheritance pattern combines choices for chromosome (`A`: autosomal, `X`: X-linked) and dominance (`D`: dominant, `R`: recessive, `I`: incomplete). In this example we select X-linked recessive (`XR`), which will adjust other inputs accordingly.
 
-Next, it is time to assign the probabilities of observing the analysis phenotypes conditional on carriership status (hereafter referred to as penetrances). This may be done in two ways:
+Next, it is time to assign the probabilities of observing the analysis phenotypes conditional on carriership status. These will be hereafter referred to as penetrances, and their specification may be done in two ways:
 
 ### 1) Relative risk
 
-This is a parametric version of the survival penetrances by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
+A parametric version of the survival penetrances by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
 
-* __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in phenocopies, i.e., non-carriers and heterozygous carriers in recessive inheritance. 
-* __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to phenocopies. They may also be specified through a __variant-associated lifetime risk__.
+* __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in phenocopies, i.e. non-carriers and heterozygous carriers in recessive inheritance. 
+* __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to phenocopies. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
 
-For example, the following defines that non-carrier men and heterozygous women have a lifetime risk of 0.01 (1%) with onset at 70±15 years of age, while hemizygous men and homozygous women have a lifetime risk of 0.75 (75%).
+For example, the following describes a constant relative risk model in which phenocopies have a lifetime risk of 0.01 (1%) with onset at 70±15 years of age, while hemizygous men and homozygous women have a lifetime risk of 0.75 (75%).
 
 ```{r}
 df3 =
@@ -119,62 +111,35 @@ df3 =
     f0mu = c("", " mu", "70"),
     f0sigma = c("", " sigma", "15"),
     f2R = c("  ♂het/hom", "risk", "0.75"),
-    HR = c("", "hazard ratio(s)", "137.93")
+    HR = c("hazard", "    ratio(s)", "137.93")
   )
 colnames(df3) = NULL
 print(df3, row.names = FALSE, col.names = FALSE, right = TRUE)
 ```
 
-Notice that the hazard ratio(s) column also indicates some value. In this case, it was automatically updated by shinyseg based on the other parameters, but it can be directly modified to specify more complex models. However, this may be difficult to do. For this reason, the app also features an assistant where users can instead enter cumulative incidence data, and the model parameters will be optimized. For instance:
-
-:::: {style="display: flex;"}
-::: {style="width: 37%;"}
-```{r}
-df4 =
-  data.frame(
-    age = c("", "age", "20", "40", "60", "80"),
-    f0CI = c(" neg/♀het", "CI", "0.01", "0.02", "0.03", "0.04"),
-    f2CI = c(" ♂het/hom", "CI", "0.01", "0.20", "0.60", "0.70")
-  )
-colnames(df4) = NULL
-print(df4, row.names = FALSE, col.names = FALSE, right = TRUE)
-```
-:::
-::: {style="width: 63%; margin-left:1rem;"}
-```{r}
-cat(
-  "Optimal parameters:\n",
-  "- neg/♀het risk: 0.0446\n",
-  "- neg/♀het mean: 50.0096\n",
-  "- neg/♀het SD: 20.0044\n",
-  "- ♂het/hom risk: 0.7059\n",
-  "- hazard ratio(s): 1.73, 1.87, 47.8, 51.47, 4.76, 2.74"
-)
-```
-:::
-::::
+To facilitate the specification, shinyseg can also optimize these parameters based on user-provided cumulative incidence data.
 
 ### 2) Liability class
 
-Alternatively, it is possible to manually define penetrances using a table. The following defines the simplest case where there are no phenocopies, and the chance of disease onset in hemizygous men and homozygous women is 100%.
+Alternatively, users can manually define the penetrances using a table. The following represents the simplest case where there are no phenocopies, and the chance of disease onset in hemizygous men and homozygous women is 100%.
 
 ```{r}
-df5 =
+df4 =
   data.frame(
-    f0 = c("neg/♀het", "risk", "0"),
-    f2 = c("♂het/hom", "risk", "1"),
+    f0 = c("neg/♀het", "risk", "0.00"),
+    f2 = c("♂het/hom", "risk", "1.00"),
     sex = c("", " sex", ""),
     phenotype = c("", " phenotype", ""),
     ages = c("", " ages", "")
   )
-colnames(df5) = NULL
-print(df5, row.names = FALSE, col.names = FALSE, right = TRUE)
+colnames(df4) = NULL
+print(df4, row.names = FALSE, col.names = FALSE, right = TRUE)
 ```
 
-A more detailed specification dependent on sex, phenotype, and age can be created by adding more rows.
+More detailed specifications, dependent on sex, phenotype, and age, can be created by adding more rows and filling in these columns accordingly.
 
-## Calculating the FLB
+## Cosegregation evidence
 
-Once all previous steps have been completed, obtaining the FLB is as easy as clicking on the corresponding button. For instance, assuming a variant population frequency of 0.001 and using the simple liability class model shown before, we obtain an `FLB = 8.00`. This value would indicate supporting evidence for pathogenicity according to [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
+Calculating the FLB is then as easy as clicking a button. For instance, with a population variant frequency of `0.001` and the simple liability class model from before, we get an `FLB = 8.00`. shinyseg reports this as supporting evidence for pathogenicity based on [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
 
-The application then opens up more possibilities, including downloading results in a custom HTML report or performing sensitivity analyses to examine the robustness of cosegregation evidence. Explore them now with [shinyseg](https://chrcarrizosa.shinyapps.io/shinyseg)!
+Afterward, the app opens up more possibilities, including downloading a report with your results or performing sensitivity analyses to assess their robustness. Explore all these features now with [shinyseg](https://chrcarrizosa.shinyapps.io/shinyseg)!
