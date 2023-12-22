@@ -11,11 +11,16 @@ optimHR = function(f0Hz, f2R, logHR) {
 # Scale log-HRs to achieve lifetime risk f2R. Return f2Hz
 optimf2Hz = function(f0Hz, f2R, logHR) {
   spl = bs(1:100, df = length(logHR), intercept = TRUE)
-  opt = optim(1, fn = function(x) {(sum(exp(spl %*% (x*logHR)) * f0Hz) + log(1 - f2R))^2},
-              method = "L-BFGS-B", lower = 0)
-  
-  # Return f2Hz
+  tryCatch(
+    {
+      opt = optim(1, fn = function(x) {(sum(exp(spl %*% (x*logHR)) * f0Hz) + log(1 - f2R))^2},
+                  method = "L-BFGS-B", lower = 0)
+      
+      # Return f2Hz
       exp(spl %*% (opt$par * logHR)) * f0Hz
+    },
+    error = function(err) NA_real_
+  )
 }
 
 # Get f2Hz from f0Hz and log-HRs
