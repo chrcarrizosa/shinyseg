@@ -15,7 +15,7 @@ optimf2Hz = function(f0Hz, f2R, logHR) {
               method = "L-BFGS-B", lower = 0)
   
   # Return f2Hz
-  exp(opt$par * logHR) * f0Hz
+      exp(spl %*% (opt$par * logHR)) * f0Hz
 }
 
 # Get f2Hz from f0Hz and log-HRs
