@@ -536,9 +536,9 @@ bayesBoxServer = function(id, values) {
       }
       else {
         showNotification(
-          HTML("<i class='fas fa-triangle-exclamation'></i> FLB could not be calculated."),
+          HTML("<i class='fas fa-triangle-exclamation'></i> FLB could not be calculated. Try with less extreme parameter values."),
           type = "error",
-          duration = 3
+          duration = 5
         )
       }
     })
