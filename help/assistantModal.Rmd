@@ -1,0 +1,9 @@
+---
+output: html_fragment
+---
+
+<!-- plotBox.html is generated from plotBox.Rmd. Please edit that file -->
+
+This panel assists in optimizing your `Relative risk` model parameters based on cumulative incidence data. Simply specify pairs of age (integer between 1-100) and their corresponding cumulative incidence using the table. Note that you can remove the default values and add/remove rows to make adjustments as needed. In addition, the <span style='color:#4e4e4e;'><i class='fa-solid fa-ruler fa-fw'></i>Length</span> slider allows you to fine-tune the model's complexity by setting the number of values for the hazard ratio vector.
+
+The plot presents the entered values (dots) and the cumulative incidences fitted by the optimal parameters (lines). The values of these parameters are also displayed below the table, and you may easily transfer them to your analysis by using the dropdown below the plot.

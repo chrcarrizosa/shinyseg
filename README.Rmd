@@ -89,7 +89,7 @@ plotSegregation(
 
 ## Penetrance model
 
-The inheritance pattern combines choices for chromosome (`A`: autosomal, `X`: X-linked) and dominance (`D`: dominant, `R`: recessive, `I`: incomplete). In this example we select X-linked recessive (`XR`), which will adjust other inputs accordingly.
+The inheritance pattern combines choices for chromosome (`A`: autosomal, `X`: X-linked) and dominance (`D`: dominant, `R`: recessive, `I`: incomplete dominance). In this example we select X-linked recessive (`XR`), which will adjust other inputs accordingly.
 
 Next, it is time to assign the probabilities of observing the analysis phenotypes conditional on carriership status. These will be hereafter referred to as penetrances, and their specification may be done in two ways:
 
@@ -97,24 +97,24 @@ Next, it is time to assign the probabilities of observing the analysis phenotype
 
 A parametric version of the survival penetrances by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
 
-* __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in phenocopies, i.e. non-carriers and heterozygous carriers in recessive inheritance. 
-* __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to phenocopies. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
+* __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in non-carriers and heterozygous carriers in recessive inheritance. 
+* __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to the baseline. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
 
-For example, the following describes a constant relative risk model in which phenocopies have a lifetime risk of 0.01 (1%) with onset at 70±15 years of age, while hemizygous men and homozygous women have a lifetime risk of 0.75 (75%).
+For example, the following describes a constant relative risk model in which non-carrier men and heterozygous women have a lifetime risk (phenocopy rate) of 1% with onset at 70±15 years of age, while hemizygous men and homozygous women have a lifetime risk of 75%.
 
 ```{r}
 df3 =
   data.frame(
     sex = c("", "sex", "both"),
-    phenotype = c("", " phenotype", "affected"),
+    phenotype = c("", "  phenotype", "affected"),
     f0R = c("  neg/♀het", "risk", "0.01"),
-    f0mu = c("", " mu", "70"),
-    f0sigma = c("", " sigma", "15"),
+    f0mu = c("", "  mean", "70"),
+    f0sigma = c("", "  SD", "15"),
     f2R = c("  ♂het/hom", "risk", "0.75"),
-    HR = c("hazard", "    ratio(s)", "137.93")
+    HR = c("", "     hazard ratio(s)", "137.93")
   )
 colnames(df3) = NULL
-print(df3, row.names = FALSE, col.names = FALSE, right = TRUE)
+print(df3, row.names = FALSE, right = TRUE)
 ```
 
 To facilitate the specification, shinyseg can also optimize these parameters based on user-provided cumulative incidence data.
@@ -127,19 +127,19 @@ Alternatively, users can manually define the penetrances using a table. The foll
 df4 =
   data.frame(
     f0 = c("neg/♀het", "risk", "0.00"),
-    f2 = c("♂het/hom", "risk", "1.00"),
-    sex = c("", " sex", ""),
-    phenotype = c("", " phenotype", ""),
-    ages = c("", " ages", "")
+    f2 = c("  ♂het/hom", "risk", "1.00"),
+    sex = c("", "   sex", ""),
+    phenotype = c("", "  phenotype", ""),
+    ages = c("", "  ages", "")
   )
 colnames(df4) = NULL
-print(df4, row.names = FALSE, col.names = FALSE, right = TRUE)
+print(df4, row.names = FALSE, right = TRUE)
 ```
 
 More detailed specifications, dependent on sex, phenotype, and age, can be created by adding more rows and filling in these columns accordingly.
 
 ## Cosegregation evidence
 
-Calculating the FLB is then as easy as clicking a button. For instance, with a population variant frequency of `0.001` and the simple liability class model from before, we get an `FLB = 8.00`. shinyseg reports this as supporting evidence for pathogenicity based on [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
+Calculating the FLB is then as easy as clicking a button. For instance, with a population variant frequency of 0.001 and the simple liability class model from before, we get an `FLB = 8.00`. shinyseg reports this as supporting evidence for pathogenicity based on [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
 
 Afterward, the app opens up more possibilities, including downloading a report with your results or performing sensitivity analyses to assess their robustness. Explore all these features now with [shinyseg](https://chrcarrizosa.shinyapps.io/shinyseg)!

@@ -1,0 +1,108 @@
+---
+output: html_fragment
+---
+
+<!-- pedigreeBox.html is generated from pedigreeBox.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+library(pedtools)
+library(segregatr)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  dpi = 300,
+  comment = NA,
+  fig.align = "center"
+)
+```
+
+**Uploading a pedigree**
+
+shinyseg works with pedigree files in ped format. These have a tabular structure with columns:
+
+-   `id`: individual ID.
+-   `fid`: father's ID, 0 if not included in the pedigree.
+-   `mid`: mother's ID, 0 if not included in the pedigree.
+-   `sex`: 1 = male; 2 = female.
+    (Note: Additional columns may be present, but the app will only read these.)
+
+Here is an example of such a file and the corresponding family:
+
+:::: {style="display:flex;"}
+
+::: {}
+```{r}
+x = avuncularPed(type = "maternal") |>
+  addChildren(fa = 4, mo = 5, verbose = FALSE) |>
+  relabel("asPlot")
+df = as.data.frame(x)
+print(df, row.names = FALSE)
+```
+:::
+
+::: {style="margin-left: 2rem;"}
+```{r ped-empty, fig.height = 2.25, fig.width = 2.25, out.width="225px", out.height="225px"}
+plot(
+  x,
+  symbolsize = .82,
+  cex = 0.7
+)
+```
+:::
+
+::::
+
+If you need help creating the ped file, you can [<i class='fa-solid fa-globe fa-fw'></i>Use QuickPed]{style="color:#4e4e4e;"}, which allows you to do so in an interactive way. Once ready, upload it by clicking on [<i class='fa-solid fa-file-import fa-fw'></i>Add pedfile]{style="color:#4e4e4e;"}. Alternatively, the dropdown menu on the left offers some basic structures that may suit your analysis.
+
+You can repeat this process to add more families; they will appear concatenated in the table below and indexed by the `ped` column. In addition, it is possible to remove them with [<i class='fa-solid fa-person-digging fa-fw'></i>Modify]{style="color:#4e4e4e;"}.
+
+> <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> You will see a warning until you add at least one family to the analysis.
+
+<br>
+
+**Filling in the data**
+
+Upon loading a pedigree, users are presented with a table to enter the clinical and genetic data. This consists of four additional columns:
+
+-   **phenotype:** a free-text field to specify disease phenotypes relevant to the analysis, e.g., `affected`, `breast cancer`, etc. Use `nonaff` for unaffected individuals; leave empty if unknown.
+-   **carrier:** use `neg` for non-carriers, `het` for heterozygous (or hemizygous) carriers, `hom` for homozygous carriers. Leave empty if unknown.
+-   **proband:** a checkbox indicating the proband or index case.
+-   **age:** an integer between 1-100 specifying the age of disease onset or censoring/last follow-up.
+
+For instance, the following states that individuals 3, 6, and 7 had the onset of a certain disease at 40 years of age. Conversely, 4 and 5 were unaffected by 60 years of age. Individuals 3, 5, 6 (proband), and 7 carry one copy of the variant under study; 4 does not. For the founders 1 and 2, only ages are known:
+
+::: {style="display:flex;"}
+<div>
+
+```{r}
+df2 =
+  data.frame(
+    df,
+    phenotype = c("", "", "affected", "nonaff", "nonaff", "affected", "affected"),
+    carrier = c("", "", "het", "neg", "het", "het", "het"),
+    proband = c("", "", "", "", "", "X", ""),
+    age = c(80, 80, 40, 60, 60, 40, 40)
+  )
+print(df2, row.names = FALSE)
+```
+
+</div>
+
+::: {style="margin-left: 2rem;"}
+```{r, fig.height = 2.25, fig.width = 2.25, out.width="225px", out.height="225px"}
+plotSegregation(
+  x,
+  affected = c(3, 6, 7),
+  unknown = 1:2,
+  carriers = c(3, 5, 6, 7),
+  noncarriers = 4,
+  proband = 6,
+  fill = "gray30",
+  labs = setNames(seq(pedsize(x)), c(80, 80, 40, 60, 60, 40, 40)),
+  symbolsize = .82,
+  cex = .7
+)
+```
+:::
+:::
+
+> <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> For each family, ensure you have: 1 or more disease phenotypes, 1 or more variant carriers, 1 proband (who should have both disease and variant), and no missing ages.

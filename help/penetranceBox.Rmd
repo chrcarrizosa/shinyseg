@@ -1,0 +1,147 @@
+---
+output: html_fragment
+---
+
+<!-- penetranceBox.html is generated from penetranceBox.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+library(pedtools)
+library(segregatr)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  dpi = 300,
+  comment = NA,
+  fig.align = "center"
+)
+```
+
+**The inheritance pattern**
+
+Choose the inheritance pattern using the buttons on the right of the header:
+
+:::: {style="display:flex;"}
+
+::: {}
+-   `AD`: autosomal dominant.
+-   `AR`: autosomal recessive.
+-   `AI`: autosomal incomplete dominance.
+:::
+
+::: {}
+-   `XD`: X-linked dominant.
+-   `XR`: X-linked recessive.
+-   `XI`: X-linked incomplete dominance.
+:::
+
+::::
+
+Note that incomplete dominance, where you can specify different parameters for the carriers 1 and 2 copies of the variant, will be unavailable unless you also switch to the `Liability class` mode.
+
+<br>
+
+**Specifying the penetrances**
+
+shinyseg offers two different ways for specifying the penetrances, or probabilities of disease onset conditional on carriership status.
+
+- `Relative risk`, where the penetrances are computed by the app based on certain parameters.
+- `Liability class`, where the user manually specifies the penetrances.
+
+The modes can be switched using the input on the left of the header.
+
+<br>
+
+**Mode: Relative risk**
+
+A parametric version of the survival penetrances introduced by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
+
+-   __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in non-carriers and heterozygous carriers in recessive inheritance.
+-   __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to the baseline. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
+
+These parameters are entered using a table generated from the phenotypes specified in the pedigree table. For example, the following describes a constant relative risk model in which non-carriers have a lifetime risk of `affected` of 1% (phenocopy rate) with onset at 70±15 years of age, while heterozygous and homozygous carriers have a lifetime risk of 75%.
+
+```{r}
+df1 =
+  data.frame(
+    sex = c("sex", "both"),
+    phenotype = c(" phenotype", "affected"),
+    f0R = c("risk", "0.01"),
+    f0mu = c(" mean", "70"),
+    f0sigma = c(" SD", "15"),
+    f2R = c("risk", "0.75"),
+    HR = c("    hazard ratio(s)", "137.93")
+  )
+colnames(df1) = c("", "", "  neg", "", "", "  het/hom", "")
+print(df1, row.names = FALSE, right = TRUE)
+```
+
+*By default, shinyseg generates two entries for each phenotype to allow for sex-specific penetrances. Changing either sex to `both` applies its parameters to both sexes. To return to sex-dependent specification, select one of the sexes again.
+
+In the previous example, the hazard ratios were represented by a single value, indicating a constant (age-independent) relative risk. Additionally, this was automatically updated based on the other parameters. However, this column can also be directly manipulated and used to specify models where relative risks are age-dependent. To do this, enter up to 10 comma-separated values representing, loosely speaking, the hazard ratios at evenly spaced ages from 1 to 100 years. For instance, `1,10,10,20,10` would correspond to the ratios at ages 1, 25, 50, 75 and 100 (approximately). The app will interpolate/smooth these across the lifespan using a B-spline basis on the log scale — you may adjust the degree of smoothing with <span style='color:#4e4e4e;'><i class='fa-solid fa-wave-square fa-fw'></i>Splines</span>.
+
+Note that it is also possible to leverage the variant-associated lifetime risk, as earlier, but combined with a vectorial specification of the hazard ratios. For instance, changing the hazard ratio(s) to `1,2,2,1` defines a model where the relative risk is higher at middle ages. Subsequently, resetting the lifetime risk to 75% will scale these values accordingly, resulting in:
+
+```{r}
+df2 =
+  data.frame(
+    sex = c("sex", "both"),
+    phenotype = c(" phenotype", "affected"),
+    f0R = c("risk", "0.01"),
+    f0mu = c(" mean", "70"),
+    f0sigma = c(" SD", "15"),
+    f2R = c("risk", "0.75"),
+    HR = c("    hazard ratio(s)", "    1, 305.02, 305.02, 1")
+  )
+colnames(df2) = c("", "", "  neg", "", "", "  het/hom", "")
+print(df2, row.names = FALSE, right = TRUE)
+```
+
+As choosing these parameters can be challenging, shinyseg offers an <span style='color:#4e4e4e;'><i class='fa-solid fa-circle-info fa-fw'></i>Assistant</span> to optimize them based on user-provided cumulative incidence data. Additionally, the <span style='color:#4e4e4e;'><i class='fa-solid fa-chart-line fa-fw'></i>Plot</span> serves as a visual guide, displaying the cumulative incidences, hazard rates, or hazard ratios determined by the current selection.
+
+> <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> None of the model parameters can be missing. If you misspecify the hazard ratio(s), their values will revert to the previous ones to prevent issues.
+
+<br>
+<br>
+
+**Mode: Liability class**
+
+Alternatively, users can manually define penetrances using a table. This table contains 2 (dominant/recessive) to 3 (incomplete inheritance) columns with the penetrances themselves, followed by an additional 3 columns specifying the classes they apply to:
+
+-   __sex:__ `male`, `female`, or `both` for classes referring to males, females, or both sexes, respectively; leaving this cell empty is equivalent to specifying `both`.
+-   __phenotype:__ a free-text field whose values should match the phenotypes in the pedigree table. Note that here, `nonaff` is treated as another phenotype whose classes must be specified (unless there are no unaffected cases); leaving this cell empty indicates that the class applies to all phenotypes.
+-   __ages:__ an integer from 1 to 100 or ranges between these values (e.g., 10-20, 30-100...) indicating the ages to which the class applies; leaving this cell empty is equivalent to specifying ages 1-100.
+
+For instance, the following illustrates an autosomal dominant model with no phenocopies, where both heterozygous and homozygous carriers have a 100% chance of disease onset:
+
+```{r}
+df3 =
+  data.frame(
+    f0 = c("risk", "0.00"),
+    f2 = c("risk", "1.00"),
+    sex = c("  sex", ""),
+    phenotype = c(" phenotype", ""),
+    ages = c(" ages", "")
+  )
+colnames(df3) = c("neg", "  het/hom", "", "", "")
+print(df3, row.names = FALSE, right = TRUE)
+```
+
+And the following defines a sex- and age-dependent specification with incomplete dominance:
+
+```{r}
+df4 =
+  data.frame(
+    f0 = c("risk", "0.00", "0.00", "0.05", "0.20"),
+    f1 = c("risk", "0.20", "0.20", "0.40", "0.40"),
+    f2 = c("risk", "0.40", "0.40", "0.70", "0.90"),
+    sex = c("     sex", "male", "female", "male", "female"),
+    phenotype = c("  phenotype", "", "", "", ""),
+    ages = c("   ages", "1-50", "1-50", "51-100", "51-100")
+  )
+colnames(df4) =  c("neg", "  het", "  hom", "", "", "")
+print(df4, row.names = FALSE, right = TRUE)
+```
+
+
+The table may be created interactively or by uploading a file via <span style='color:#4e4e4e;'><i class='fa-solid fa-file-import fa-fw'></i>Load file</span>. If opting for the latter, shinyseg expects a tabular file without column headers and a structure resembling the one shown in-app.
+
+> <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> There should be no sex/phenotype/age overlaps. All family members in the pedigree table should map to a single liability class without missing penetrances.

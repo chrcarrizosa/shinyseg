@@ -80,8 +80,8 @@ For instance:
 
 The inheritance pattern combines choices for chromosome (`A`: autosomal,
 `X`: X-linked) and dominance (`D`: dominant, `R`: recessive, `I`:
-incomplete). In this example we select X-linked recessive (`XR`), which
-will adjust other inputs accordingly.
+incomplete dominance). In this example we select X-linked recessive
+(`XR`), which will adjust other inputs accordingly.
 
 Next, it is time to assign the probabilities of observing the analysis
 phenotypes conditional on carriership status. These will be hereafter
@@ -94,22 +94,22 @@ A parametric version of the survival penetrances by [Belman et
 al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
 
 - **Baseline lifetime risk, mean and SD:** the lifetime risk, mean, and
-  standard deviation of disease onset in phenocopies, i.e. non-carriers
-  and heterozygous carriers in recessive inheritance.
+  standard deviation of disease onset in non-carriers and heterozygous
+  carriers in recessive inheritance.
 - **Hazard ratios:** the relative risks in homo-, hemi-, and
-  heterozygous carriers in dominant inheritance, compared to
-  phenocopies. They can be either constant or age-dependent and may also
-  be specified through a **variant-associated lifetime risk**.
+  heterozygous carriers in dominant inheritance, compared to the
+  baseline. They can be either constant or age-dependent and may also be
+  specified through a **variant-associated lifetime risk**.
 
 For example, the following describes a constant relative risk model in
-which phenocopies have a lifetime risk of 0.01 (1%) with onset at 70±15
-years of age, while hemizygous men and homozygous women have a lifetime
-risk of 0.75 (75%).
+which non-carrier men and heterozygous women have a lifetime risk
+(phenocopy rate) of 1% with onset at 70±15 years of age, while
+hemizygous men and homozygous women have a lifetime risk of 75%.
 
-                                                                  
-                       neg/♀het              ♂het/hom       hazard
-      sex  phenotype       risk  mu  sigma       risk     ratio(s)
-     both   affected       0.01  70     15       0.75       137.93
+                                                                            
+                        neg/♀het               ♂het/hom                     
+      sex   phenotype       risk   mean   SD       risk      hazard ratio(s)
+     both    affected       0.01     70   15       0.75               137.93
 
 To facilitate the specification, shinyseg can also optimize these
 parameters based on user-provided cumulative incidence data.
@@ -121,10 +121,10 @@ The following represents the simplest case where there are no
 phenocopies, and the chance of disease onset in hemizygous men and
 homozygous women is 100%.
 
-                                            
-     neg/♀het ♂het/hom                      
-         risk     risk  sex  phenotype  ages
-         0.00     1.00                      
+                                                  
+     neg/♀het   ♂het/hom                          
+         risk       risk    sex   phenotype   ages
+         0.00       1.00                          
 
 More detailed specifications, dependent on sex, phenotype, and age, can
 be created by adding more rows and filling in these columns accordingly.
@@ -132,7 +132,7 @@ be created by adding more rows and filling in these columns accordingly.
 ## Cosegregation evidence
 
 Calculating the FLB is then as easy as clicking a button. For instance,
-with a population variant frequency of `0.001` and the simple liability
+with a population variant frequency of 0.001 and the simple liability
 class model from before, we get an `FLB = 8.00`. shinyseg reports this
 as supporting evidence for pathogenicity based on [Jarvik and Browning’s
 (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.

@@ -1,0 +1,11 @@
+---
+output: html_fragment
+---
+
+<!-- plotBox.html is generated from plotBox.Rmd. Please edit that file -->
+
+This panel shows the existing pedigrees. You can shift through them by using the <i class='fa-solid fa-backward-step fa-fw' style='color:#4e4e4e;'></i> / <i class='fa-solid fa-forward-step fa-fw' style='color:#4e4e4e;'></i> buttons.
+
+In the graph, each individual is colored according to its phenotype (**?** if unknown) and the symbols below denote the carriership status (**&#8722;**: non-carrier; **+**: heterozygous or hemizygous carrier; **++**: homozygous carrier; empty: unknown).
+
+The numbers indicate ages of onset or censoring, and the arrow **&#8599;** denotes the proband(s) of the analysis.
