@@ -1,42 +1,58 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  actionBttn(
-    inputId = NS(id, "help"),
-    label = NULL,
-    style = "jelly",
-    color = "warning",
-    size = "s",
-    icon = icon("question")
+  popover(
+    actionBttn(
+      inputId = NS(id, "help"),
+      label = NULL,
+      style = "jelly",
+      color = "warning",
+      size = "s",
+      icon = icon("question")
+    ),
+    title = NULL,
+    content = "See help on this panel."
   )
 
 w_mode = function(id)
-  radioGroupButtons(
-    inputId = NS(id, "mode"),
-    label = NULL,
-    choices = c("Relative risk" = "rrisk", "Liability class" = "lclass"),
-    justified = TRUE,
-    individual = TRUE,
-    status = "gray"
+  popover(
+    radioGroupButtons(
+      inputId = NS(id, "mode"),
+      label = NULL,
+      choices = c("Relative risk" = "rrisk", "Liability class" = "lclass"),
+      justified = TRUE,
+      individual = TRUE,
+      status = "gray"
+    ),
+    title = NULL,
+    content = "Switch between penetrance modes."
   )
 
 w_inheritance = function(id)
-  radioGroupButtons(
-    inputId = NS(id, "inheritance"),
-    label = NULL,
-    choices = c("AD", "AR", "AI", "XD", "XR", "XI"),
-    justified = TRUE,
-    individual = TRUE,
-    status = "gray"
+  popover(
+    radioGroupButtons(
+      inputId = NS(id, "inheritance"),
+      label = NULL,
+      choices = c("AD", "AR", "AI", "XD", "XR", "XI"),
+      justified = TRUE,
+      individual = TRUE,
+      status = "gray"
+    ),
+    title = NULL,
+    content = "Select the inheritance pattern."
   )
 
 w_loadLclass = function(id)
-  fileInput2(
-    inputId = NS(id, "loadLclass"),
-    label = "Load file",
-    labelIcon = "file-import",
-    progress = FALSE,
-    divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+  popover(
+    fileInput2(
+      inputId = NS(id, "loadLclass"),
+      label = "Load file",
+      labelIcon = "file-import",
+      progress = FALSE,
+      divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+    ),
+    title = NULL,
+    content = "Upload a liability class table."
   )
 
 w_addLclass = function(id)
@@ -75,7 +91,7 @@ w_assistant = function(id)
       icon = icon("circle-info")
     ),
     title = NULL,
-    content = "Use assistant."
+    content = "Optimize model parameters from incidence data."
   )
 
 w_plotType = function(id)
@@ -91,7 +107,7 @@ w_plotType = function(id)
       )
     ),
     title = NULL,
-    content = "Change parameter to display."
+    content = "Change summary to display."
   )
 
 w_polDegree = function(id)
@@ -107,7 +123,8 @@ w_polDegree = function(id)
       )
     ),
     title = NULL,
-    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios."
+    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios.",
+    placement = "right"
   )
 
 

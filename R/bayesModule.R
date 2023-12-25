@@ -1,13 +1,17 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  actionBttn(
-    inputId = NS(id, "help"),
-    label = NULL,
-    style = "jelly",
-    color = "warning",
-    size = "s",
-    icon = icon("question")
+  popover(
+    actionBttn(
+      inputId = NS(id, "help"),
+      label = NULL,
+      style = "jelly",
+      color = "warning",
+      size = "s",
+      icon = icon("question")
+    ),
+    title = NULL,
+    content = "See help on this panel."
   )
 
 w_calculate = function(id)
@@ -100,7 +104,7 @@ w_plot = function(id)
       icon = icon("chart-area")
     ),
     title = NULL,
-    content = "Display contour plot."
+    content = "Display FLB values on a contour plot."
   )
 
 # Module code -------------------------------------------------------------

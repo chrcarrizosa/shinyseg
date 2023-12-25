@@ -120,15 +120,20 @@ w_example2 =
   )
 
 w_examples =
-  dropdown(
-    label = "Examples",
-    icon = icon("person-chalkboard"),
-    style = "jelly",
-    size = "s",
-    width = "230px",
-    status = "primary",
-    w_example1,
-    w_example2
+  popover(
+    dropdown(
+      label = "Examples",
+      icon = icon("person-chalkboard"),
+      style = "jelly",
+      size = "s",
+      width = "230px",
+      status = "primary",
+      w_example1,
+      w_example2
+    ),
+    title = NULL,
+    content = "Load a worked example.",
+    placement = "right"
   )
 
 

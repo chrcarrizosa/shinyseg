@@ -1,13 +1,17 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  actionBttn(
-    inputId = NS(id, "help"),
-    label = NULL,
-    style = "jelly",
-    color = "warning",
-    size = "s",
-    icon = icon("question")
+  popover(
+    actionBttn(
+      inputId = NS(id, "help"),
+      label = NULL,
+      style = "jelly",
+      color = "warning",
+      size = "s",
+      icon = icon("question")
+    ),
+    title = NULL,
+    content = "See help on this panel."
   )
 
 # w_addCI = function(id)
@@ -37,12 +41,17 @@ w_help = function(id)
 #   )
 
 w_splDF = function(id)
-  sliderTextInput(
-    inputId = NS(id, "splDF"),
-    label = HTML("<i class='fa fa-ruler'></i> Length"),
-    choices = c(1, 4:10),
-    selected = 4,
-    grid = FALSE
+  popover(
+    sliderTextInput(
+      inputId = NS(id, "splDF"),
+      label = HTML("<i class='fa fa-ruler'></i> Length"),
+      choices = c(1, 4:10),
+      selected = 4,
+      grid = FALSE
+    ),
+    title = NULL,
+    content = "Select the length of the hazard ratio vector.",
+    placement = "right"
   )
 
 w_transfer = function(id)

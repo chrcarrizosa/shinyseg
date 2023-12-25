@@ -1,13 +1,17 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  actionBttn(
-    inputId = NS(id, "help"),
-    label = NULL,
-    style = "jelly",
-    color = "warning",
-    size = "s",
-    icon = icon("question")
+  popover(
+    actionBttn(
+      inputId = NS(id, "help"),
+      label = NULL,
+      style = "jelly",
+      color = "warning",
+      size = "s",
+      icon = icon("question")
+    ),
+    title = NULL,
+    content = "See help on this panel."
   )
 
 w_pedCases = function(id)
@@ -24,12 +28,16 @@ w_pedCases = function(id)
   )
 
 w_loadPed = function(id)
-  fileInput2(
-    inputId = NS(id, "loadPed"),
-    label = "Load pedfile",
-    labelIcon = "file-import",
-    progress = FALSE,
-    divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+  popover(
+    fileInput2(
+      inputId = NS(id, "loadPed"),
+      label = "Load pedfile",
+      labelIcon = "file-import",
+      progress = FALSE,
+      divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+    ),
+    title = NULL,
+    content = "Upload a pedigree from a ped file."
   )
 
 # w_addChild = function(id)
@@ -81,23 +89,27 @@ w_rmvPed = function(id)
       icon = icon("users-slash")
     ),
     title = NULL,
-    content = "Remove family."
+    content = "Remove a family."
   )
 
 w_modify = function(id)
-  dropdown(
-    label = "Modify",
-    icon = icon("person-digging"),
-    style = "jelly",
-    size = "s",
-    status = "default",
-    div(
-      class = "flexcontainer",
-      # w_addChild(id),
-      # w_rmvPeople(id),
-      # w_swapSex(id),
-      w_rmvPed(id)
-    )
+  popover(
+    dropdown(
+      label = "Modify",
+      icon = icon("person-digging"),
+      style = "jelly",
+      size = "s",
+      status = "default",
+      div(
+        class = "flexcontainer",
+        # w_addChild(id),
+        # w_rmvPeople(id),
+        # w_swapSex(id),
+        w_rmvPed(id)
+      )
+    ),
+    title = NULL,
+    content = "Make changes on loaded families."
   )
 
 w_quickPed = function(id)
