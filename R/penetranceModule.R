@@ -390,12 +390,24 @@ penetranceBoxServer = function(id, values) {
                 logHR = rep(1, 4)
               else if (length(logHR) == 1)
                 logHR = rep(logHR, 4)
-
-              if (diff(range(scaledHR)) == 0)
-                temp[row_index, HR := as.character(round(scaledHR[1], 2))]
-              else
               scaledHR = optimHR(f0Hz, f2R, logHR, values[["polDegree"]])
+              
+              # undo if scaled HR cannot be calculated
+              if(any(is.na(scaledHR))) {
+                showNotification(
+                  HTML("<i class='fas fa-triangle-exclamation'></i> Hazard ratio(s) could not be calculated. Try with other values."),
+                  type = "error",
+                  duration = 5
+                )
+                values[["phenoData"]][row_index, (col_index + 1) := NA_real_]  # to re-render table
+                temp[row_index, (col_index + 1) := before]
+              }
+              else{
+                if (diff(range(scaledHR)) == 0)
+                  temp[row_index, HR := as.character(round(scaledHR[1], 2))]
+                else
                   temp[row_index, HR := paste(round(scaledHR, 2), collapse = ", ")]
+              }
             }
           })
         }
