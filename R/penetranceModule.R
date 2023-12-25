@@ -484,7 +484,9 @@ penetranceBoxServer = function(id, values) {
                                      f2CI = unlist(f2CI)), by = .(sex, phenotype)]
         
         # Re-adjust f2 lifetime risks
-        values[["phenoData"]][rriskPlot[age == 100, ], f2R := round(i.f2CI, 4), on = c("sex", "phenotype")]
+        phenoData = copy(values[["phenoData"]]) # to re-render table (makes this observer run twice, but needed to update f2R after changing polDegree)
+        phenoData[rriskPlot[age == 100, ], f2R := round(i.f2CI, 4), on = c("sex", "phenotype")]
+        values[["phenoData"]] = phenoData
         
         # Expand sex (here so the plot can be faceted)
         rriskPlot[, sex := as.character(sex)]
