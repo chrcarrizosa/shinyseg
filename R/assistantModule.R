@@ -215,7 +215,7 @@ assistantModalServer = function(id, values) {
         rriskNames[2], ": ", values[["OptPar"]][["f0"]][2],
         rriskNames[3], ": ", values[["OptPar"]][["f0"]][3],
         rriskNames[4], ": ", round(values[["OptPar"]][["f2CI"]][100], 4),
-        "\nhazard ratio(s): ", paste(values[["OptPar"]][["f2"]], collapse = ",")
+        "\nhazard ratio(s): ", paste(values[["OptPar"]][["f2"]], collapse = ", ")
       )
     })
     
@@ -265,7 +265,7 @@ assistantModalServer = function(id, values) {
           values[["OptPar"]][["f0"]][2],
           values[["OptPar"]][["f0"]][3],
           round(values[["OptPar"]][["f2CI"]][100], 4),
-          paste(values[["OptPar"]][["f2"]], collapse = ",")
+          paste(values[["OptPar"]][["f2"]], collapse = ", ")
         )
       updatePickerInput(
         session = getDefaultReactiveDomain(),

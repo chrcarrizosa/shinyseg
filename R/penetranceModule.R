@@ -374,7 +374,7 @@ penetranceBoxServer = function(id, values) {
               if (diff(range(scaledHR)) == 0)
                 temp[row_index, HR := as.character(round(scaledHR[1], 2))]
               else
-                temp[row_index, HR := paste(round(scaledHR, 2), collapse = ",")]
+                  temp[row_index, HR := paste(round(scaledHR, 2), collapse = ", ")]
             }
           })
         }
@@ -390,7 +390,7 @@ penetranceBoxServer = function(id, values) {
           else if (df %in% 2:3) # re-adjust if length is 2 or 3
             scaledHR = rep(scaledHR, each = 2)
           
-          temp[row_index, HR := paste(scaledHR, collapse = ",")]
+          temp[row_index, HR := paste(scaledHR, collapse = ", ")]
         }
         
         values[["phenoData"]] = temp
