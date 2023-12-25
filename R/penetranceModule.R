@@ -344,7 +344,6 @@ penetranceBoxServer = function(id, values) {
           disableFill(hot);
         }")
     })
-    outputOptions(output, "rrisktable", priority = -1) # needed to trigger re-rendering when f2R is updated after switching modes
     
     # (rrisk) Update phenotype data from table edits
     observeEvent(input$rrisktable$changes$changes, {
