@@ -128,6 +128,7 @@
   color: #4e4e4e!important;
 }
 .helpbox {
+  max-height: 96%!important;;
   padding-top: 0rem!important;
   padding-bottom: 0.4rem!important;
 }
