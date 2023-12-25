@@ -85,10 +85,8 @@ w_plotType = function(id)
       label = HTML("<i class='fa fa-chart-line'></i> Plot"),
       choices = c("Cumulative incidence" = "CI", "Hazard rate" = "Hz", "Hazard ratio" = "HR"),
       selected = "HR",
-      multiple = TRUE,
+      multiple = FALSE,
       options = list(
-        `max-options` = 1,
-        `none-selected-text` = "Choose a parameter",
         `style` = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
       )
     ),
