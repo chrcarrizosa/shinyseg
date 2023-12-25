@@ -1,22 +1,25 @@
 # Libraries
-library(shiny, quietly = TRUE)
-library(shinyjs, quietly = TRUE)
-library(bs4Dash, quietly = TRUE)
-library(shinyWidgets, quietly = TRUE)
-library(shinyalert, quietly = TRUE)
-library(readr, quietly = TRUE) # read html
-library(pedtools, quietly = TRUE)
-library(segregatr, quietly = TRUE)
-library(data.table, quietly = TRUE)
-library(stringr, quietly = TRUE)
-library(rhandsontable, quietly = TRUE)
-library(htmlwidgets, quietly = TRUE)
-library(truncdist, quietly = TRUE)
-library(splines, quietly = TRUE)
-library(plotly, quietly = TRUE)
-library(stringi, quietly = TRUE) # stri_remove_empty_na
-library(rvest, quietly = TRUE)
-library(jsonlite, quietly = TRUE)
+suppressPackageStartupMessages({
+  library(shiny, quietly = TRUE)
+  library(shinyjs, quietly = TRUE)
+  library(bs4Dash, quietly = TRUE)
+  library(shinyWidgets, quietly = TRUE)
+  library(shinyalert, quietly = TRUE)
+  library(readr, quietly = TRUE) # read html
+  library(pedtools, quietly = TRUE)
+  library(segregatr, quietly = TRUE)
+  library(data.table, quietly = TRUE)
+  library(stringr, quietly = TRUE)
+  library(rhandsontable, quietly = TRUE)
+  library(htmlwidgets, quietly = TRUE)
+  library(truncdist, quietly = TRUE)
+  library(splines, quietly = TRUE)
+  library(plotly, quietly = TRUE)
+  library(stringi, quietly = TRUE) # stri_remove_empty_na
+  library(rvest, quietly = TRUE)
+  library(jsonlite, quietly = TRUE)
+})
+
 
 ##### TODO (priority)
   # Reset session button?
