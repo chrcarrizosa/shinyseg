@@ -348,6 +348,14 @@ bayesBoxServer = function(id, values) {
     observeEvent(input$plot, {
       message("Running sensitivity analysis")
       
+      showNotification(
+        HTML("<i class='fas fa-hourglass-half'></i> Computing FLB values..."),
+        type = "warning",
+        duration = NULL,
+        closeButton = FALSE,
+        id = "senWait"
+      )
+      
       # Create grid of values
       vars = c(input$senV1, input$senV2)
       values[["grid"]] = 
@@ -528,6 +536,8 @@ bayesBoxServer = function(id, values) {
           })
         flb = prod(flb)
       })
+      
+      removeNotification(id = "senWait")
       
       if (!any(is.na(flbs))) {
         values[["gridCurrent"]] = gridCurrent
