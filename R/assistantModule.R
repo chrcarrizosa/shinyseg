@@ -36,6 +36,15 @@ w_help = function(id)
 #     content = "Delete the last entry."
 #   )
 
+w_splDF = function(id)
+  sliderTextInput(
+    inputId = NS(id, "splDF"),
+    label = HTML("<i class='fa fa-ruler'></i> Length"),
+    choices = c(1, 4:10),
+    selected = 4,
+    grid = FALSE
+  )
+
 w_transfer = function(id)
   pickerInput(
     inputId = NS(id, "transfer"),
@@ -82,7 +91,12 @@ assistantModalUI = function(id) {
         class = "rightcolumn",
         div("Fitted values", class = "heading"),
         plotlyOutput(NS(id, "assisPlot"), width = "425px", height = "360px"),
-        div(w_transfer(id), style = "float:right; margin-top: 2rem; width: 250px;")
+        div(w_transfer(id), style = "float:right; margin-top: 2rem; margin-left: 1.5rem; width: 250px;"),
+        div(
+          w_splDF(id),
+          class = "inline inlinetext inlinetext3",
+          style = "float:right; margin-top: 1.5rem; margin-left: 1rem;"
+          )
       )
     )
   )
@@ -92,14 +106,13 @@ assistantModalServer = function(id, values) {
   moduleServer(id, function(input, output, session) {
     
     # Default values
-    values[["assisSpl"]] = bs(1:100, df = 6, intercept = TRUE)
     values[["assisData"]] =
       data.table(
         age = c(30L, 40L, 50L, 60L, 70L, 80L, rep(NA_integer_, 4)),
         f0CI = c(0.02, 0.03, 0.04, 0.05, 0.06, 0.07, rep(NA_real_, 4)),
         f2CI = c(0.10, 0.15, 0.25, 0.35, 0.45, 0.50, rep(NA_real_, 4))
       )
-    
+
     # Help
     observeEvent(input$help, {
       shinyalert(
@@ -178,6 +191,8 @@ assistantModalServer = function(id, values) {
     
     # Optimization
     observe({
+      req(input$splDF)
+      
       values[["OptPar"]][["data"]][["f0"]] = values[["assisData"]][complete.cases(values[["assisData"]][, .(age, f0CI)]), .(age, f0CI)]
       values[["OptPar"]][["data"]][["f2"]] = values[["assisData"]][complete.cases(values[["assisData"]][, .(age, f2CI)]), .(age, f2CI)]
       
@@ -192,15 +207,20 @@ assistantModalServer = function(id, values) {
       values[["OptPar"]][["f0Hz"]] = diff(c(0, -log(1 - values[["OptPar"]][["f0CI"]])))
       
       # Variant-associated rates
+      if(input$splDF == 1)
+        spl = matrix(rep(1, 100))
+      else
+        spl = bs(1:100, df = input$splDF, intercept = TRUE, degree = values[["polDegree"]])
       optf2 =
         optimf2(
           ages = values[["OptPar"]][["data"]][["f2"]][["age"]],
           f0Hz = values[["OptPar"]][["f0Hz"]],
           f2CI = values[["OptPar"]][["data"]][["f2"]][["f2CI"]],
-          df = 6
+          df = input$splDF,
+          spl = spl
         )
       values[["OptPar"]][["f2"]] = round(optf2, 2) # round
-      values[["OptPar"]][["f2Hz"]] = exp(values[["assisSpl"]] %*% as.vector(log(values[["OptPar"]][["f2"]]))) * values[["OptPar"]][["f0Hz"]]
+      values[["OptPar"]][["f2Hz"]] = exp(spl %*% as.vector(log(values[["OptPar"]][["f2"]]))) * values[["OptPar"]][["f0Hz"]]
       values[["OptPar"]][["f2CI"]] = 1 - exp(-cumsum(values[["OptPar"]][["f2Hz"]]))
       
     })

@@ -394,8 +394,15 @@ server = function(input, output, session) {
             table = str_extract(parameters, "\\[\\{.*?\\}\\]") # non-greedy match for JSON
             if (!is.na(table)) {
               mode = gsub(".*Mode:\\s*([^\\.]+)\\..*", "\\1", parameters)
-              inheritance = gsub(".*Inheritance: (\\S+)\\..*", "\\1", parameters)
-              if (mode == "Relative risk") {
+              inheritance = gsub(".*Inheritance:\\s*([A-Za-z]{2}).*", "\\1", parameters)
+              if (grepl("Relative risk", mode)) {
+                polDegree =
+                  switch(
+                    word(mode, -1),
+                    "linear" = 1,
+                    "quadratic" = 2,
+                    "cubic" = 3,
+                  )
                 mode = "rrisk"
                 phenoData = setDT(fromJSON(table))
                 phenoData[, c("f0mu", "f0sigma") := lapply(.SD, as.numeric), .SDcols = c("f0mu", "f0sigma")]
@@ -410,6 +417,7 @@ server = function(input, output, session) {
               }
               else {
                 mode = "lclass"
+                polDegree = 2
                 phenoData = NULL
                 lclassData = setDT(fromJSON(table))
                 if (inheritance %in% c("AI", "XI"))
@@ -421,6 +429,7 @@ server = function(input, output, session) {
             }
             else {
               mode = "rrisk"
+              polDegree = 2
               inheritance = "AD"
               phenoData = NULL
               lclassData =
@@ -438,6 +447,7 @@ server = function(input, output, session) {
               list(
                 "afreq" = afreq,
                 "mode" = mode,
+                "polDegree" = polDegree,
                 "inheritance" = inheritance,
                 "pedData" = pedData,
                 "pedTotal" = pedTotal,
@@ -513,6 +523,7 @@ server = function(input, output, session) {
               # UI changes
               afreq = 0.001
               mode = "rrisk" # values[["mode"]]
+              polDegree = 2
               inheritance = "AD"
               
               # Pedigree table
@@ -573,6 +584,7 @@ server = function(input, output, session) {
               # UI changes
               afreq = 0.001
               mode = "lclass" # values[["mode"]]
+              polDegree = 2
               inheritance = "XR"
               
               # Pedigree table
@@ -633,6 +645,7 @@ server = function(input, output, session) {
             list(
               "afreq" = afreq,
               "mode" = mode,
+              "polDegree" = polDegree,
               "inheritance" = inheritance,
               "pedData" = pedData,
               "pedTotal" = pedTotal,
@@ -659,6 +672,11 @@ server = function(input, output, session) {
         disabledChoices = if (inheritance %in% c("AI", "XI")) "rrisk" else NULL
       )
       values[["mode"]] = mode
+      updatePickerInput(
+        session = getDefaultReactiveDomain(),
+        inputId = "penetrance-polDegree",
+        selected = polDegree
+      )
       updateRadioGroupButtons(
         inputId = "penetrance-inheritance",
         selected = inheritance,

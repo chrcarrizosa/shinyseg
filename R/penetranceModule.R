@@ -96,6 +96,22 @@ w_plotType = function(id)
     content = "Change parameter to display."
   )
 
+w_polDegree = function(id)
+  popover(
+    pickerInput(
+      inputId = NS(id, "polDegree"),
+      label = HTML("<i class='fa fa-wave-square'></i> Splines"),
+      choices = c("Linear" = 1, "Quadratic" = 2, "Cubic" = 3),
+      selected = 2,
+      multiple = FALSE,
+      options = list(
+        `style` = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
+      )
+    ),
+    title = NULL,
+    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios."
+  )
+
 
 # Module code -------------------------------------------------------------
 
@@ -123,9 +139,14 @@ penetranceBoxUI = function(id) {
           fluidRow(
             div(w_assistant(id)),
             div(
-              class = "inline inlinetext",
+              class = "inline inlinetext inlinetext1",
               style = "margin-left: 1rem;",
               w_plotType(id)
+            ),
+            div(
+              class = "inline inlinetext inlinetext2",
+              style = "margin-left: 1rem;",
+              w_polDegree(id)
             )
           ),
           div(rHandsontableOutput(NS(id, "rrisktable")), style = "margin-top: 2rem;"),
@@ -170,7 +191,7 @@ penetranceBoxServer = function(id, values) {
         param = c("f0", "f1", "f2"),
         other = c("sex", "phenotype", "ages")
       )
-    
+
     # Help
     observeEvent(input$help, {
       shinyalert(
@@ -369,11 +390,11 @@ penetranceBoxServer = function(id, values) {
                 logHR = rep(1, 4)
               else if (length(logHR) == 1)
                 logHR = rep(logHR, 4)
-              scaledHR = optimHR(f0Hz, f2R, logHR)
 
               if (diff(range(scaledHR)) == 0)
                 temp[row_index, HR := as.character(round(scaledHR[1], 2))]
               else
+              scaledHR = optimHR(f0Hz, f2R, logHR, values[["polDegree"]])
                   temp[row_index, HR := paste(round(scaledHR, 2), collapse = ", ")]
             }
           })
@@ -422,7 +443,7 @@ penetranceBoxServer = function(id, values) {
     })
     
     # (rrisk) Compute penetrances
-    observeEvent(c(input$mode, values[["phenoData"]]), {
+    observeEvent(c(input$mode, values[["phenoData"]], values[["polDegree"]]), {
       req(input$mode == "rrisk", values[["phenoTotal"]] > 0, values[["phenoData"]], input$mode == values[["mode"]])
       
       for (i in 6:7)
@@ -442,7 +463,7 @@ penetranceBoxServer = function(id, values) {
         rriskPlot = copy(fBase)
         rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
         rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
-        rriskPlot[, f2Hz := list(list(getf2Hz(unlist(f0Hz), unlist(logHR)))), by = .(rowid)]
+        rriskPlot[, f2Hz := list(list(getf2Hz(unlist(f0Hz), unlist(logHR), values[["polDegree"]]))), by = .(rowid)]
         rriskPlot[, f2CI := list(list(1 - exp(-cumsum(unlist(f2Hz))))), by = .(rowid)]
         rriskPlot = rriskPlot[, list(age = 1:100,
                                      f0Hz = unlist(f0Hz),
@@ -552,6 +573,12 @@ penetranceBoxServer = function(id, values) {
         assistantModalUI("assistant")
       )
       
+    })
+    
+    # (rrisk) Basis degree
+    observeEvent(priority = 1, input$polDegree, {
+      message("Updating spline basis degree")
+      values[["polDegree"]] = input$polDegree
     })
     
     # (lclass) Lclass table

@@ -429,7 +429,7 @@ bayesBoxServer = function(id, values) {
           # Compute hazards
           rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
           rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
-          rriskPlot[, f2Hz := list(list(optimf2Hz(unlist(f0Hz), f2R, unlist(logHR)))), by = .(rowid)]
+          rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, unlist(logHR), values[["polDegree"]], returnf2Hz = TRUE))), by = .(rowid)]
           rriskPlot = rriskPlot[, list(age = 1:100, f0Hz = unlist(f0Hz), f2Hz = unlist(f2Hz)), by = .(sex, phenotype)]
           # Expand sex
           rriskPlot[, sex := as.character(sex)]

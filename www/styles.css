@@ -153,7 +153,7 @@
   position: absolute;
   z-index: 200; /* avoids getting behind the table*/
 }
-.dropdown-item:active {
+.dropdown-item:active, .dropdown-item.active {
   text-decoration: none;
   background-color: #e4e9f0;
 }
@@ -209,8 +209,11 @@
 .btn-gray:hover {
   color: #4e4e4e;
 }
-.inlinetext .filter-option {
+.inlinetext1 .filter-option {
   width: 150px!important;
+}
+.inlinetext2 .filter-option {
+  width: 75px!important;
 }
 .inlinetext label{
   color: #4e4e4e;
@@ -243,6 +246,10 @@
   background-color: #f4f6f9;
   border-radius: 20px;
   font-family: helvetica;
+}
+.inlinetext3 .irs--flat {
+  width: 60px!important;
+  margin-left: 0.5rem!important;
 }
 
 /*flb*/

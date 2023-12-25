@@ -55,7 +55,19 @@ cat("No phenotypes specified.")
 
 ```{r,echo=FALSE,results="asis",eval=params$values$phenoTotal>0}
 cat("Allele frequency: ``", params$values[["afreq"]], "``.<br>")
-cat("Mode: ``", ifelse(params$values[["mode"]] == "rrisk", "Relative risk", "Liability class"), "``.<br>")
+
+if(params$values[["mode"]] == "rrisk") {
+  polDegree = switch(
+    params$values[["polDegree"]],
+    `1` = "linear",
+    `2` = "quadratic",
+    `3` = "cubic"
+  )
+  cat("Mode: ``Relative risk`` – ``", polDegree, "``.<br>")
+} else {
+  cat("Mode: ``Liability class``.<br>")
+}
+
 cat("Inheritance: ``", params$values[["inheritance"]], "``.<br>")
 ```
 
