@@ -569,7 +569,7 @@ penetranceBoxServer = function(id, values) {
       g = g +
         facet_grid(~ sex, scales = "fixed", drop = FALSE) +
         # Color palette (Okabe-Ito colors, without black)
-        scale_color_manual(values = rep(c("#0072B2", "#D55E00", "#56B4E9", "#E69F00", "#009E73", "#F0E442", "#CC79A7"), ceiling(values[["phenoTotal"]]/8)), breaks = values[["phenoVector"]]) +
+        scale_color_manual(values = rep(c("#0072B2", "#D55E00", "#56B4E9", "#E69F00", "#009E73", "#F0E442", "#CC79A7"), ceiling(values[["phenoTotal"]]/7)), breaks = values[["phenoVector"]]) +
         theme_bw() +
         theme(
           strip.background = element_rect(fill = "#f4f6f9", color = "#4e4e4e"),
