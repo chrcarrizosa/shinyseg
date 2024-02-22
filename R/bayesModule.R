@@ -352,14 +352,6 @@ bayesBoxServer = function(id, values) {
     observeEvent(input$plot, {
       message("Running sensitivity analysis")
       
-      showNotification(
-        HTML("<i class='fas fa-hourglass-half'></i> Computing FLB values..."),
-        type = "warning",
-        duration = NULL,
-        closeButton = FALSE,
-        id = "senWait"
-      )
-      
       # Create grid of values
       vars = c(input$senV1, input$senV2)
       values[["grid"]] = 
@@ -426,32 +418,35 @@ bayesBoxServer = function(id, values) {
           gridCurrent[v] = values[["phenoData"]][idx[[v]]$row, get(idx[[v]]$col)]
         
         # Substitute parameters and recalculate
-        fBase = lapply(seq(nrow(grid2)), function(i) {
-          rriskPlot = temp
-          for(v in vars)
-            rriskPlot[rowid == idx[[v]]$row, idx[[v]]$col] = grid2[i, v]
-          # Compute hazards
-          rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
-          rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
-          rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, unlist(logHR), values[["polDegree"]], returnf2Hz = TRUE))), by = .(rowid)]
-          rriskPlot = rriskPlot[, list(age = 1:100, f0Hz = unlist(f0Hz), f2Hz = unlist(f2Hz)), by = .(sex, phenotype)]
-          # Expand sex
-          rriskPlot[, sex := as.character(sex)]
-          rriskPlot[, sexList := .(list(list(sex))), by = .(sex, phenotype, age, f0Hz, f2Hz)]
-          rriskPlot[sex == "both", sexList := .(list(list("male", "female")))]
-          rriskPlot = rriskPlot[, .(sex = unlist(sexList)), by = .(phenotype, age, f0Hz, f2Hz)]
-          # Back to long format
-          fBase = melt(rriskPlot, measure.vars = c("f0Hz", "f2Hz"), value.name = "Hz")
-          fBase[, variable := factor(variable, levels = c("f0Hz", "f2Hz"), labels = c("f0", "f2"))]
-          # Survival penetrances
-          fBase[, nonaff := sum(Hz), by = .(age, sex, variable)]
-          fBase[, nonaff := 1-exp(-cumsum(nonaff)), by = .(sex, phenotype, variable)]
-          fBase[, sp := shift(1 - nonaff, fill = 1) * Hz, by = .(sex, phenotype, variable)]
-          faff = dcast(fBase, sex + phenotype + age ~ variable, value.var = "sp")
-          fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))
-          fnonaff[, phenotype := "nonaff"]
-          fBase = rbind(faff, fnonaff)
-          return(fBase)
+        withProgress(message = "Recalculating penetrances", max = nrow(grid2), value = 0, {
+          fBase = lapply(seq(nrow(grid2)), function(i) {
+            incProgress(1)
+            rriskPlot = temp
+            for(v in vars)
+              rriskPlot[rowid == idx[[v]]$row, idx[[v]]$col] = grid2[i, v]
+            # Compute hazards
+            rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
+            rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
+            rriskPlot[, f2Hz := list(list(optimHR(unlist(f0Hz), f2R, unlist(logHR), values[["polDegree"]], returnf2Hz = TRUE))), by = .(rowid)]
+            rriskPlot = rriskPlot[, list(age = 1:100, f0Hz = unlist(f0Hz), f2Hz = unlist(f2Hz)), by = .(sex, phenotype)]
+            # Expand sex
+            rriskPlot[, sex := as.character(sex)]
+            rriskPlot[, sexList := .(list(list(sex))), by = .(sex, phenotype, age, f0Hz, f2Hz)]
+            rriskPlot[sex == "both", sexList := .(list(list("male", "female")))]
+            rriskPlot = rriskPlot[, .(sex = unlist(sexList)), by = .(phenotype, age, f0Hz, f2Hz)]
+            # Back to long format
+            fBase = melt(rriskPlot, measure.vars = c("f0Hz", "f2Hz"), value.name = "Hz")
+            fBase[, variable := factor(variable, levels = c("f0Hz", "f2Hz"), labels = c("f0", "f2"))]
+            # Survival penetrances
+            fBase[, nonaff := sum(Hz), by = .(age, sex, variable)]
+            fBase[, nonaff := 1-exp(-cumsum(nonaff)), by = .(sex, phenotype, variable)]
+            fBase[, sp := shift(1 - nonaff, fill = 1) * Hz, by = .(sex, phenotype, variable)]
+            faff = dcast(fBase, sex + phenotype + age ~ variable, value.var = "sp")
+            fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))
+            fnonaff[, phenotype := "nonaff"]
+            fBase = rbind(faff, fnonaff)
+            return(fBase)
+          })
         })
       }
       
@@ -513,35 +508,36 @@ bayesBoxServer = function(id, values) {
             f = list(male = fSubset[sex == "male", c("f0", "f1")],
                      female = fSubset[sex == "female", c("f0", "f1", "f2")])
           })
-        },
+        }
       )
       
       # FLB
-      flbs = sapply(seq(nrow(grid2)), function(i) {
-        flb = 
-          sapply(1:values[["pedTotal"]], function(pedid) {
-            idxs = which(values[["pedData"]][["ped"]] == pedid)
-            tryCatch(
-              FLB(
-                x = as.ped(values[["pedData"]][idxs, c("id", "fid", "mid", "sex")]),
-                affected = which(values[["affected"]][idxs]),
-                unknown = which(values[["unknown"]][idxs]),
-                proband = which(values[["proband"]][idxs]),
-                if (length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
-                if (length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
-                if (length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
-                freq = afreq[i],
-                penetrances = f[[i]],
-                liability = values[["liability"]][idxs],
-                Xchrom = ifelse(values[["chrom"]] == "x", TRUE, FALSE),
-                details = FALSE
-              ),
-              error = function(err) NA)
-          })
-        flb = prod(flb)
+      withProgress(message = "Computing FLB values", max = nrow(grid2), value = 0, {
+        flbs = sapply(seq(nrow(grid2)), function(i) {
+          incProgress(1)
+          flb = 
+            sapply(1:values[["pedTotal"]], function(pedid) {
+              idxs = which(values[["pedData"]][["ped"]] == pedid)
+              tryCatch(
+                FLB(
+                  x = as.ped(values[["pedData"]][idxs, c("id", "fid", "mid", "sex")]),
+                  affected = which(values[["affected"]][idxs]),
+                  unknown = which(values[["unknown"]][idxs]),
+                  proband = which(values[["proband"]][idxs]),
+                  if (length(which(values[["carriers"]][idxs]) > 0)) carriers = which(values[["carriers"]][idxs]),
+                  if (length(which(values[["homozygous"]][idxs]) > 0)) homozygous = which(values[["homozygous"]][idxs]),
+                  if (length(which(values[["noncarriers"]][idxs]) > 0)) noncarriers = which(values[["noncarriers"]][idxs]),
+                  freq = afreq[i],
+                  penetrances = f[[i]],
+                  liability = values[["liability"]][idxs],
+                  Xchrom = ifelse(values[["chrom"]] == "x", TRUE, FALSE),
+                  details = FALSE
+                ),
+                error = function(err) NA)
+            })
+          flb = prod(flb)
+        })
       })
-      
-      removeNotification(id = "senWait")
       
       if (!any(is.na(flbs))) {
         values[["gridCurrent"]] = gridCurrent
