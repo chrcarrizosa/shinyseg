@@ -284,13 +284,13 @@ bayesBoxServer = function(id, values) {
         slidervals = switch(
           senV1,
           "afreq" = c(0.00001, 0.10),
-          "f0R" = c(0.0001, 0.50),
+          "f0R" = c(0.0001, 0.9999),
           "f0mu" = c(1, 250),
           "f0sigma" = c(5, 100),
-          "f2R" = c(0.50, 0.9999),
-          "f0" = c(0.0001, 0.50),
+          "f2R" = c(0.0001, 0.9999),
+          "f0" = c(0.0001, 0.9999),
           "f1" = c(0.0001, 0.9999),
-          "f2" = c(0.50, 0.9999)
+          "f2" = c(0.0001, 0.9999)
         )
         updateSliderInput(
           inputId = "senX1",
@@ -326,13 +326,13 @@ bayesBoxServer = function(id, values) {
         slidervals = switch(
           senV2,
           "afreq" = c(0.00001, 0.10),
-          "f0R" = c(0.0001, 0.50),
+          "f0R" = c(0.0001, 0.9999),
           "f0mu" = c(1, 250),
           "f0sigma" = c(5, 100),
-          "f2R" = c(0.50, 0.9999),
-          "f0" = c(0.0001, 0.50),
+          "f2R" = c(0.0001, 0.9999),
+          "f0" = c(0.0001, 0.9999),
           "f1" = c(0.0001, 0.9999),
-          "f2" = c(0.50, 0.9999)
+          "f2" = c(0.0001, 0.9999)
         )
         updateSliderInput(
           inputId = "senX2",
@@ -424,6 +424,7 @@ bayesBoxServer = function(id, values) {
             rriskPlot = temp
             for(v in vars)
               rriskPlot[rowid == idx[[v]]$row, idx[[v]]$col] = grid2[i, v]
+            lower_f2R = any(rriskPlot[["f0R"]] > rriskPlot[["f2R"]])
             # Compute hazards
             rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
             rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
@@ -445,9 +446,17 @@ bayesBoxServer = function(id, values) {
             fnonaff = dcast(fBase, sex + age ~ variable, value.var = "nonaff", subset = .(phenotype == values[["phenoVector"]][1]))
             fnonaff[, phenotype := "nonaff"]
             fBase = rbind(faff, fnonaff)
-            return(fBase)
+            return(list(fBase, lower_f2R))
           })
         })
+        # Warning if f0R > f2R
+        if (any(sapply(fBase, "[[", 2)))
+          showNotification(
+            HTML(paste0("<i class='fas fa-triangle-exclamation'></i> `", values[["rriskNames"]][4], "` set to `",  values[["rriskNames"]][1], "` (baseline) when lower.")),
+            type = "warning",
+            duration = 5
+          )
+        fBase = lapply(fBase, "[[", 1)
       }
       
       # Final penetrances
