@@ -411,6 +411,7 @@ server = function(input, output, session) {
                 mode = "rrisk"
                 phenoData = setDT(fromJSON(table))
                 phenoData[, c("f0mu", "f0sigma") := lapply(.SD, as.numeric), .SDcols = c("f0mu", "f0sigma")]
+                extraPheno = setdiff(unique(phenoData[["phenotype"]]), pedData[["phenotype"]])
                 lclassData =
                   data.table(
                     f0 = 0.1,
@@ -423,6 +424,7 @@ server = function(input, output, session) {
               else {
                 mode = "lclass"
                 polDegree = 2
+                extraPheno = NULL
                 phenoData = NULL
                 lclassData = setDT(fromJSON(table))
                 if (inheritance %in% c("AI", "XI"))
@@ -436,6 +438,7 @@ server = function(input, output, session) {
               mode = "rrisk"
               polDegree = 2
               inheritance = "AD"
+              extraPheno = NULL
               phenoData = NULL
               lclassData =
                 data.table(
@@ -457,6 +460,7 @@ server = function(input, output, session) {
                 "pedData" = pedData,
                 "pedTotal" = pedTotal,
                 "lastProband" = lastProband,
+                "extraPheno" = extraPheno,
                 "phenoData" = phenoData,
                 "lclassData" = lclassData
               )
@@ -565,6 +569,7 @@ server = function(input, output, session) {
               )
               
               # Penetrance
+              extraPheno = NULL
               phenoData = 
                 data.table(
                   sex = c("both"),
@@ -623,6 +628,7 @@ server = function(input, output, session) {
               )
               
               # Penetrance
+              extraPheno = NULL
               phenoData = 
                 data.table(
                   sex = "both",
@@ -655,6 +661,7 @@ server = function(input, output, session) {
               "pedData" = pedData,
               "pedTotal" = pedTotal,
               "lastProband" = lastProband,
+              "extraPheno" = extraPheno,
               "phenoData" = phenoData,
               "lclassData" = lclassData
             )
@@ -693,6 +700,7 @@ server = function(input, output, session) {
       values[["pedTotal"]] = pedTotal
       values[["lastProband"]] = lastProband
       values[["pedCurrent"]] = 1
+      values[["extraPheno"]] = extraPheno
       values[["phenoData"]] = phenoData
       values[["lclassData"]] = lclassData
       

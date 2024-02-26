@@ -123,10 +123,27 @@ w_polDegree = function(id)
       )
     ),
     title = NULL,
-    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios.",
-    placement = "right"
+    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios."
   )
 
+w_extraPheno = function(id)
+  popover(
+    selectizeInput(
+      inputId = NS(id, "extraPheno"),
+      label = HTML("<i class='fa fa-plus'></i> Extra phenotypes"),
+      choices = "",
+      multiple = TRUE,
+      options =
+        list(
+          create = TRUE,
+          createOnBlur = TRUE,
+          createFilter = I("/^(?!(nonaff)$).*$/"),
+          plugins = list("remove_button")
+        )
+    ),
+    title = NULL,
+    content = "Add extra phenotypes associated with the variant."
+  )
 
 # Module code -------------------------------------------------------------
 
@@ -157,15 +174,22 @@ penetranceBoxUI = function(id) {
               class = "inline inlinetext inlinetext1",
               style = "margin-left: 1rem;",
               w_plotType(id)
-            ),
-            div(
-              class = "inline inlinetext inlinetext2",
-              style = "margin-left: 1rem;",
-              w_polDegree(id)
             )
           ),
           div(rHandsontableOutput(NS(id, "rrisktable")), style = "margin-top: 2rem;"),
-          div(plotlyOutput(NS(id, "rriskPlot"), height = "250px"), style = "margin-top: 2rem;")
+          div(plotlyOutput(NS(id, "rriskPlot"), height = "250px"), style = "margin-top: 2rem;"),
+          fluidRow(
+            div(
+              class = "inline inlinetext inlinetext2",
+              style = "margin-left: 1rem; margin-top: 1rem;",
+              w_polDegree(id),
+            ),
+            div(
+              class = "inline inlinetext inlinetext2",
+              w_extraPheno(id),
+              style = "margin-left: 1.5rem;"
+            )
+          )
         )
       ),
       
@@ -447,21 +471,25 @@ penetranceBoxServer = function(id, values) {
     # (rrisk) Update phenotype table
     observeEvent(ignoreNULL = FALSE, values[["phenoVector"]], {
       message("Update phenotype table")
-      if (!is.null(values[["phenoVector"]])) {
+      if (length(values[["phenoVector"]]) > 0) {
         phenoDataOld = values[["phenoData"]]
         phenotypesOld = intersect(phenoDataOld$phenotype, values[["phenoVector"]])
         phenoDataNew = phenoDataOld[phenoDataOld$phenotype %in% phenotypesOld, ] # keep current
         phenotypesNew = setdiff(values[["phenoVector"]], phenotypesOld)
         if (length(phenotypesNew) > 0) {
           new_rows = data.table(
-            sex = factor(rep(c("male", "female"), each = length(phenotypesNew)), levels = c("both", "male", "female")),
-            phenotype = rep(phenotypesNew, 2),
+            sex = factor("both", levels = c("both", "male", "female")),
+            phenotype = phenotypesNew,
             f0R = 0.5, f0mu = 50, f0sigma = 10,
             f2R = 0.5, HR = "1"
           )
           phenoDataNew = rbind(phenoDataNew, new_rows)
         }
-        values[["phenoData"]] = as.data.table(phenoDataNew)
+        # Rearrange rows (Otherwise the order can be different due to automated removal of extra phenotypes)
+        phenoDataNew[, pheno_order := match(phenotype, values[["phenoVector"]])]
+        phenoDataNew = phenoDataNew[order(pheno_order, sex)]
+        phenoDataNew[, pheno_order := NULL]
+        values[["phenoData"]] = phenoDataNew
       }
       else {
         values[["phenoData"]] = NULL
@@ -607,6 +635,33 @@ penetranceBoxServer = function(id, values) {
     observeEvent(priority = 1, input$polDegree, {
       message("Updating spline basis degree")
       values[["polDegree"]] = input$polDegree
+    })
+    
+    # (rrisk) Extra phenotypes
+    observeEvent(ignoreInit = TRUE, ignoreNULL = FALSE, input$extraPheno, {
+      message("Updating extra phenotypes")
+      values[["extraPheno"]] = input$extraPheno
+      all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
+      phenotypes = setdiff(all_phenotypes, c("", "nonaff"))
+      values[["phenoVector"]] = unique(c(phenotypes, values[["extraPheno"]]))
+      values[["phenoTotal"]] = length(values[["phenoVector"]])
+    })
+    observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["pedData"]][["phenotype"]], {
+      message("Disabling pedigree phenotypes")
+      all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
+      values[["extraPheno"]] = setdiff(values[["extraPheno"]], all_phenotypes)
+      updateSelectizeInput(
+        inputId = "extraPheno",
+        choices = c("", values[["extraPheno"]]),
+        selected = values[["extraPheno"]],
+        options =
+          list(
+            create = TRUE,
+            createOnBlur = TRUE,
+            createFilter = I(paste0("/^(?!(nonaff|", paste(all_phenotypes, collapse = "|"), ")$).*$/")),
+            plugins = list("remove_button")
+          )
+      )
     })
     
     # (lclass) Lclass table

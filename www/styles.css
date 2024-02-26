@@ -223,10 +223,17 @@
 .inlinetext2 .filter-option {
   width: 75px!important;
 }
+.inlinetext2 .selectize-control {
+  min-width: 100px!important;
+}
 .inlinetext label{
   color: #4e4e4e;
   vertical-align: middle;
   padding-right: 0.35rem;
+}
+.selectize-control.multi {
+  margin-top: 1rem;
+  padding: 0px;
 }
 
 /*assistant*/

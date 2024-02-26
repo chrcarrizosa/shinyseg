@@ -345,8 +345,8 @@ pedigreeBoxServer = function(id, values) {
         message("Check for changes in phenotypes")
         all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
         phenotypes = setdiff(all_phenotypes, c("", "nonaff"))
-        values[["phenoVector"]] = phenotypes
-        values[["phenoTotal"]] = length(phenotypes)
+        values[["phenoVector"]] = unique(c(phenotypes, values[["extraPheno"]]))
+        values[["phenoTotal"]] = length(values[["phenoVector"]])
         
         message("Update FLB indexes")
         values[["affected"]] = !values[["pedData"]][["phenotype"]] %in% c("", "nonaff")
@@ -363,6 +363,7 @@ pedigreeBoxServer = function(id, values) {
       }
       
       else {
+        values[["extraPheno"]] = NULL
         values[["phenoVector"]] = NULL
         values[["phenoTotal"]] = 0
         values[["pedTotal"]] = 0
