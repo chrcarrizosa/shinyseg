@@ -170,7 +170,7 @@ pedigreeBoxServer = function(id, values) {
     
     # Basic cases
     observeEvent(input$pedCases, {
-      values[["pedToAdd"]] = 
+      pedLoaded = 
         switch(
           input$pedCases,
           "Trio" = nuclearPed(),
@@ -179,6 +179,7 @@ pedigreeBoxServer = function(id, values) {
           "1st cousins" = cousinPed(1),
           "Avuncular" = avuncularPed()
         )
+      values[["pedLoaded"]] = as.data.table(pedLoaded)
       updatePickerInput(
         session = getDefaultReactiveDomain(),
         inputId = "pedCases",
@@ -186,41 +187,138 @@ pedigreeBoxServer = function(id, values) {
     })
     # Read from file
     observeEvent(input$loadPed, {
-      pedToAdd = 
+      pedLoaded = 
         suppressWarnings(
           tryCatch(
             {
-              pedToAdd = read.table(input$loadPed$datapath, header = TRUE)
-              pedToAdd = as.ped(pedToAdd[c("id", "fid", "mid", "sex")])
-              pedToAdd = relabel(pedToAdd, "asPlot")
+              fullData = read.table(input$loadPed$datapath, header = TRUE)
+              if (exists("ped", fullData) & !any(is.na(fullData[["ped"]]))) {
+                fullData$ped = as.integer(factor(fullData$ped, levels = unique(fullData$ped)))
+                pedList = split(fullData[c("id", "fid", "mid", "sex")], fullData[["ped"]])
+              }
+              else
+                pedList = list(fullData[c("id", "fid", "mid", "sex")])
+              if (!is.pedList(pedList)) # if (!is.ped(fullData[c("id", "fid", "mid", "sex")]))
+                stop # If pedigree is malformed, stop   # pedToAdd = relabel(pedToAdd, "asPlot")
+              colSelect = intersect(c("ped", "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age"), colnames(fullData))
+              pedLoaded = fullData[colSelect]
+              pedLoaded = setDT(pedLoaded)
             },
             error = function(err) NULL
           )
         )
-      if (is.null(pedToAdd))
+      if (is.null(pedLoaded))
         showNotification(
           HTML("<i class='fas fa-triangle-exclamation'></i> Invalid pedigree file."),
           type = "error",
           duration = 3
         )
       
+      values[["pedLoaded"]] = pedLoaded
+    })
+    
+    # Fix/check input
+    observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["pedLoaded"]], {
+      message("Checking loaded pedfile")
+      pedToAdd = copy(values[["pedLoaded"]])
+      
+      within(pedToAdd, {
+        # Family identifier
+        if (!exists("ped", pedToAdd))
+          pedToAdd[, ped := as.integer(values[["pedTotal"]] + 1)]
+        else
+          pedToAdd[, ped := as.integer(values[["pedTotal"]] + ped)]
+        # Fix phenotypes
+        if (!exists("phenotype"))
+          pedToAdd[, phenotype := factor("nonaff", levels = unique(c("", "nonaff", "aff", values[["phenoVector"]])))]
+        else
+          pedToAdd[, phenotype := factor(phenotype, levels = unique(c("", "nonaff", "aff", values[["phenoVector"]], phenotype)))]
+        # Fix carrier
+        if (!exists("carrier"))
+          pedToAdd[, carrier := factor("", levels = c("", "neg", "het", "hom"))]
+        else
+          pedToAdd[, carrier := factor(carrier, levels = c("", "neg", "het", "hom"))]
+        # Fix proband
+        if (!exists("proband"))
+          pedToAdd[, proband := FALSE]
+        else {
+          sapply(1:max(pedToAdd$ped), function(pedid) {
+            idxs = which(pedToAdd$ped == pedid)
+            if (any(!proband[idxs] %in% c(NA, "", "0", "1")) || sum(proband[idxs], na.rm = TRUE) > 1)
+              pedToAdd[idxs, proband := FALSE]
+            else
+              pedToAdd[idxs, proband := proband %in% 1]
+          })
+          pedToAdd[, proband := as.logical(proband)]
+        }
+        # Fix age
+        if (!exists("age"))
+          pedToAdd[, age := as.integer(50)]
+        else {
+          pedToAdd[!age %in% 1:100, age := NA_integer_]
+          pedToAdd[, age := as.integer(age)]
+        }
+      })
+      setcolorder(pedToAdd, c("ped", "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age"))
+      
       values[["pedToAdd"]] = pedToAdd
+      values[["pedToAddCurrent"]] = 1
+      values[["pedLoaded"]] = NULL
     })
     
     # Plot pedigree to add
     output$pedToAdd = renderPlot({
       req(values[["pedToAdd"]])
-      plot(values[["pedToAdd"]], margins = c(1, 2, 2, 2))
+      par(family = "helvetica")
+      
+      # Phenotypes
+      all_phenotypes = levels(droplevels(values[["pedToAdd"]][["phenotype"]]))
+      phenotypes = setdiff(all_phenotypes, c("", "nonaff"))
+      phenoVector = phenotypes
+      phenoTotal = length(phenotypes)
+      # FLB indexes
+      affected = !values[["pedToAdd"]][["phenotype"]] %in% c("", "nonaff")
+      unknown = values[["pedToAdd"]][["phenotype"]] == ""
+      proband = values[["pedToAdd"]][["proband"]] == 1
+      carriers = values[["pedToAdd"]][["carrier"]] == "het"
+      homozygous = values[["pedToAdd"]][["carrier"]] == "hom"
+      noncarriers = values[["pedToAdd"]][["carrier"]] == "neg"
+      # Colors
+      pal = c("white", rep(c("#0072B2", "#D55E00", "#56B4E9", "#E69F00", "#009E73", "#F0E442", "#CC79A7"), ceiling(phenoTotal/8)))
+      names(pal) = c("nonaff", phenoVector)
+      fillcols = pal[as.character(values[["pedToAdd"]][["phenotype"]])]
+      
+      idxs = which(values[["pedToAdd"]][["ped"]] == values[["pedToAddCurrent"]] + values[["pedTotal"]])
+      plotSegregation(
+        as.ped(values[["pedToAdd"]][idxs, c("id", "fid", "mid", "sex")]),
+        affected = NULL,  # important to keep this, otherwise symbols may not be plotted correctly
+        fill = unname(fillcols[idxs]),
+        unknown = which(unknown[idxs]),
+        proband = which(proband[idxs]),
+        if (length(which(carriers[idxs]) > 0)) carriers = which(carriers[idxs]),
+        if (length(which(homozygous[idxs]) > 0)) homozygous = which(homozygous[idxs]),
+        if (length(which(noncarriers[idxs]) > 0)) noncarriers = which(noncarriers[idxs]),
+        labs = setNames(seq_along(idxs), str_replace_na(values[["pedToAdd"]][["age"]][idxs], " ")),
+        margins = c(2 + 3, 2, 2, 2)
+      )
+      legend(
+        "bottomright",
+        inset = c(-0.1, -0.15),
+        legend = c("nonaff", phenoVector),
+        fill = pal,
+        ncol = phenoTotal + 1,
+        bty = "n",
+        cex = 1.2)
     }, execOnResize = TRUE)
     
     # Add pedigree
     observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["pedToAdd"]], {
       shinyalert(
         html = TRUE,
-        text = 
+        text =
           tagList(
             div(
-              "The following pedigree will be added:",
+              "The following pedigree(s) will be added:",
               plotOutput(outputId = NS(id, "pedToAdd"), height = "300px", width = "85%"),
               align = "center"
             )
@@ -232,21 +330,27 @@ pedigreeBoxServer = function(id, values) {
         callbackR = function(x) {
           if (x) {
             message("Adding pedigree")
-            values[["pedTotal"]] = as.integer(values[["pedTotal"]] + 1)
-            pedData = data.table(
-              ped = values[["pedTotal"]],
-              as.data.frame(values[["pedToAdd"]]),
-              phenotype = factor("nonaff", levels = unique(c("", "nonaff", "aff", values[["phenoVector"]]))),
-              carrier = factor("", levels = c("", "neg", "het", "hom")),
-              proband = FALSE,
-              age = as.integer(50)
-            )
-            values[["pedData"]] = rbind(values[["pedData"]], pedData)
+            values[["pedData"]] = rbind(values[["pedData"]], values[["pedToAdd"]])
+            values[["pedTotal"]] = max(values[["pedData"]][["ped"]])
+            values[["lastProband"]] = values[["pedData"]][["proband"]]
             values[["pedCurrent"]] = values[["pedTotal"]]
           }
           values[["pedToAdd"]] = NULL
+          pedToAdd$suspend()
         }
       )
+      if (length(unique(values[["pedToAdd"]][["ped"]])) > 1)
+        pedToAdd$resume()
+    })
+    # Cycle plots
+    pedToAdd = observe(suspended = TRUE, {
+      invalidateLater(2000)
+      isolate({
+      if (values[["pedToAddCurrent"]] < length(unique(values[["pedToAdd"]][["ped"]])))
+        values[["pedToAddCurrent"]] = values[["pedToAddCurrent"]] + 1
+      else
+        values[["pedToAddCurrent"]] = 1
+      })
     })
     
     # Remove family
