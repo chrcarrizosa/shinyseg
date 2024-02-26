@@ -1,6 +1,13 @@
 # Scale log-HRs to achieve lifetime risk f2R
 optimHR = function(f0Hz, f2R, logHR, degree, returnf2Hz = FALSE) {
-  logHR = logHR / max(logHR)
+  
+  # Standardize
+  if (all(logHR == 0) || length(logHR) == 0)
+    logHR = rep(1, 4)
+  else
+    logHR = logHR / max(logHR)
+  
+  # Calculate
   spl = bs(1:100, df = length(logHR), intercept = TRUE, degree = degree)
   tryCatch(
     {

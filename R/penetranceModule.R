@@ -373,7 +373,7 @@ penetranceBoxServer = function(id, values) {
         hot_col(1, type = "dropdown", source = c("both", "male", "female"), allowInvalid = FALSE, colWidths = "75px") %>%
         hot_col(2, readOnly = TRUE, colWidths = "110px") %>% 
         hot_col(c(3, 6), format = "0,0000") %>% 
-        hot_validate_numeric(c(3, 6), min = 0.0001, max = 0.9999, allowInvalid = FALSE) %>%
+        hot_validate_numeric(c(3, 6), min = 0, max = 0.9999, allowInvalid = FALSE) %>%
         hot_validate_numeric(4, min = 0.0001, max = 1000, allowInvalid = FALSE) %>%
         hot_validate_numeric(5, min = 5, max = 1000, allowInvalid = FALSE) %>%
         hot_col(7, type = "autocomplete", colWidths = "130px") %>%
@@ -417,6 +417,11 @@ penetranceBoxServer = function(id, values) {
         }
         else if (col_index %in% 2:5) { # f0R, f0mu, f0sigma, f2R -> re-adjust HRs
           with(temp[row_index, ], {
+            if (is.na(f0R)) {
+              f0R = 0
+              temp[row_index, f0R := 0]
+            }
+
             if (is.na(f2R) || f0R >= f2R) # set HR to 1
               temp[row_index, HR := "1"]
             
@@ -424,9 +429,7 @@ penetranceBoxServer = function(id, values) {
               f0CI = f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100)
               f0Hz = diff(c(0, -log(1 - unlist(f0CI))))
               logHR = log(as.numeric(strsplit(HR, ",")[[1]]))
-              if (all(logHR == 0) || length(logHR) == 0)
-                logHR = rep(1, 4)
-              else if (length(logHR) == 1)
+              if (length(logHR) == 1)
                 logHR = rep(logHR, 4)
               scaledHR = optimHR(f0Hz, f2R, logHR, values[["polDegree"]])
               
@@ -513,7 +516,7 @@ penetranceBoxServer = function(id, values) {
       # Compute incidences
       if (any(notNA)) {
         fBase[, logHR := list(list(log(as.numeric(strsplit(HR, ",")[[1]])))), by = .(rowid)]
-        fBase[, logHR := lapply(fBase[["logHR"]], function(i) if (length(i) == 1) rep(i, 4) else i)] 
+        fBase[, logHR := lapply(fBase[["logHR"]], function(i) if (length(i) == 1) rep(i, 4) else i)]
         rriskPlot = copy(fBase)
         rriskPlot[, f0CI := list(list(f0R*ptrunc(1:100, "norm", mean = f0mu, sd = f0sigma, a = 0, b = 100))), by = .(rowid)]
         rriskPlot[, f0Hz := list(list(diff(c(0, -log(1 - unlist(f0CI)))))), by = .(rowid)]
