@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-how-to/penetrance" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.1.1">
+<title data-rh="true">Specifying the penetrance | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Specifying the penetrance | shinyseg"><meta data-rh="true" name="description" content="Second, read more on how to define the variant-disease model."><meta data-rh="true" property="og:description" content="Second, read more on how to define the variant-disease model."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.62148ee2.css">
+<script src="/shinyseg/assets/js/runtime~main.05a20f16.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/main.86486c3a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="navbar navbar--fixed-top navbarHideable_m1mJ"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/shinyseg/"><b class="navbar__title text--truncate">shinyseg</b></a><div class="navbar__item">A web application for clinical cosegregation analysis</div></div><div class="navbar__items navbar__items--right"><a href="https://chrcarrizosa.shinyapps.io/shinyseg" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link button button--secondary button">To the app</a><a href="https://github.com/chrcarrizosa/shinyseg" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link navbar--github-link" aria-label="GitHub"></a><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex="-1" class="sidebarLogo_isFc" href="/shinyseg/"><b>shinyseg</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/shinyseg/">Welcome to shinyseg</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/shinyseg/quick-start">Quick start</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--active" aria-expanded="true" href="/shinyseg/how-to/">How to…</a><button aria-label="Collapse sidebar category &#x27;How to…&#x27;" type="button" class="clean-btn menu__caret"></button></div><ul style="display:block;overflow:visible;height:auto" class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/shinyseg/how-to/pedigree">The pedigree table</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/shinyseg/how-to/penetrance">Specifying the penetrance</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/shinyseg/how-to/flb">FLB and sensitivity</a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist" aria-expanded="true" href="/shinyseg/examples/">Examples</a><button aria-label="Collapse sidebar category &#x27;Examples&#x27;" type="button" class="clean-btn menu__caret"></button></div><ul style="display:block;overflow:visible;height:auto" class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/shinyseg/examples/example1">#1 Constant relative risk</a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/shinyseg/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item"><a class="breadcrumbs__link" itemprop="item" href="/shinyseg/how-to/"><span itemprop="name">How to…</span></a><meta itemprop="position" content="1"></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">Specifying the penetrance</span><meta itemprop="position" content="2"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><h1>Specifying the penetrance</h1>
+<p>A critical aspect affecting the analysis output is the model connecting
+genetic variant and disease. This is encoded by the penetrance function,
+which shinyseg allows to build with different degrees of complexity
+using the <em>Penetrance</em> panel.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="inheritance-pattern">Inheritance pattern<a href="#inheritance-pattern" class="hash-link" aria-label="Direct link to Inheritance pattern" title="Direct link to Inheritance pattern">​</a></h2>
+<p>The first decision regarding the penetrance relates to the inheritance
+model. Choose one of the options on the header:</p>
+<ul>
+<li><code>AD</code>: autosomal dominant.</li>
+<li><code>AR</code>: autosomal recessive.</li>
+<li><code>AI</code>: autosomal incomplete dominance.</li>
+<li><code>XD</code>: X-linked dominant.</li>
+<li><code>XR</code>: X-linked recessive.</li>
+<li><code>XI</code>: X-linked incomplete dominance.</li>
+</ul>
+<p>Note that incomplete dominance, where you can specify different
+parameters for the carriers of 1 and 2 copies of the variant, will be
+unavailable unless you also switch to the <a href="/shinyseg/how-to/penetrance#liability-class">Liability
+class</a> mode.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="penetrance-mode">Penetrance mode<a href="#penetrance-mode" class="hash-link" aria-label="Direct link to Penetrance mode" title="Direct link to Penetrance mode">​</a></h2>
+<p>Next, it is time to assign the probabilities of observing the analysis
+phenotypes conditional on carriership status, hereafter referred to as
+penetrances. shinyseg offers two different ways to do it:</p>
+<ul>
+<li><strong>Relative risk</strong>, where the penetrances are computed by the app
+based on certain parameters.</li>
+<li><strong>Liability class</strong>, where the user manually specifies them.</li>
+</ul>
+<p>The mode can be switched anytime with the input on the left of the
+header, but note that <a href="/shinyseg/how-to/penetrance#relative-risk">Relative risk</a>
+will be unavailable if incomplete dominance is selected.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="relative-risk">1) Relative risk<a href="#relative-risk" class="hash-link" aria-label="Direct link to 1) Relative risk" title="Direct link to 1) Relative risk">​</a></h2>
+<p>This is a parametric version of the survival penetrances introduced by
+<a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et al. (2020)</a>. It is
+based on:</p>
+<ul>
+<li><strong>Baseline lifetime risk, mean and SD:</strong> the lifetime risk, mean,
+and standard deviation of disease onset in non-carriers and
+heterozygous carriers in recessive inheritance.</li>
+<li><strong>Hazard ratios:</strong> the relative risks in homo-, hemi-, and
+heterozygous carriers in dominant inheritance, compared to the
+baseline. They can be either constant or age-dependent and may also
+be specified through a <strong>variant-associated lifetime risk</strong>.</li>
+</ul>
+<p>These parameters are entered using a table generated from the phenotypes
+specified in the pedigree table. For example, the following describes a
+constant relative risk model in which non-carriers have a lifetime risk
+of <code>affected</code> of 1% (phenocopy rate) with onset at 70±15 years of age,
+while heterozygous and homozygous carriers have a lifetime risk of 75%.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">                   neg             het/hom                    </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  sex  phenotype  risk  mean  SD      risk     hazard ratio(s)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> both   affected  0.01    70  15      0.75              137.93</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>Below the table, you will also find a plot which can serve as a visual
+aid displaying the cumulative incidences, hazard rates, or hazard ratios
+determined by the current selection.</p>
+<div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>warning</div><div class="admonitionContent_BuS1"><p>None of the model parameters can be missing.</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="sex-specific-penetrances">Sex-specific penetrances<a href="#sex-specific-penetrances" class="hash-link" aria-label="Direct link to Sex-specific penetrances" title="Direct link to Sex-specific penetrances">​</a></h3>
+<p>By default, shinyseg generates a unique entry for each phenotype. This
+means that the specified penetrances will apply to <code>both</code> sexes.
+However, you can click on this field and select <code>male</code> or <code>female</code> to
+create a sex-depended specification. For instance:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">                     neg             het/hom                    </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    sex  phenotype  risk  mean  SD      risk     hazard ratio(s)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   male   affected  0.01    70  15      0.75              137.94</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> female   affected  0.25    80  15      0.90                8.00</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>To undo it, change back to <code>both</code> any of two the sex-specific entries.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="hazard-ratios">Hazard ratios<a href="#hazard-ratios" class="hash-link" aria-label="Direct link to Hazard ratios" title="Direct link to Hazard ratios">​</a></h3>
+<p>The previous examples ignored the <strong>hazard ratio(s)</strong> column, which
+contained the constant (age-independent) relative risk of <code>affected</code> in
+variant carriers compared to the baseline. This is because shinyseg
+allows to input the <strong>variant-associated lifetime risk</strong> instead, and
+updates the other column accordingly. However, users can also manipulate
+the hazard ratios directly, in which case it will be the other input
+that be updated.</p>
+<p>Although more complicated, the direct specification of the <strong>hazard
+ratio(s)</strong> has the advantage of allowing for age-dependent relative
+risks if, instead of a single value, a vector is provided. Specifically,
+it admits up to 10 comma-separated values representing, loosely
+speaking, the hazard ratios at evenly spaced ages from 1 to 100 years.
+For instance, <code>1,10,10,20,10</code> would roughly correspond to the values at
+ages 1, 25, 50, 75 and 100. The app will interpolate/smooth these across
+the lifespan using a B-spline basis — you may adjust the smoothing
+degree with the <strong>Splines</strong> input at the bottom. <a href="/shinyseg/example3/">Example #3: Multiple
+phenotypes</a> showcases a penetrance model with age-dependent
+relative risks.</p>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_BuS1"><p>If you misspecify the hazard ratio(s), their values will revert to the
+previous ones to prevent issues.</p></div></div>
+<p>Note that it is also possible to leverage the <strong>variant-associated
+lifetime risk</strong>, as earlier, but combined with a vectorial specification
+of the hazard ratios. For instance, changing the <strong>hazard ratio(s)</strong> to
+<code>1,2,2,1</code> defines a model where the relative risk is higher at middle
+ages. Subsequently, resetting the lifetime risk to 75% will scale these
+values accordingly, resulting in:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">                   neg             het/hom                         </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  sex  phenotype  risk  mean  SD      risk          hazard ratio(s)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> both   affected  0.01    70  15      0.75     1, 305.02, 305.02, 1</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="optimal-parameters">Optimal parameters<a href="#optimal-parameters" class="hash-link" aria-label="Direct link to Optimal parameters" title="Direct link to Optimal parameters">​</a></h3>
+<p>As choosing the model parameters can be challenging, shinyseg also
+offers an <strong>Assistant</strong> to optimize them based on user-provided
+cumulative incidence data.</p>
+<p>To use it, simply specify pairs of age (integer between 1-100) and their
+corresponding cumulative incidence in the table provided. The <strong>Length</strong>
+slider also allows to fine tune the model’s complexity by defining the
+number of values for the hazard ratio vector. The app will then find the
+optimal parameters, which you may easily transfer them to your analysis
+with <strong>Use these parameters for…</strong>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="extra-phenotypes">Extra phenotypes<a href="#extra-phenotypes" class="hash-link" aria-label="Direct link to Extra phenotypes" title="Direct link to Extra phenotypes">​</a></h3>
+<p>Sometimes, as in <a href="/shinyseg/example3/">Example #3: Multiple phenotypes</a>, not all
+phenotypes relevant for the penetrance function may be observed in the
+analysis families. This means that, by default, they will not appear in
+the table where you can set their parameters. Type their names in the
+<strong>Extra phenotypes</strong> input, at the bottom, to remedy it.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="liability-class">2) Liability class<a href="#liability-class" class="hash-link" aria-label="Direct link to 2) Liability class" title="Direct link to 2) Liability class">​</a></h2>
+<p>Alternatively, users can manually define penetrances using a table. This
+table contains 2 (dominant/recessive) to 3 (incomplete inheritance)
+columns with the penetrances themselves, followed by an additional 3
+columns specifying the classes they apply to:</p>
+<ul>
+<li><strong>sex:</strong> <code>male</code>, <code>female</code>, or <code>both</code> for classes referring to males,
+females, or both sexes, respectively; leaving this cell empty is
+equivalent to specifying <code>both</code>.</li>
+<li><strong>phenotype:</strong> a free-text field whose values should match the
+phenotypes in the pedigree table. Note that here, <code>nonaff</code> is
+treated as another phenotype whose classes must be specified (unless
+there are no unaffected cases); leaving this cell empty indicates
+that the class applies to all phenotypes.</li>
+<li><strong>ages:</strong> an integer from 1 to 100 or ranges between these values
+(e.g., 10-20, 30-100…) indicating the ages to which the class
+applies; leaving this cell empty is equivalent to specifying ages
+1-100.</li>
+</ul>
+<p>For instance, the following illustrates an autosomal dominant model with
+no phenocopies, where both heterozygous and homozygous carriers have a
+100% chance of disease onset:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">  neg   het/hom                       </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> risk      risk   sex  phenotype  ages</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 0.00      1.00                       </span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>And the following defines a sex- and age-dependent specification with
+incomplete dominance:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">  neg   het   hom                             </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> risk  risk  risk      sex   phenotype    ages</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 0.00  0.20  0.40     male                1-50</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 0.00  0.20  0.40   female                1-50</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 0.05  0.40  0.70     male              51-100</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 0.20  0.40  0.90   female              51-100</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>The table may be created interactively or by uploading a file via <strong>Load
+file</strong>. If opting for the latter, shinyseg expects a tabular file
+without column headers and a structure resembling the one shown in-app.</p>
+<div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>warning</div><div class="admonitionContent_BuS1"><p>There should be no sex/phenotype/age overlaps. All family members should
+map to a single liability class without missing penetrances.</p></div></div></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/shinyseg/how-to/pedigree"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">The pedigree table</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/shinyseg/how-to/flb"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">FLB and sensitivity</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#inheritance-pattern" class="table-of-contents__link toc-highlight">Inheritance pattern</a></li><li><a href="#penetrance-mode" class="table-of-contents__link toc-highlight">Penetrance mode</a></li><li><a href="#relative-risk" class="table-of-contents__link toc-highlight">1) Relative risk</a><ul><li><a href="#sex-specific-penetrances" class="table-of-contents__link toc-highlight">Sex-specific penetrances</a></li><li><a href="#hazard-ratios" class="table-of-contents__link toc-highlight">Hazard ratios</a></li><li><a href="#optimal-parameters" class="table-of-contents__link toc-highlight">Optimal parameters</a></li><li><a href="#extra-phenotypes" class="table-of-contents__link toc-highlight">Extra phenotypes</a></li></ul></li><li><a href="#liability-class" class="table-of-contents__link toc-highlight">2) Liability class</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Site built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
