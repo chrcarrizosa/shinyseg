@@ -1,0 +1,148 @@
+---
+output: docusaurus-md
+sidebar_position: 1
+description: The first step. Learn here how to create/upload the family data.
+# generated from pedigree.qmd
+---
+
+# The pedigree table
+
+```{r, include = FALSE}
+library(pedtools)
+library(segregatr)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  dpi = 300,
+  comment = NA,
+  fig.align = "center",
+  fig.path = "img/"
+)
+```
+
+The first step is to input the data for the analysis. You will need to upload suitable pedigree file and specify who is affected, who is a carrier, and who is the proband or index case. All these tasks are done on the *Pedigree table* panel within the app.
+
+## Uploading a pedigree
+
+shinyseg works with pedigree files in ped format, and you may upload more than one and remove them at any time.
+
+### The ped format 
+
+A ped file encodes a family in a tabular structure with columns:
+
+-   `id`: individual ID.
+-   `fid`: father's ID, 0 if not included in the pedigree.
+-   `mid`: mother's ID, 0 if not included in the pedigree.
+-   `sex`: 1 = male; 2 = female.
+
+Here is an example of such a file and the corresponding family:
+
+```{r}
+x = avuncularPed(type = "maternal") |>
+  addChildren(fa = 4, mo = 5, sex = 2, verbose = FALSE) |>
+  relabel("asPlot")
+df = as.data.frame(x)
+print(df, row.names = FALSE)
+```
+
+```{r ped-empty, fig.height = 2.25, fig.width = 2.25, out.width="300px"}
+plot(
+  x,
+  symbolsize = .82,
+  cex = 0.7
+)
+```
+
+If you need help creating the ped file, you can use [QuickPed](https://magnusdv.shinyapps.io/quickped), which allows you to do so in an interactive way.
+
+Once ready, upload it by clicking on **Add pedfile**. Alternatively, the dropdown menu on the left (**Add basic pedigree**) offers some basic structures that may suit your analysis. If successful, you will see the family data appearing on the pedigree table and also displayed on the *Plot* panel to the right.
+
+::: {.callout-warning}
+You will not be able to do more until you add at least one family to the analysis!
+:::
+
+### Multiple families 
+
+You can repeat this process to add more families; they will appear concatenated in the pedigree table indexed by the `ped` column. However, it is also possible to upload multiple pedigrees simultaneously if you provide this column yourself. For instance:
+
+```{r}
+x2 = list(
+  nuclearPed(sex = 2),
+  nuclearPed(nch = 2, sex = 1:2)
+)
+df2 = rbind(
+  data.frame(ped = 1, x2[[1]]),
+  data.frame(ped = 2, x2[[2]])
+)
+print(df2, row.names = FALSE)
+```
+
+```{r ped-list, fig.height = 2.25, fig.width = 4.5, out.width="600px"}
+plotPedList(
+  x2,
+  symbolsize = .82,
+  cex = 0.7,
+  frames = FALSE
+)
+```
+
+When you have more than one family, you can choose which one to show on the *Plot* panel using the directional buttons on its header. You may remove the one currently on display by clicking on **Modify > Remove family** on the *Pedigree table* panel.
+
+## Filling in the data
+
+To conduct the analysis, it is required to specify some additional data about the families on the pedigree table. This may be done in-app or together with the previous step.
+
+### Clinical and genetic data
+
+This refers to who is affected and of what, who is known to carry the variant, who does not, etc... It is summarised on four columns:
+
+-   **phenotype:** a free-text field to specify disease phenotypes relevant to the analysis, e.g., `affected`, `breast cancer`, etc. Use `nonaff` for unaffected individuals; leave empty if unknown.
+-   **carrier:** use `neg` for non-carriers, `het` for heterozygous (or hemizygous) carriers, `hom` for homozygous carriers. Leave empty if unknown.
+-   **proband:** a checkbox indicating the proband or index case.
+-   **age:** an integer between 1-100 specifying the age of disease onset or censoring/last follow-up.
+
+For instance, the following states that individuals 3, 6, and 7 had the onset of a certain unspecified disease at 40 years of age. Conversely, 4 and 5 were unaffected by 60 years of age. Individuals 3, 5, 6 (proband), and 7 carry one copy of the variant under study; 4 does not. For the founders 1 and 2, only ages are known:
+
+```{r}
+df3 =
+  data.frame(
+    df,
+    phenotype = c("", "", "affected", "nonaff", "nonaff", "affected", "affected"),
+    carrier = c("", "", "het", "neg", "het", "het", "het"),
+    proband = c("", "", "", "", "", "1", ""),
+    age = c(80, 80, 40, 60, 60, 40, 40)
+  )
+print(df3, row.names = FALSE)
+```
+
+```{r, ped-filled, fig.height = 2.25, fig.width = 2.25, out.width="300px"}
+plotSegregation(
+  x,
+  affected = c(3, 6, 7),
+  unknown = 1:2,
+  carriers = c(3, 5, 6, 7),
+  noncarriers = 4,
+  proband = 6,
+  fill = "gray30",
+  labs = setNames(seq(pedsize(x)), c(80, 80, 40, 60, 60, 40, 40)),
+  symbolsize = .82,
+  cex = .7
+)
+```
+
+You can find more cases on the [Examples](/examples/) section.
+
+:::{.callout-important}
+For each family, ensure you have:
+
+  - 1 or more disease phenotypes.
+  - 1 or more variant carriers.
+  - 1 proband, who should be both affected and carrier.
+  - No missing ages.
+
+:::
+
+### Extended ped file
+
+Introducing all this information can be tedious if there are many family members. However, you can skip doing this in-app if you already provide some of the additional columns with the ped file. For example, try to copy the previous code block and upload it via **Add pedfile**.
+
+Note that shinyseg will check the uploaded data and may remove part of it if they have been wrongly specified.

@@ -1,0 +1,15 @@
+---
+output: docusaurus-md
+sidebar_position: 4
+# generated from index.qmd
+---
+
+# Examples
+
+The app contains a series of example cases that can be used for pedagogical purposes. You may access and load them using the **Examples** menu on the navigation bar. In the following sections you can find a more detailed description of each one.
+
+```{=mdx}
+import DocCardList from '@theme/DocCardList';
+
+<DocCardList />
+```

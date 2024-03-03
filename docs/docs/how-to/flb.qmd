@@ -1,0 +1,55 @@
+---
+output: docusaurus-md
+sidebar_position: 3
+description: And third, obtain a Bayes factor and assess its robustness.
+# generated from flb.qmd
+---
+
+# FLB and sensitivity
+
+```{r, include = FALSE}
+library(pedtools)
+library(segregatr)
+source("../../../R/colourbar.R")
+source("../../../R/contourplot.R")
+knitr::opts_chunk$set(
+  echo = FALSE,
+  dpi = 300,
+  comment = NA,
+  fig.align = "center",
+  fig.path = "img/"
+)
+```
+
+Once all the essential data is in place, shinyseg will let you compute the cosegregation evidence using the *FLB* panel.
+
+:::{.callout-important}
+Make sure that you have also adjusted the frequency of the rare variant in the population, which is by default 0.001 (so 0.1%). You can find this input on the upper right corner, by the notification menu.
+:::
+
+## FLB calculation
+
+Click on **Calculate** to compute the full-likelihood Bayes factor (FLB) for the analysis, as described by [Thompson et al. (2003)](https://doi.org/10.1086/378100). If all goes well, a numerical value will appear, and also be mapped to the colored key like the one below. You may use this key for translating the cosegregation evidence into the ACMG-AMP framework using [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds. For instance, in this single-family analysis the result is `FLB = 5.00`, which means no qualitative evidence for the variant's pathogenicity:
+
+```{r colorbar, fig.height = 0.55, fig.width = 5, out.width="300px"}
+colbar +
+  theme(plot.margin = margin(1.25, 1, 0.25, 1, unit = "lines"),
+        axis.text.x = element_text(color = "black", size = 8.5)) +
+  annotate("segment", x = 1.2, xend = 1.19, y = 5, yend = 5, linewidth = 0.35,
+           arrow = arrow(type = "closed", length = unit(1, "npc")), arrow.fill = "#F4A582") +
+  annotate("text", x = 4, y = 5, label = "No evidence", hjust = 0.25, size = 2.5)
+```
+
+Note that upon any modification of the inputs, the displayed FLB will disappear until you calculate a new one.
+
+
+
+Calculations may sometimes fail. The main reasons can be numerical problems in the computation of the penetrances, Mendelian errors in the pedigree, or other inconsistencies between penetrance and pedigree (e.g., two unaffected parents cannot have an affected child under a full penetrance model). If you cannot figure out the cause, please get in touch!
+
+## Sensitivity analyses
+
+Afterward, you may click on **Sensitivity** to perform sensitivity analyses. Essentially, this feature allows to systematically test how robust the FLB is when varying the values of the analysis parameters. [#1 Constant relative risk](/examples/example1) is a good example of why this may be relevant.
+
+To proceed, select two analysis parameters from the dropdowns and specify a range of values, then click on **Plot**. A contour plot will appear displaying the FLB as a function of the selected parameters, using the same colors from the key from before. If your current parameter values are within the specified ranges, you will also see it as a cross in the graph. For instance, 
+
+Sensitivity analyses are somewhat slow, but you will be informed of their progress via progress bars.

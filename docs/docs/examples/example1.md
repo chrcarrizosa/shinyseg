@@ -1,0 +1,11 @@
+---
+output: docusaurus-md
+sidebar_position: 1
+description: A simple case to showcase the relative risk mode and the importance of accounting for age of onset.
+# generated from example1.qmd
+---
+
+# #1 Constant relative risk {#constant-relative-risk}
+
+placeholder
+
