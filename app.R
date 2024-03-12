@@ -21,20 +21,6 @@ suppressPackageStartupMessages({
 })
 
 
-##### TODO (priority)
-  # Reset session button?
-  # Add figures and FLB to report, S.analyses
-  # Give some indication if nonaff is not specified in lclass table? (it is also message8)
-
-##### TODO (other)
-  # Modify ped functions
-  # Messages and help modals
-  # Fix issues with plot legend and screen resolution
-  # Color palette selector?
-  # Message if f2R is lower than f0R?
-  # Color labels
-
-
 # Input widgets -----------------------------------------------------------
 
 w_saveReport = 
