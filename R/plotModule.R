@@ -108,7 +108,7 @@ plotBoxServer = function(id, values) {
     # Segregation plot
     output$pedplot = renderPlot({
       req(values[["pedData"]])
-      message("Updating pedigree plot")
+      # message("Updating pedigree plot")
       par(family = "helvetica")
       
       # Color palette (Okabe-Ito colors, without black)

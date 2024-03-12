@@ -170,7 +170,7 @@ bayesBoxServer = function(id, values) {
     
     # Calculate FLB
     observeEvent(input$calculate, {
-      message("Calculate BF")
+      # message("Calculate BF")
       flb = 
         sapply(1:values[["pedTotal"]], function(pedid) {
           idxs = which(values[["pedData"]][["ped"]] == pedid)
@@ -350,7 +350,7 @@ bayesBoxServer = function(id, values) {
     
     # Contourplot computation
     observeEvent(input$plot, {
-      message("Running sensitivity analysis")
+      # message("Running sensitivity analysis")
       
       # Create grid of values
       vars = c(input$senV1, input$senV2)

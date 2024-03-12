@@ -71,7 +71,7 @@ contourplot = function(grid, current, values) {
           label = NA,
           breaks = eb,
           linetype = "dotted",
-          size = .4,
+          linewidth = .4,
           color = "white"
         ) +
         metR::geom_text_contour(

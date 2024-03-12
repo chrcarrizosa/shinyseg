@@ -221,7 +221,7 @@ pedigreeBoxServer = function(id, values) {
     
     # Fix/check input
     observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["pedLoaded"]], {
-      message("Checking loaded pedfile")
+      # message("Checking loaded pedfile")
       pedToAdd = copy(values[["pedLoaded"]])
       
       within(pedToAdd, {
@@ -331,7 +331,7 @@ pedigreeBoxServer = function(id, values) {
         size = "s",
         callbackR = function(x) {
           if (x) {
-            message("Adding pedigree")
+            # message("Adding pedigree")
             values[["pedData"]] = rbind(values[["pedData"]], values[["pedToAdd"]])
             values[["pedTotal"]] = max(values[["pedData"]][["ped"]])
             values[["lastProband"]] = values[["pedData"]][["proband"]]
@@ -422,12 +422,12 @@ pedigreeBoxServer = function(id, values) {
       before = input$pedTable$changes$changes[[1]][[3]]
       after = input$pedTable$changes$changes[[1]][[4]]
       if (is.null(before) || before != after) {
-        message("Update pedigree data from table edits")
+        # message("Update pedigree data from table edits")
         temp = hot_to_r(input$pedTable)
         
         # Check if proband column was modified (col 7 for handsontable)
         if (input$pedTable$changes$changes[[1]][[2]] == 7) {
-          message("Only one proband per pedigree")
+          # message("Only one proband per pedigree")
           lapply(1:values[["pedTotal"]], function(pedid) {
             idxs = which(temp[["ped"]] == pedid)
             currentproband = temp[["proband"]][idxs]
@@ -448,13 +448,13 @@ pedigreeBoxServer = function(id, values) {
     observeEvent(ignoreNULL = FALSE, values[["pedData"]], {
       
       if (!is.null(values[["pedData"]])) {
-        message("Check for changes in phenotypes")
+        # message("Check for changes in phenotypes")
         all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
         phenotypes = setdiff(all_phenotypes, c("", "nonaff"))
         values[["phenoVector"]] = unique(c(phenotypes, values[["extraPheno"]]))
         values[["phenoTotal"]] = length(values[["phenoVector"]])
         
-        message("Update FLB indexes")
+        # message("Update FLB indexes")
         values[["affected"]] = !values[["pedData"]][["phenotype"]] %in% c("", "nonaff")
         values[["unknown"]] = values[["pedData"]][["phenotype"]] == ""
         values[["proband"]] = values[["pedData"]][["proband"]] == 1

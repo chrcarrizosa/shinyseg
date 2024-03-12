@@ -1,23 +1,23 @@
 # Libraries
 suppressPackageStartupMessages({
-  library(shiny, quietly = TRUE)
-  library(shinyjs, quietly = TRUE)
-  library(bs4Dash, quietly = TRUE)
-  library(shinyWidgets, quietly = TRUE)
-  library(shinyalert, quietly = TRUE)
-  library(readr, quietly = TRUE) # read html
-  library(pedtools, quietly = TRUE)
-  library(segregatr, quietly = TRUE)
-  library(data.table, quietly = TRUE)
-  library(stringr, quietly = TRUE)
-  library(rhandsontable, quietly = TRUE)
-  library(htmlwidgets, quietly = TRUE)
-  library(truncdist, quietly = TRUE)
-  library(splines, quietly = TRUE)
-  library(plotly, quietly = TRUE)
-  library(stringi, quietly = TRUE) # stri_remove_empty_na
-  library(rvest, quietly = TRUE)
-  library(jsonlite, quietly = TRUE)
+  library(shiny)
+  library(shinyjs)
+  library(bs4Dash)
+  library(shinyWidgets)
+  library(shinyalert)
+  library(readr) # read html
+  library(pedtools)
+  library(segregatr)
+  library(data.table)
+  library(stringr)
+  library(rhandsontable)
+  library(htmlwidgets)
+  library(truncdist)
+  library(splines)
+  library(plotly)
+  library(stringi) # stri_remove_empty_na
+  library(rvest)
+  library(jsonlite)
 })
 
 
@@ -280,7 +280,7 @@ server = function(input, output, session) {
   ##### Flags
   # At least 1 family
   observeEvent(values[["pedTotal"]], {
-    message("Checking ped")
+    # message("Checking ped")
     if (values[["pedTotal"]]) {
       hideElement("message1")
       showElement("plot-box")
@@ -296,7 +296,7 @@ server = function(input, output, session) {
   })
   # At least 1 affected per family
   observeEvent(values[["affected"]], {
-    message("Checking affected")
+    # message("Checking affected")
     ok = 
       all(
         sapply(1:values[["pedTotal"]], function(pedid) {
@@ -325,7 +325,7 @@ server = function(input, output, session) {
   })
   # At least 1 carrier per family
   observeEvent(c(values[["carriers"]], values[["homozygous"]]), {
-    message("Checking carriers")
+    # message("Checking carriers")
     ok =
       all(
         sapply(1:values[["pedTotal"]], function(pedid) {
@@ -344,7 +344,7 @@ server = function(input, output, session) {
   })
   # At least 1 affected carrier proband per family
   observeEvent(c(values[["affected"]], values[["carriers"]], values[["homozygous"]], values[["proband"]]), {
-    message("Checking proband")
+    # message("Checking proband")
     ok = sum(values[["proband"]] & values[["affected"]] & (values[["carriers"]] | values[["homozygous"]])) == values[["pedTotal"]]
     if (ok) {
       values[["pedNames"]][8] = "proband"
@@ -549,7 +549,7 @@ server = function(input, output, session) {
       size = "xs",
       callbackR = function(x) {
         if (x) {
-          message("Loading example")
+          # message("Loading example")
           switch(
             values[["example"]],
             

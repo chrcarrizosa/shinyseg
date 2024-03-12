@@ -270,7 +270,7 @@ penetranceBoxServer = function(id, values) {
     
     # Inheritance UI changes
     observeEvent(priority = 1, input$inheritance, {
-      message("Inheritance changes")
+      # message("Inheritance changes")
       values[["inheritance"]] = input$inheritance
       switch(
         input$inheritance,
@@ -350,7 +350,7 @@ penetranceBoxServer = function(id, values) {
     # Remove homozygous males if X-linked
     observeEvent(priority = 1, c(values[["pedData"]][["carrier"]], input$inheritance), {
       req(values[["pedData"]], input$inheritance %in% c("XR", "XD", "XI"))
-      message("X-linked model changes")
+      # message("X-linked model changes")
       to_change = which(values[["pedData"]][["carrier"]] == "hom" & values[["pedData"]][["sex"]] == 1)
       newcarrier = values[["pedData"]][["carrier"]]
       newcarrier[to_change] = "het"
@@ -391,7 +391,7 @@ penetranceBoxServer = function(id, values) {
       before = input$rrisktable$changes$changes[[1]][[3]]
       after = input$rrisktable$changes$changes[[1]][[4]]
       if (is.null(before) || before != after) {
-        message("Update phenotype data from table edits")
+        # message("Update phenotype data from table edits")
         temp = hot_to_r(input$rrisktable)
         
         # Check for modified row/column
@@ -473,7 +473,7 @@ penetranceBoxServer = function(id, values) {
     
     # (rrisk) Update phenotype table
     observeEvent(ignoreNULL = FALSE, values[["phenoVector"]], {
-      message("Update phenotype table")
+      # message("Update phenotype table")
       if (length(values[["phenoVector"]]) > 0) {
         phenoDataOld = values[["phenoData"]]
         phenotypesOld = intersect(phenoDataOld$phenotype, values[["phenoVector"]])
@@ -506,7 +506,7 @@ penetranceBoxServer = function(id, values) {
       for (i in 6:7)
         hideElement(paste0("message", i), asis = TRUE)
       
-      message("Expanding phenotype table")
+      # message("Expanding phenotype table")
       
       fBase = copy(values[["phenoData"]])
       fBase[, rowid := seq(.N)]
@@ -636,13 +636,13 @@ penetranceBoxServer = function(id, values) {
     
     # (rrisk) Basis degree
     observeEvent(priority = 1, input$polDegree, {
-      message("Updating spline basis degree")
+      # message("Updating spline basis degree")
       values[["polDegree"]] = input$polDegree
     })
     
     # (rrisk) Extra phenotypes
     observeEvent(ignoreInit = TRUE, ignoreNULL = FALSE, input$extraPheno, {
-      message("Updating extra phenotypes")
+      # message("Updating extra phenotypes")
       values[["extraPheno"]] = input$extraPheno
       all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
       phenotypes = setdiff(all_phenotypes, c("", "nonaff"))
@@ -650,7 +650,7 @@ penetranceBoxServer = function(id, values) {
       values[["phenoTotal"]] = length(values[["phenoVector"]])
     })
     observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["pedData"]][["phenotype"]], {
-      message("Disabling pedigree phenotypes")
+      # message("Disabling pedigree phenotypes")
       all_phenotypes = levels(droplevels(values[["pedData"]][["phenotype"]]))
       values[["extraPheno"]] = setdiff(values[["extraPheno"]], all_phenotypes)
       updateSelectizeInput(
@@ -714,7 +714,7 @@ penetranceBoxServer = function(id, values) {
     
     # (lclass) Update lclass data from table edits
     observeEvent(input$lclasstable, {
-      message("Update liability classes from table edits")
+      # message("Update liability classes from table edits")
       lclassData = hot_to_r(input$lclasstable)
       values[["lclassData"]] = lclassData
     })
@@ -813,7 +813,7 @@ penetranceBoxServer = function(id, values) {
       req(input$mode == "lclass", input$mode == values[["mode"]])
       hideElement("message8", asis = TRUE)
       
-      message("Expanding liability class table")
+      # message("Expanding liability class table")
       
       fBase = copy(values[["lclassData"]])
       fBase[, rowid := seq(.N)]
@@ -867,7 +867,7 @@ penetranceBoxServer = function(id, values) {
     # Set f1 based on inheritance model
     observeEvent(c(values[["fBase"]], input$inheritance), {
       req(values[["fBase"]], input$inheritance == values[["inheritance"]])
-      message("Setting f1 based on inheritance model")
+      # message("Setting f1 based on inheritance model")
       
       fFull = copy(values[["fBase"]])
       switch(
@@ -886,7 +886,7 @@ penetranceBoxServer = function(id, values) {
     # Get final penetrances
     observeEvent(c(values[["fFull"]], values[["chrom"]], values[["lclasses"]]), {
       req(values[["fFull"]], values[["lclasses"]]) # values[["pedData"]],
-      message("Get final penetrances")
+      # message("Get final penetrances")
       
       # Subset f based on needed lclasses
       fSubset = values[["fFull"]][values[["lclasses"]], on = c("sex", "phenotype", "age")]

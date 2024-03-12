@@ -184,7 +184,7 @@ assistantModalServer = function(id, values) {
     # Update data from table edits
     observeEvent(priority = 1, input$assisTable, {
       req(!is.null(input$assisTable))
-      message("Update assis data from table edits")
+      # message("Update assistant data from table edits")
       assisData = hot_to_r(input$assisTable)
       values[["assisData"]] = assisData
     })
@@ -287,7 +287,7 @@ assistantModalServer = function(id, values) {
     
     # Transfer parameters
     observeEvent(input$transfer, {
-      message("Transfering parameters")
+      # message("Transfering parameters")
       values[["phenoData"]][as.numeric(input$transfer), 3:7] = 
         data.table(
           values[["OptPar"]][["f0"]][1], 
