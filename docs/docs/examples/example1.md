@@ -7,10 +7,10 @@ description: A simple case to showcase the relative risk mode and the importance
 
 # 1) Constant relative risk {#constant-relative-risk}
 
-This example pertains to a family suffering from a rare connective
-tissue disorder in which a rare autosomal variant was identified. The
-case primarily focuses on accounting for unaffected carriers who are
-relatively young compared to the expected onset of the disease.
+This example concerns a family with a rare connective tissue disorder,
+where a rare autosomal variant was found. The case primarily focuses on
+accounting for unaffected carriers who are relatively young compared to
+the expected onset of the disease.
 
 ## Pedigree table {#pedigree-table}
 
