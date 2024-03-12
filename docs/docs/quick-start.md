@@ -39,7 +39,7 @@ male; 2 = female).
 :::tip
 
 You can even upload multiple families at the same time. Read
-[here](how-to/pedigree#multiple-families) how to do it!
+[here](/how-to/pedigree#multiple-families) how to do it!
 
 :::
 
@@ -62,13 +62,13 @@ For instance:
 
 ``` text
  id fid mid sex phenotype carrier proband age
-  1   0   0   1                            80
-  2   0   0   2                            80
-  3   1   2   1  affected     het          40
-  4   0   0   1    nonaff     neg          60
-  5   1   2   2    nonaff     het          60
+  1   0   0   1         .       .       .  80
+  2   0   0   2         .       .       .  80
+  3   1   2   1  affected     het       .  40
+  4   0   0   1    nonaff     neg       .  60
+  5   1   2   2    nonaff     het       .  60
   6   4   5   1  affected     het       1  40
-  7   4   5   1  affected     het          40
+  7   4   5   1  affected     het       .  40
 ```
 
 ![](img/ped-filled-1.png)
@@ -76,7 +76,7 @@ For instance:
 :::warning
 
 The app will signal if some information is wrong. Look at the
-requirements [here](how-to/pedigree#clinical-and-genetic-data)!
+requirements [here](/how-to/pedigree#clinical-and-genetic-data)!
 
 :::
 
@@ -94,7 +94,7 @@ ways:
 
 ### 1) Relative risk {#relative-risk}
 
-A parametric version of the survival penetrances by [Belman et
+A parametric version of the survival penetrances described in [Belman et
 al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
 
 -   **Baseline lifetime risk, mean and SD:** the lifetime risk, mean,
@@ -110,18 +110,13 @@ which non-carrier men and heterozygous women have a lifetime risk
 (phenocopy rate) of 1% with onset at 70±15 years of age, while
 hemizygous men and homozygous women have a lifetime risk of 75%.
 
-``` text
-                                                                        
-                    neg/♀het               ♂het/hom                     
-  sex   phenotype       risk   mean   SD       risk      hazard ratio(s)
- both    affected       0.01     70   15       0.75               137.93
-```
+<img src={require("./img/rrisk-tab.png").default} style={{maxHeight:"300px"}} />
 
 :::tip
 
 To facilitate the specification, shinyseg can also optimize these
 parameters based on user-provided cumulative incidence data. See
-[here](how-to/penetrance#relative-risk) all the possibilities!
+[here](/how-to/penetrance#optimal-parameters) how to do it!
 
 :::
 
@@ -132,12 +127,7 @@ The following represents the simplest case where there are no
 phenocopies, and the chance of disease onset in hemizygous men and
 homozygous women is 100%.
 
-``` text
-                                              
- neg/♀het   ♂het/hom                          
-     risk       risk    sex   phenotype   ages
-     0.00       1.00                          
-```
+<img src={require("./img/lclass-tab.png").default} style={{maxHeight:"61px"}} />
 
 More detailed specifications, dependent on sex, phenotype, and age, can
 be created by adding more rows and filling in these columns accordingly.
@@ -150,14 +140,14 @@ class model from before, we get an `FLB = 8.00`. shinyseg reports this
 as supporting evidence for pathogenicity based on [Jarvik and Browning’s
 (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
 
-![](img/colorbar-1.png)
+<img src={require("./img/flb.png").default} style={{maxHeight:"70px"}} />
 
 Afterward, the app opens up more possibilities, including performing
 sensitivity analyses to assess the robustness of your results.
 
 :::tip
 
-Take a look at the [documentation](how-to/flb#sensitivity-analyses) to
+Take a look at the [documentation](/how-to/flb#sensitivity-analyses) to
 explore this feature!
 
 :::

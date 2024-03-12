@@ -26,8 +26,9 @@ model. Choose one of the options on the header:
 
 Note that incomplete dominance, where you can specify different
 parameters for the carriers of 1 and 2 copies of the variant, will be
-unavailable unless you also switch to the [Liability
-class](/how-to/penetrance#liability-class) mode.
+unavailable unless you also switch to the `Liability class` mode. An
+example of an analysis using this mode can be found at [#2 X-linked
+inheritance](/examples/example2).
 
 ## Penetrance mode {#penetrance-mode}
 
@@ -63,14 +64,10 @@ constant relative risk model in which non-carriers have a lifetime risk
 of `affected` of 1% (phenocopy rate) with onset at 70±15 years of age,
 while heterozygous and homozygous carriers have a lifetime risk of 75%.
 
-``` text
-                   neg             het/hom                    
-  sex  phenotype  risk  mean  SD      risk     hazard ratio(s)
- both   affected  0.01    70  15      0.75              137.93
-```
+<img src={require("./img/rrisk-tab1.png").default} style={{maxHeight:"325px",width:"auto"}} />
 
 Below the table, you will also find a plot which can serve as a visual
-aid displaying the cumulative incidences, hazard rates, or hazard ratios
+aid displaying the cumulative incidences, hazards, or hazard ratios
 determined by the current selection.
 
 :::warning
@@ -82,16 +79,11 @@ None of the model parameters can be missing.
 ### Sex-specific penetrances {#sex-specific-penetrances}
 
 By default, shinyseg generates a unique entry for each phenotype. This
-means that the specified penetrances will apply to `both` sexes.
-However, you can click on this field and select `male` or `female` to
-create a sex-depended specification. For instance:
+means that the specified penetrances will apply to `both`sexes. However,
+you can click on this field and select `male` or `female` to create a
+sex-dependent specification.
 
-``` text
-                     neg             het/hom                    
-    sex  phenotype  risk  mean  SD      risk     hazard ratio(s)
-   male   affected  0.01    70  15      0.75              137.94
- female   affected  0.25    80  15      0.90                8.00
-```
+<img src={require("./img/rrisk-tab2.png").default} style={{maxHeight:"350px"}} />
 
 To undo it, change back to `both` any of two the sex-specific entries.
 
@@ -100,10 +92,10 @@ To undo it, change back to `both` any of two the sex-specific entries.
 The previous examples ignored the **hazard ratio(s)** column, which
 contained the constant (age-independent) relative risk of `affected` in
 variant carriers compared to the baseline. This is because shinyseg
-allows to input the **variant-associated lifetime risk** instead, and
+allows inputting the **variant-associated lifetime risk** instead, and
 updates the other column accordingly. However, users can also manipulate
 the hazard ratios directly, in which case it will be the other input
-that be updated.
+that is updated.
 
 Although more complicated, the direct specification of the **hazard
 ratio(s)** has the advantage of allowing for age-dependent relative
@@ -113,8 +105,9 @@ speaking, the hazard ratios at evenly spaced ages from 1 to 100 years.
 For instance, `1,10,10,20,10` would roughly correspond to the values at
 ages 1, 25, 50, 75 and 100. The app will interpolate/smooth these across
 the lifespan using a B-spline basis — you may adjust the smoothing
-degree with the **Splines** input at the bottom. #3 Multiple phenotypes
-showcases a penetrance model with age-dependent relative risks.
+degree with the **Splines** input at the bottom. [#4 Breast cancer and
+BRCA1](/examples/example4) showcases a penetrance model with
+age-dependent relative risks.
 
 :::note
 
@@ -130,17 +123,15 @@ of the hazard ratios. For instance, changing the **hazard ratio(s)** to
 ages. Subsequently, resetting the lifetime risk to 75% will scale these
 values accordingly, resulting in:
 
-``` text
-                   neg             het/hom                         
-  sex  phenotype  risk  mean  SD      risk          hazard ratio(s)
- both   affected  0.01    70  15      0.75     1, 305.02, 305.02, 1
-```
+<img src={require("./img/rrisk-tab3.png").default} style={{maxHeight:"325px"}} />
 
 ### Optimal parameters {#optimal-parameters}
 
 As choosing the model parameters can be challenging, shinyseg also
 offers an **Assistant** to optimize them based on user-provided
 cumulative incidence data.
+
+<img src={require("./img/assistant.png").default} style={{maxHeight:"475px"}} />
 
 To use it, simply specify pairs of age (integer between 1-100) and their
 corresponding cumulative incidence in the table provided. The **Length**
@@ -151,11 +142,11 @@ with **Use these parameters for…**.
 
 ### Extra phenotypes {#extra-phenotypes}
 
-Sometimes, as in #3 Multiple phenotypes, not all phenotypes relevant for
-the penetrance function may be observed in the analysis families. This
-means that, by default, they will not appear in the table where you can
-set their parameters. Type their names in the **Extra phenotypes**
-input, at the bottom, to remedy it.
+Sometimes, as in [#4 Breast cancer and BRCA1](/examples/example4), not
+all phenotypes relevant for the penetrance function may be observed in
+the analysis families. This means that, by default, they will not appear
+in the table where you can set their parameters. Type their names in the
+**Extra phenotypes** input, at the bottom, to remedy it.
 
 ## 2) Liability class {#liability-class}
 
@@ -181,23 +172,12 @@ For instance, the following illustrates an autosomal dominant model with
 no phenocopies, where both heterozygous and homozygous carriers have a
 100% chance of disease onset:
 
-``` text
-  neg   het/hom                       
- risk      risk   sex  phenotype  ages
- 0.00      1.00                       
-```
+<img src={require("./img/lclass-tab1.png").default} style={{maxHeight:"61px"}} />
 
 And the following defines a sex- and age-dependent specification with
 incomplete dominance:
 
-``` text
-  neg   het   hom                             
- risk  risk  risk      sex   phenotype    ages
- 0.00  0.20  0.40     male                1-50
- 0.00  0.20  0.40   female                1-50
- 0.05  0.40  0.70     male              51-100
- 0.20  0.40  0.90   female              51-100
-```
+<img src={require("./img/lclass-tab2.png").default} style={{maxHeight:"120px"}} />
 
 The table may be created interactively or by uploading a file via **Load
 file**. If opting for the latter, shinyseg expects a tabular file

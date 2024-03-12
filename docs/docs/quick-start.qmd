@@ -7,8 +7,6 @@ sidebar_position: 2
 ```{r, include = FALSE}
 library(pedtools)
 library(segregatr)
-source("../../R/colourbar.R")
-source("../../R/contourplot.R")
 knitr::opts_chunk$set(
   echo = FALSE,
   dpi = 300,
@@ -45,7 +43,7 @@ plot(
 Note that other columns may be present, but you will at least need: `id` (individual ID), `fid` (father's ID, 0 if not included in the pedigree), `mid` (mother's ID, 0 if not included in the pedigree), and `sex` (1 = male; 2 = female).
 
 ::: {.callout-tip}
-You can even upload multiple families at the same time. Read [here](how-to/pedigree#multiple-families) how to do it!
+You can even upload multiple families at the same time. Read [here](/how-to/pedigree#multiple-families) how to do it!
 :::
 
 ## Genetic and clinical data
@@ -68,6 +66,7 @@ df2 =
     proband = c("", "", "", "", "", "1", ""),
     age = c(80, 80, 40, 60, 60, 40, 40)
   )
+df2[is.na(df2) | df2 == ""] = "."
 print(df2, row.names = FALSE)
 ```
 
@@ -87,7 +86,7 @@ plotSegregation(
 ```
 
 ::: {.callout-warning}
-The app will signal if some information is wrong. Look at the requirements [here](how-to/pedigree#clinical-and-genetic-data)!
+The app will signal if some information is wrong. Look at the requirements [here](/how-to/pedigree#clinical-and-genetic-data)!
 :::
 
 ## Penetrance model
@@ -98,48 +97,24 @@ Next, it is time to assign the probabilities of observing the analysis phenotype
 
 ### 1) Relative risk
 
-A parametric version of the survival penetrances by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
+A parametric version of the survival penetrances described in [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
 
 * __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in non-carriers and heterozygous carriers in recessive inheritance. 
 * __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to the baseline. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
 
 For example, the following describes a constant relative risk model in which non-carrier men and heterozygous women have a lifetime risk (phenocopy rate) of 1% with onset at 70±15 years of age, while hemizygous men and homozygous women have a lifetime risk of 75%.
 
-```{r}
-df3 =
-  data.frame(
-    sex = c("", "sex", "both"),
-    phenotype = c("", "  phenotype", "affected"),
-    f0R = c("  neg/♀het", "risk", "0.01"),
-    f0mu = c("", "  mean", "70"),
-    f0sigma = c("", "  SD", "15"),
-    f2R = c("  ♂het/hom", "risk", "0.75"),
-    HR = c("", "     hazard ratio(s)", "137.93")
-  )
-colnames(df3) = NULL
-print(df3, row.names = FALSE, right = TRUE)
-```
+<img src={require("./img/rrisk-tab.png").default} style={{maxHeight:"300px"}} />
 
 ::: {.callout-tip}
-To facilitate the specification, shinyseg can also optimize these parameters based on user-provided cumulative incidence data. See [here](how-to/penetrance#relative-risk) all the possibilities!
+To facilitate the specification, shinyseg can also optimize these parameters based on user-provided cumulative incidence data. See [here](/how-to/penetrance#optimal-parameters) how to do it!
 :::
 
 ### 2) Liability class
 
 Alternatively, users can manually define the penetrances using a table. The following represents the simplest case where there are no phenocopies, and the chance of disease onset in hemizygous men and homozygous women is 100%.
 
-```{r}
-df4 =
-  data.frame(
-    f0 = c("neg/♀het", "risk", "0.00"),
-    f2 = c("  ♂het/hom", "risk", "1.00"),
-    sex = c("", "   sex", ""),
-    phenotype = c("", "  phenotype", ""),
-    ages = c("", "  ages", "")
-  )
-colnames(df4) = NULL
-print(df4, row.names = FALSE, right = TRUE)
-```
+<img src={require("./img/lclass-tab.png").default} style={{maxHeight:"61px"}} />
 
 More detailed specifications, dependent on sex, phenotype, and age, can be created by adding more rows and filling in these columns accordingly.
 
@@ -147,17 +122,10 @@ More detailed specifications, dependent on sex, phenotype, and age, can be creat
 
 Calculating the FLB is then as easy as clicking a button. For instance, with a population variant frequency of 0.001 and the simple liability class model from before, we get an `FLB = 8.00`. shinyseg reports this as supporting evidence for pathogenicity based on [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds.
 
-```{r colorbar, fig.height = 0.55, fig.width = 5, out.width="300px"}
-colbar +
-  theme(plot.margin = margin(1.25, 1, 0.25, 1, unit = "lines"),
-        axis.text.x = element_text(color = "black", size = 8.5)) +
-  annotate("segment", x = 1.2, xend = 1.19, y = 8.2, yend = 8.2, linewidth = 0.35,
-           arrow = arrow(type = "closed", length = unit(1, "npc")), arrow.fill = "#D6604D") +
-  annotate("text", x = 4, y = 8.2, label = "Pathogenic supporting", hjust = 0.25, size = 2.5)
-```
+<img src={require("./img/flb.png").default} style={{maxHeight:"70px"}} />
 
 Afterward, the app opens up more possibilities, including performing sensitivity analyses to assess the robustness of your results.
 
 ::: {.callout-tip}
-Take a look at the [documentation](how-to/flb#sensitivity-analyses) to explore this feature!
+Take a look at the [documentation](/how-to/flb#sensitivity-analyses) to explore this feature!
 :::

@@ -8,10 +8,10 @@ description: And third, obtain a Bayes factor and assess its robustness.
 # FLB and sensitivity
 
 ```{r, include = FALSE}
-library(pedtools)
-library(segregatr)
-source("../../../R/colourbar.R")
-source("../../../R/contourplot.R")
+# library(pedtools)
+# library(segregatr)
+# source("../../../R/colourbar.R")
+# source("../../../R/contourplot.R")
 knitr::opts_chunk$set(
   echo = FALSE,
   dpi = 300,
@@ -24,32 +24,67 @@ knitr::opts_chunk$set(
 Once all the essential data is in place, shinyseg will let you compute the cosegregation evidence using the *FLB* panel.
 
 :::{.callout-important}
-Make sure that you have also adjusted the frequency of the rare variant in the population, which is by default 0.001 (so 0.1%). You can find this input on the upper right corner, by the notification menu.
+Before computing the cosegregation evidence, ensure that you have adjusted the frequency of the rare variant in the population. By default, it is set to 0.001 (equivalent to 0.1%). You can find this input in the upper right corner, next to the notification menu.
 :::
 
 ## FLB calculation
 
-Click on **Calculate** to compute the full-likelihood Bayes factor (FLB) for the analysis, as described by [Thompson et al. (2003)](https://doi.org/10.1086/378100). If all goes well, a numerical value will appear, and also be mapped to the colored key like the one below. You may use this key for translating the cosegregation evidence into the ACMG-AMP framework using [Jarvik and Browning's (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003) thresholds. For instance, in this single-family analysis the result is `FLB = 5.00`, which means no qualitative evidence for the variant's pathogenicity:
+Click on **Calculate** to compute the full-likelihood Bayes factor (FLB) for the analysis, as described by [Thompson et al. (2003)](https://doi.org/10.1086/378100). If successful, a numerical value will appear and be mapped to a colored key, as shown below. You may use this key to interpret the cosegregation evidence within the ACMG-AMP framework, following the thresholds outlined by [Jarvik and Browning (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003). For example, in this single-family analysis with FLB = 19.2, the app will indicate that there is moderate evidence for the variant's pathogenicity.
 
 ```{r colorbar, fig.height = 0.55, fig.width = 5, out.width="300px"}
-colbar +
-  theme(plot.margin = margin(1.25, 1, 0.25, 1, unit = "lines"),
-        axis.text.x = element_text(color = "black", size = 8.5)) +
-  annotate("segment", x = 1.2, xend = 1.19, y = 5, yend = 5, linewidth = 0.35,
-           arrow = arrow(type = "closed", length = unit(1, "npc")), arrow.fill = "#F4A582") +
-  annotate("text", x = 4, y = 5, label = "No evidence", hjust = 0.25, size = 2.5)
+# colbar +
+#   theme(plot.margin = margin(1.25, 1, 0.25, 1, unit = "lines"),
+#         axis.text.x = element_text(color = "black", size = 8.5)) +
+#   annotate("segment", x = 1.2, xend = 1.19, y = 5, yend = 5, linewidth = 0.35,
+#            arrow = arrow(type = "closed", length = unit(1, "npc")), arrow.fill = "#F4A582") +
+#   annotate("text", x = 4, y = 5, label = "No evidence", hjust = 0.25, size = 2.5)
 ```
 
-Note that upon any modification of the inputs, the displayed FLB will disappear until you calculate a new one.
+<img src={require("./img/flb.png").default} style={{maxHeight:"125px"}} />
 
-
-
-Calculations may sometimes fail. The main reasons can be numerical problems in the computation of the penetrances, Mendelian errors in the pedigree, or other inconsistencies between penetrance and pedigree (e.g., two unaffected parents cannot have an affected child under a full penetrance model). If you cannot figure out the cause, please get in touch!
+Calculations may occasionally fail due to numerical issues in penetrance computation, Mendelian errors in the pedigree, or other inconsistencies between penetrance and pedigree (e.g., two unaffected parents cannot have an affected child under a complete penetrance model). If you encounter difficulties identifying the cause, please don't hesitate to contact us for assistance!
 
 ## Sensitivity analyses
 
-Afterward, you may click on **Sensitivity** to perform sensitivity analyses. Essentially, this feature allows to systematically test how robust the FLB is when varying the values of the analysis parameters. [#1 Constant relative risk](/examples/example1) is a good example of why this may be relevant.
+Afterward, you can click on **Sensitivity** to conduct sensitivity analyses. This feature enables systematic testing of the FLB's robustness by varying the values of the analysis parameters. [#1 Constant relative risk](/examples/example1) provides a good example of why this may be relevant.
 
-To proceed, select two analysis parameters from the dropdowns and specify a range of values, then click on **Plot**. A contour plot will appear displaying the FLB as a function of the selected parameters, using the same colors from the key from before. If your current parameter values are within the specified ranges, you will also see it as a cross in the graph. For instance, 
+To proceed, select two analysis parameters from the dropdown inputs. The choices will depend on all previous inputs and are presented as a list of sex-age-phenotype-parameter combinations. Then, specify a range of values to test for each one, and click on **Plot**. A contour plot will appear displaying the FLB as a function of the selected parameters, using the same colors as the key provided earlier. If your current parameter values are within the specified ranges, they will also be displayed as a cross on the graph. For example, the following plot illustrates that assuming a higher phenocopy rate (`neg risk`) or a higher risk for variant carriers (`het/hom risk`) would quickly decrease cosegregation evidence from the 16–32 to the 8–16 range.
 
-Sensitivity analyses are somewhat slow, but you will be informed of their progress via progress bars.
+<img src={require("./img/sen.png").default} style={{maxHeight:"350px"}} />
+
+```{r, contour, fig.height = 3, fig.width = 3, out.width="300px"}
+# x = nuclearPed(nch = 2) |>
+#   addChildren(fa = 3, nch = 2, verbose = FALSE) |>
+#   addChildren(fa = 4, nch = 2, verbose = FALSE) |>
+#   addChildren(fa = 7, nch = 3, sex = c(2, 2, 1), verbose = FALSE) |>
+#   addChildren(fa = 9, nch = 1, verbose = FALSE) |>
+#   relabel("asPlot")
+# affected = c(5, 8, 10, 13)
+# unknown = c(1:2)
+# carriers = c(5, 8, 10, 13, 16)
+# noncarriers = c(7, 12, 14)
+# proband = 13
+# afreq = 0.001
+# 
+# grid = 
+#   expand.grid(
+#     seq(0.0001, 0.25, l = 15),
+#     seq(0.50, 0.9999, l = 15)
+#   )
+# names(grid) = c("neg risk", "het/hom risk")
+# values = sapply(1:nrow(grid), function(i) {
+#   FLB(
+#     x,
+#     affected = affected,
+#     unknown = unknown,
+#     proband = proband,
+#     carriers = carriers,
+#     noncarriers = noncarriers,
+#     freq = afreq,
+#     penetrances = c(grid[i,1], grid[i,2], grid[i,2])
+#   )
+# })
+# contourplot(grid, current = c(0.05, 0.85), values)
+```
+
+Sensitivity analyses may take some time to complete, but progress bars will keep you informed of their status.

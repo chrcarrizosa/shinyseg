@@ -26,7 +26,7 @@ A ped file encodes a family in a tabular structure with columns:
 -   `mid`: mother’s ID, 0 if not included in the pedigree.
 -   `sex`: 1 = male; 2 = female.
 
-Here is an example of such a file and the corresponding family:
+Here is an example of such a file and the corresponding family.
 
 ``` text
  id fid mid sex
@@ -63,7 +63,7 @@ analysis!
 You can repeat this process to add more families; they will appear
 concatenated in the pedigree table indexed by the `ped` column. However,
 it is also possible to upload multiple pedigrees simultaneously if you
-provide this column yourself. For instance:
+provide this column yourself.
 
 ``` text
  ped id fid mid sex
@@ -78,21 +78,22 @@ provide this column yourself. For instance:
 
 ![](img/ped-list-1.png)
 
-When you have more than one family, you can choose which one to show on
-the *Plot* panel using the directional buttons on its header. You may
-remove the one currently on display by clicking on **Modify \> Remove
-family** on the *Pedigree table* panel.
+When dealing with multiple families, you can choose which one to display
+on the *Plot* panel by using the directional buttons located on its
+header. If you want to remove the currently displayed family, simply
+click on **Modify \> Remove family** on the *Pedigree table* panel.
 
 ## Filling in the data {#filling-in-the-data}
 
-To conduct the analysis, it is required to specify some additional data
-about the families on the pedigree table. This may be done in-app or
-together with the previous step.
+To conduct the analysis, additional data about the families must be
+specified on the pedigree table. This can be done either within the app
+or simultaneously with the previous step.
 
 ### Clinical and genetic data {#clinical-and-genetic-data}
 
-This refers to who is affected and of what, who is known to carry the
-variant, who does not, etc… It is summarised on four columns:
+This refers to specifying who is affected and with what condition, who
+is known to carry the variant, who does not, and other relevant details.
+This information is summarized in four columns:
 
 -   **phenotype:** a free-text field to specify disease phenotypes
     relevant to the analysis, e.g., `affected`, `breast cancer`, etc.
@@ -104,26 +105,27 @@ variant, who does not, etc… It is summarised on four columns:
 -   **age:** an integer between 1-100 specifying the age of disease
     onset or censoring/last follow-up.
 
-For instance, the following states that individuals 3, 6, and 7 had the
-onset of a certain unspecified disease at 40 years of age. Conversely, 4
-and 5 were unaffected by 60 years of age. Individuals 3, 5, 6 (proband),
-and 7 carry one copy of the variant under study; 4 does not. For the
-founders 1 and 2, only ages are known:
+For instance, the following information states that individuals 3, 6,
+and 7 experienced the onset of a certain unspecified disease at 40 years
+of age. Conversely, individuals 4 and 5 remained unaffected until the
+age of 60. Individuals 3, 5, 6 (proband), and 7 carry one copy of the
+variant under study, while individual 4 does not. For the founders 1 and
+2, only their ages are known.
 
 ``` text
  id fid mid sex phenotype carrier proband age
-  1   0   0   1                            80
-  2   0   0   2                            80
-  3   1   2   1  affected     het          40
-  4   0   0   1    nonaff     neg          60
-  5   1   2   2    nonaff     het          60
+  1   0   0   1         .       .       .  80
+  2   0   0   2         .       .       .  80
+  3   1   2   1  affected     het       .  40
+  4   0   0   1    nonaff     neg       .  60
+  5   1   2   2    nonaff     het       .  60
   6   4   5   1  affected     het       1  40
-  7   4   5   2  affected     het          40
+  7   4   5   2  affected     het       .  40
 ```
 
 ![](img/ped-filled-1.png)
 
-You can find more cases on the [Examples](/examples/) section.
+You can find more cases on the [Examples](/examples) section.
 
 :::important
 
@@ -138,11 +140,20 @@ For each family, ensure you have:
 
 ### Extended ped file {#extended-ped-file}
 
-Introducing all this information can be tedious if there are many family
-members. However, you can skip doing this in-app if you already provide
-some of the additional columns with the ped file. For example, try to
-copy the previous code block and upload it via **Add pedfile**.
+Introducing all this information can be tedious, especially with many
+family members. However, you can streamline this process by providing
+some of the additional columns within the pedigree file itself. For
+example, try copying the previous code block and uploading it via **Add
+pedfile**.
 
-Note that shinyseg will check the uploaded data and may remove part of
-it if they have been wrongly specified.
+:::note
+
+This option accepts various input formats, but it can be finicky with
+empty cells. For this reason, we recommend replacing these with dots to
+ensure smooth processing.
+
+:::
+
+Note that shinyseg will verify the uploaded data and may remove any
+incorrectly specified information.
 

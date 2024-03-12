@@ -1,0 +1,83 @@
+---
+output: docusaurus-md
+sidebar_position: 3
+description: An example with two phenotypes in a consanguineous family.
+# generated from example3.qmd
+---
+
+```{r, include = FALSE}
+library(pedtools)
+library(data.table)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  dpi = 300,
+  comment = NA,
+  fig.align = "center",
+  fig.path = "img/"
+)
+```
+
+# 3) Two phenotypes
+
+This example demonstrates how to incorporate multiple phenotypes into the cosegregation analysis. It also showcases how the app can deal with consanguineous families.
+
+## Pedigree table
+
+The data corresponding to the case is shown below:
+
+```{r}
+x = cousinPed(degree = 2, child = TRUE) |>
+  addChildren(fa = 11, mo = 12, nch = 2, sex = 2) |>
+  relabel("asPlot")
+
+affected = c(4, 7, 9, 12, 13, 14)
+unknown = c(1:3, 5)
+carriers = c(7, 12:14)
+noncarriers = 15
+proband = 13
+age = rep(50, pedsize(x))
+
+vecPheno = rep("nonaff", pedsize(x))
+vecPheno[affected] = c("mild", "severe", "mild", "mild", "severe", "mild")
+vecPheno[unknown] = ""
+vecCarrier = rep("", pedsize(x))
+vecCarrier[carriers] = "het"
+vecCarrier[noncarriers] = "neg"
+lastProband = rep("", pedsize(x))
+lastProband[proband] = 1
+
+df = data.table(
+  ped = as.integer(1),
+  as.data.frame(x),
+  phenotype = vecPheno,
+  carrier = vecCarrier,
+  proband = lastProband,
+  age = as.integer(age)
+)
+df[is.na(df) | df == ""] = "."
+print(df, row.names = FALSE)
+```
+
+<img src={require("./img/ex3-ped.png").default} style={{maxHeight:"350px"}} />
+
+There are two disease phenotypes in this family: one relatively mild and common and one more rare and severe. It is hypothesized that the rare autosomal variant found could be related to an increased risks for both.
+
+## One phenotype
+
+A basic approach would be to ignore this fact and treat both as the same "affected" phenotype. For instance, we may use a conservative phenocopy rate (`neg risk`) of 20% and a penetrance (`het/hom risk`) of 70% for all pedigree members:
+
+<img src={require("./img/ex3-lclass1-tab.png").default} style={{maxHeight:"62px"}} />
+
+With this setup, we would obtain moderate evidence for pathogenicity, as shown below. The sensitivity analysis also indicates that reducing the phenocopy rate would greatly increase the evidence. However, doing so may result in overestimation, since we know the mild phenotype is relatively common.
+
+<img src={require("./img/ex3-lclass1-flb.png").default} style={{maxHeight:"500px"}} />
+
+## Two phenotypes
+
+Luckily, we can easily account for this fact by declaring a lower phenocopy rate for only the severe phenotype, let's say 1%. This can be done by clicking on **ADD** to add more liability classes. 
+
+<img src={require("./img/ex3-lclass2-tab.png").default} style={{maxHeight:"105px"}} />
+
+And with that, the FLB doubles to 41.5, resulting in strong evidence for pathogenicity.
+
+<img src={require("./img/ex3-lclass2-flb.png").default} style={{maxHeight:"100px"}} />

@@ -17,3 +17,10 @@ import DocCardList from '@theme/DocCardList';
 <DocCardList />
 ```
 
+:::note
+
+The results of all these cases assume a rare variant frequency in the
+population of 0.001 (0.1%).
+
+:::
+
