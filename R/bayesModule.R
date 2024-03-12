@@ -411,7 +411,7 @@ bayesBoxServer = function(id, values) {
         temp = copy(values[["phenoData"]])
         temp[, rowid := seq(.N)]
         temp[, logHR := list(list(log(as.numeric(strsplit(HR, ",")[[1]])))), by = .(rowid)]
-        temp[, logHR := lapply(temp[["logHR"]], function(i) if (length(i) == 1) rep(i, 4) else i)] 
+        temp[, logHR := lapply(temp[["logHR"]], function(i) if (length(i) == 1) rep(i, 4) else i)]
         
         # Store current selection
         for(v in vars)

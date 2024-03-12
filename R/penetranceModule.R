@@ -99,7 +99,7 @@ w_plotType = function(id)
     pickerInput(
       inputId = NS(id, "plotType"),
       label = HTML("<i class='fa fa-chart-line'></i> Plot"),
-      choices = c("Cumulative incidence" = "CI", "Hazard rate" = "Hz", "Hazard ratio" = "HR"),
+      choices = c("Cumulative incidence" = "CI", "Hazard" = "Hz", "Hazard ratio" = "HR"),
       selected = "HR",
       multiple = FALSE,
       options = list(
@@ -594,7 +594,7 @@ penetranceBoxServer = function(id, values) {
           g = ggplot(rriskPlot) +
             geom_line(aes(x = age, y = f0Hz, color = phenotype, group = phenotype), linewidth = .5, linetype = "42") +
             geom_line(aes(x = age, y = f2Hz, color = phenotype, group = phenotype), linewidth = .5, linetype = "solid") +
-            labs(y = "Hazard rate")
+            labs(y = "Hazard")
         }
       )
       g = g +
