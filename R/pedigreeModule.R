@@ -191,17 +191,19 @@ pedigreeBoxServer = function(id, values) {
         suppressWarnings(
           tryCatch(
             {
-              fullData = read.table(input$loadPed$datapath, header = TRUE)
+              fullData = fread(input$loadPed$datapath, header = TRUE, na.strings = c(NA, "", "."))
+              fullData[is.na(fullData)] = ""
               if (exists("ped", fullData) & !any(is.na(fullData[["ped"]]))) {
                 fullData$ped = as.integer(factor(fullData$ped, levels = unique(fullData$ped)))
-                pedList = split(fullData[c("id", "fid", "mid", "sex")], fullData[["ped"]])
+                pedList = split(fullData[, c("id", "fid", "mid", "sex")], fullData[["ped"]])
               }
               else
-                pedList = list(fullData[c("id", "fid", "mid", "sex")])
+                pedList = list(fullData[, c("id", "fid", "mid", "sex")])
+              pedList = lapply(pedList, as.ped)
               if (!is.pedList(pedList)) # if (!is.ped(fullData[c("id", "fid", "mid", "sex")]))
                 stop # If pedigree is malformed, stop   # pedToAdd = relabel(pedToAdd, "asPlot")
               colSelect = intersect(c("ped", "id", "fid", "mid", "sex", "phenotype", "carrier", "proband", "age"), colnames(fullData))
-              pedLoaded = fullData[colSelect]
+              pedLoaded = fullData[, ..colSelect]
               pedLoaded = setDT(pedLoaded)
             },
             error = function(err) NULL
@@ -244,7 +246,7 @@ pedigreeBoxServer = function(id, values) {
         else {
           sapply(1:max(pedToAdd$ped), function(pedid) {
             idxs = which(pedToAdd$ped == pedid)
-            if (any(!proband[idxs] %in% c(NA, "", "0", "1")) || sum(proband[idxs], na.rm = TRUE) > 1)
+            if (any(!proband[idxs] %in% c(NA, "", "0", "1")) || sum(as.numeric(proband[idxs]), na.rm = TRUE) > 1)
               pedToAdd[idxs, proband := FALSE]
             else
               pedToAdd[idxs, proband := proband %in% 1]
