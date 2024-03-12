@@ -161,6 +161,22 @@ w_examples =
     placement = "right"
   )
 
+w_docs =
+  popover(
+    actionBttn(
+      inputId = "docs",
+      label = "Documentation",
+      style = "jelly",
+      color = "primary",
+      size = "s",
+      icon = icon("github"),
+      value = "Open popup",
+      onclick = "window.open('https://chrcarrizosa.github.io/shinyseg/')"
+    ),
+    title = NULL,
+    content = "Go to documentation website."
+  )
+
 
 # UI ----------------------------------------------------------------------
 
@@ -199,7 +215,7 @@ ui = dashboardPage(
         ),
         tags$li(
           class = "dropdown",
-          w_howto
+          w_docs
         )
       ),
     
