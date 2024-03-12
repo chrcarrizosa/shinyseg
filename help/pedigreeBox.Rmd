@@ -53,7 +53,7 @@ plot(
 
 If you need help creating the ped file, you can [<i class='fa-solid fa-globe fa-fw'></i>Use QuickPed]{style="color:#4e4e4e;"}, which allows you to do so in an interactive way. Once ready, upload it by clicking on [<i class='fa-solid fa-file-import fa-fw'></i>Add pedfile]{style="color:#4e4e4e;"}. Alternatively, the dropdown menu on the left offers some basic structures that may suit your analysis.
 
-You can repeat this process to add more families; they will appear concatenated in the table below and indexed by the `ped` column. In addition, it is possible to remove them with [<i class='fa-solid fa-person-digging fa-fw'></i>Modify]{style="color:#4e4e4e;"}.
+You can repeat this process to add more families; they will appear concatenated in the table below and indexed by the `ped` column. Alternatively, you may upload multiple families simultaneously by providing this column yourself. To remove a family, click on [<i class='fa-solid fa-person-digging fa-fw'></i>Modify]{style="color:#4e4e4e;"} > [<i class='fa-solid fa-users-slash fa-fw'></i>]{style="color:#4e4e4e;"}.
 
 > <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> You will see a warning until you add at least one family to the analysis.
 
@@ -104,5 +104,7 @@ plotSegregation(
 ```
 :::
 :::
+
+Note that you can also upload these data together with your pedigree via [<i class='fa-solid fa-file-import fa-fw'></i>Add pedfile]{style="color:#4e4e4e;"}. To ensure smooth processing, we recommend replacing the empty cells with dots when doing so.
 
 > <i class='fa fa-triangle-exclamation fa-fw' style='color:#db1f48'></i> For each family, ensure you have: 1 or more disease phenotypes, 1 or more variant carriers, 1 proband (who should have both disease and variant), and no missing ages.

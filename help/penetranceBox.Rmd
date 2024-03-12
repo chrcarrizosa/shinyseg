@@ -52,7 +52,7 @@ The modes can be switched using the input on the left of the header.
 
 **Mode: Relative risk**
 
-A parametric version of the survival penetrances introduced by [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
+A parametric version of the survival penetrances described by <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank">Belman et al. (2020)</a>. It is based on:
 
 -   __Baseline lifetime risk, mean and SD:__ the lifetime risk, mean, and standard deviation of disease onset in non-carriers and heterozygous carriers in recessive inheritance.
 -   __Hazard ratios:__ the relative risks in homo-, hemi-, and heterozygous carriers in dominant inheritance, compared to the baseline. They can be either constant or age-dependent and may also be specified through a __variant-associated lifetime risk__.
@@ -74,26 +74,7 @@ colnames(df1) = c("", "", "  neg", "", "", "  het/hom", "")
 print(df1, row.names = FALSE, right = TRUE)
 ```
 
-*By default, shinyseg generates two entries for each phenotype to allow for sex-specific penetrances. Changing either sex to `both` applies its parameters to both sexes. To return to sex-dependent specification, select one of the sexes again.
-
-In the previous example, the hazard ratios were represented by a single value, indicating a constant (age-independent) relative risk. Additionally, this was automatically updated based on the other parameters. However, this column can also be directly manipulated and used to specify models where relative risks are age-dependent. To do this, enter up to 10 comma-separated values representing, loosely speaking, the hazard ratios at evenly spaced ages from 1 to 100 years. For instance, `1,10,10,20,10` would correspond to the ratios at ages 1, 25, 50, 75 and 100 (approximately). The app will interpolate/smooth these across the lifespan using a B-spline basis on the log scale — you may adjust the degree of smoothing with <span style='color:#4e4e4e;'><i class='fa-solid fa-wave-square fa-fw'></i>Splines</span>.
-
-Note that it is also possible to leverage the variant-associated lifetime risk, as earlier, but combined with a vectorial specification of the hazard ratios. For instance, changing the hazard ratio(s) to `1,2,2,1` defines a model where the relative risk is higher at middle ages. Subsequently, resetting the lifetime risk to 75% will scale these values accordingly, resulting in:
-
-```{r}
-df2 =
-  data.frame(
-    sex = c("sex", "both"),
-    phenotype = c(" phenotype", "affected"),
-    f0R = c("risk", "0.01"),
-    f0mu = c(" mean", "70"),
-    f0sigma = c(" SD", "15"),
-    f2R = c("risk", "0.75"),
-    HR = c("    hazard ratio(s)", "    1, 305.02, 305.02, 1")
-  )
-colnames(df2) = c("", "", "  neg", "", "", "  het/hom", "")
-print(df2, row.names = FALSE, right = TRUE)
-```
+By default, shinyseg generates a unique entry for each phenotype. This means that the specified penetrances will apply to `both` sexes. However, you can click on this field and select `male` or `female` to create a sex-dependent specification; to undo it, change back to `both` any of two the sex-specific entries. Moreover, you can also specify models with age-dependent relative risks. Read <a href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance#hazard-ratios" target="_blank">here</a> how to do it!
 
 As choosing these parameters can be challenging, shinyseg offers an <span style='color:#4e4e4e;'><i class='fa-solid fa-circle-info fa-fw'></i>Assistant</span> to optimize them based on user-provided cumulative incidence data. Additionally, the <span style='color:#4e4e4e;'><i class='fa-solid fa-chart-line fa-fw'></i>Plot</span> serves as a visual guide, displaying the cumulative incidences, hazard rates, or hazard ratios determined by the current selection.
 
