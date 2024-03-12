@@ -87,7 +87,7 @@ w_example2 =
       id = "example2"
     ),
     title = NULL,
-    content = "An example for the analysis of an X-linked inheritance case. Further explained in https://github.com/chrcarrizosa/shinyseg",
+    content = "An example for the analysis of an X-linked inheritance case.",
     placement = "right"
   )
 
@@ -95,37 +95,26 @@ w_example3 =
   popover(
     boxDropdownItem(
       boxLabel("3", status = "gray"),
-      HTML("&nbsp;Multiple phenotypes"),
+      HTML("&nbsp;Two phenotypes"),
       id = "example3"
     ),
     title = NULL,
-    content = "A breast cancer example from Belman et al. (2020). Here we use a penetrance model for BRCA1, which requires specifying additional (not observed) phenotypes.",
+    content = "A consanguineous family with two disease phenotypes: one mild and common, and other rare and severe.",
     placement = "right"
   )
 
-# w_example4 = 
-#   popover(
-#     boxDropdownItem(
-#       boxLabel("4", status = "gray"),
-#       HTML("&nbsp;Multiple families"),
-#       id = "example4"
-#     ),
-#     title = NULL,
-#     content = "An analysis which includes two different families and a slighly complex liability class specification.",
-#     placement = "right"
-#   )
-# 
-# w_example5 = 
-#   popover(
-#     boxDropdownItem(
-#       boxLabel("5", status = "gray"),
-#       HTML("&nbsp;Consanguinity"),
-#       id = "example5"
-#     ),
-#     title = NULL,
-#     content = "An example of a consanguineous family.",
-#     placement = "right"
-#   )
+w_example4 =
+  popover(
+    boxDropdownItem(
+      boxLabel("4", status = "gray"),
+      HTML("&nbsp;Breast cancer and BRCA1"),
+      id = "example4"
+    ),
+    title = NULL,
+    content = "A breast cancer case from Belman et al. (2020) requiring additional phenotypes and age-dependent relative risks.",
+    placement = "right"
+  )
+
 
 w_examples =
   popover(
@@ -134,13 +123,12 @@ w_examples =
       icon = icon("person-chalkboard"),
       style = "jelly",
       size = "s",
-      width = "220px",
+      width = "240px",
       status = "primary",
       w_example1,
       w_example2,
-      w_example3#,
-      # w_example4,
-      # w_example5
+      w_example3,
+      w_example4
     ),
     title = NULL,
     content = "Load a worked example.",
@@ -541,12 +529,9 @@ server = function(input, output, session) {
   observeEvent(input$example3, {
     values[["example"]] = 3
   })
-  # observeEvent(input$example4, {
-  #   values[["example"]] = 4
-  # })
-  # observeEvent(input$example5, {
-  #   values[["example"]] = 5
-  # })
+  observeEvent(input$example4, {
+    values[["example"]] = 4
+  })
   observeEvent(ignoreInit = TRUE, ignoreNULL = TRUE, values[["example"]], {
     shinyalert(
       type = "warning",
@@ -692,6 +677,65 @@ server = function(input, output, session) {
             `3` = {
               # UI changes
               afreq = 0.001
+              mode = "lclass" # values[["mode"]]
+              polDegree = 2
+              inheritance = "AD"
+              
+              # Pedigree table
+              # Family and indexes
+              pedTotal = as.integer(1)
+              pedToAdd = cousinPed(degree = 2, child = TRUE) |>
+                addChildren(fa = 11, mo = 12, nch = 2, sex = 2) |>
+                relabel("asPlot")
+              affected = c(4, 7, 9, 12, 13, 14)
+              unknown = c(1:3, 5)
+              carriers = c(7, 12:14)
+              noncarriers = 15
+              proband = 13
+              age = rep(50, pedsize(pedToAdd))
+              # Full vectors and data
+              vecPheno = rep("nonaff", pedsize(pedToAdd))
+              vecPheno[affected] = c("mild", "severe", "mild", "mild", "severe", "mild")
+              vecPheno[unknown] = ""
+              vecCarrier = rep("", pedsize(pedToAdd))
+              vecCarrier[carriers] = "het"
+              vecCarrier[noncarriers] = "neg"
+              lastProband = rep(FALSE, pedsize(pedToAdd))
+              lastProband[proband] = TRUE
+              pedData = data.table(
+                ped = as.integer(1),
+                as.data.frame(pedToAdd),
+                phenotype = factor(vecPheno, levels = unique(c("", "nonaff", "aff", vecPheno))),
+                carrier = factor(vecCarrier, levels = c("", "neg", "het", "hom")),
+                proband = lastProband,
+                age = as.integer(age)
+              )
+              
+              # Penetrance
+              extraPheno = NULL
+              phenoData =
+                data.table(
+                  sex = factor("both", levels = c("both", "male", "female")),
+                  phenotype = c("mild", "severe"),
+                  f0R = 0.5,
+                  f0mu = 50,
+                  f0sigma = 10,
+                  f2R = 0.5,
+                  HR = "1"
+                )
+              lclassData =
+                data.table(
+                  f0 = c(0.2, 0.2, 0.01),
+                  f2 = c(0.7, 0.7, 0.7),
+                  sex = NA_character_,
+                  phenotype = c("nonaff", "mild", "severe"),
+                  ages = NA_character_
+                )
+            },
+            
+            `4` = {
+              # UI changes
+              afreq = 0.001
               mode = "rrisk" # values[["mode"]]
               polDegree = 2
               inheritance = "AD"
@@ -752,68 +796,7 @@ server = function(input, output, session) {
                   phenotype = NA_character_,
                   ages = NA_character_
                 )
-            }#,
-            
-            # `4` = {
-            #   # UI changes
-            #   afreq = 0.001
-            #   mode = "rrisk" # values[["mode"]]
-            #   polDegree = 3
-            #   inheritance = "AD"
-            #   
-            #   # Pedigree table
-            #   # Family and indexes
-            #   pedTotal = as.integer(1)
-            #   pedToAdd = nuclearPed(nch = 4, sex = c(2, 1, 2, 2)) |>
-            #     addChildren(fa = 4, nch = 3, sex = 2, verbose = FALSE) |>
-            #     addChildren(mo = 5, nch = 3, sex = c(2, 1, 2), verbose = FALSE) |>
-            #     relabel("asPlot")
-            #   affected = c(2, 3, 9, 10, 12, 14)
-            #   unknown = 5
-            #   carriers = c(3, 7, 9:14)
-            #   noncarriers = 8
-            #   proband = 12
-            #   age = c(80, 65, 81, 41, 89, 80, 75, 60, 41, 50, 52, 49, 36, 48)
-            #   # Full vectors and data
-            #   vecPheno = rep("nonaff", pedsize(pedToAdd))
-            #   vecPheno[affected] = "BrCa"
-            #   vecPheno[unknown] = ""
-            #   vecCarrier = rep("", pedsize(pedToAdd))
-            #   vecCarrier[carriers] = "het"
-            #   vecCarrier[noncarriers] = "neg"
-            #   lastProband = rep(FALSE, pedsize(pedToAdd))
-            #   lastProband[proband] = TRUE
-            #   pedData = data.table(
-            #     ped = as.integer(1),
-            #     as.data.frame(pedToAdd),
-            #     phenotype = factor(vecPheno, levels = unique(c("", "nonaff", "aff", vecPheno))),
-            #     carrier = factor(vecCarrier, levels = c("", "neg", "het", "hom")),
-            #     proband = lastProband,
-            #     age = as.integer(age)
-            #   )
-            #   
-            #   # Penetrance
-            #   extraPheno = NULL
-            #   phenoData = 
-            #     data.table(
-            #       sex = factor(c("male", "female"), levels = c("both", "male", "female")),
-            #       phenotype = "BrCa",
-            #       f0R = c(0.0015, 0.091),
-            #       f0mu = c(67.29, 64.02),
-            #       f0sigma = c(9.73, 10.38),
-            #       f2R = c(NA_real_, NA_real_),
-            #       HR = c("176059.6, 43.9, 1.0, 41.4",
-            #              "1.3, 80974.0, 51.4, 7.5, 17.5, 28.0")
-            #     )
-            #   lclassData = 
-            #     data.table(
-            #       f0 = 0.1,
-            #       f2 = 0.8,
-            #       sex = NA_character_,
-            #       phenotype = NA_character_,
-            #       ages = NA_character_
-            #     )
-            # },
+            }
             
           )
           
