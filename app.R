@@ -677,7 +677,7 @@ server = function(input, output, session) {
             `3` = {
               # UI changes
               afreq = 0.001
-              mode = "lclass" # values[["mode"]]
+              mode = "rrisk" # values[["mode"]]
               polDegree = 2
               inheritance = "AD"
               
@@ -692,7 +692,7 @@ server = function(input, output, session) {
               carriers = c(7, 12:14)
               noncarriers = 15
               proband = 13
-              age = rep(50, pedsize(pedToAdd))
+              age = c(80, 90, 80, 70, 70, 80, 60, 80, 50, 80, 70, 60, 50, 50, 40)
               # Full vectors and data
               vecPheno = rep("nonaff", pedsize(pedToAdd))
               vecPheno[affected] = c("mild", "severe", "mild", "mild", "severe", "mild")
@@ -717,16 +717,16 @@ server = function(input, output, session) {
                 data.table(
                   sex = factor("both", levels = c("both", "male", "female")),
                   phenotype = c("mild", "severe"),
-                  f0R = 0.5,
-                  f0mu = 50,
-                  f0sigma = 10,
-                  f2R = 0.5,
-                  HR = "1"
+                  f0R = c(0.2, 0.01),
+                  f0mu = c(75, 60),
+                  f0sigma = c(20, 15),
+                  f2R = c(0.7, 0.25),
+                  HR = c("2.63, 4.16, 13.13, 1", "28.62")
                 )
               lclassData =
                 data.table(
-                  f0 = c(0.2, 0.2, 0.01),
-                  f2 = c(0.7, 0.7, 0.7),
+                  f0 = c(0.208, 0.2, 0.01),
+                  f2 = c(0.775, 0.7, 0.25),
                   sex = NA_character_,
                   phenotype = c("nonaff", "mild", "severe"),
                   ages = NA_character_

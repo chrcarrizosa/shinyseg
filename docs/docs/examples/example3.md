@@ -36,37 +36,65 @@ The data corresponding to the case is shown below:
 
 <img src={require("./img/ex3-ped.png").default} style={{maxHeight:"350px"}} />
 
-There are two disease phenotypes in this family: one relatively mild and
-common and one more rare and severe. It is hypothesized that the rare
-autosomal variant found could be related to an increased risks for both.
+In this family, there are two disease phenotypes: one relatively mild
+and common, and one more rare and severe. It is hypothesized that the
+rare autosomal variant found in some members (indicated by + or –) could
+be associated with increased risks for both.
 
-## One phenotype {#one-phenotype}
+## Simplified models {#simplified-models}
 
-A basic approach would be to ignore this fact and treat both as the same
-“affected” phenotype. For instance, we may use a conservative phenocopy
-rate (`neg risk`) of 20% and a penetrance (`het/hom risk`) of 70% for
-all pedigree members:
+In a first approach, we will ignore onset/censoring ages by switching to
+the `Liability class` mode and declaring age-independent classes.
 
-<img src={require("./img/ex3-lclass1-tab.png").default} style={{maxHeight:"62px"}} />
+The most basic strategy would be to also disregard the distinction
+between both phenotypes and treat both as the same “affected”. For
+instance, let’s assume that we suspect the phenocopy rate and penetrance
+for the mild phenotype to be 20% and 70%, respectively, and we decide to
+apply these values to all pedigree members:
+
+<img src={require("./img/ex3-lclass1-tab.png").default} style={{maxHeight:"185px"}} />
 
 With this setup, we would obtain moderate evidence for pathogenicity, as
-shown below. The sensitivity analysis also indicates that reducing the
-phenocopy rate would greatly increase the evidence. However, doing so
-may result in overestimation, since we know the mild phenotype is
-relatively common.
+shown below. The sensitivity analysis also indicates that increasing the
+ratio of the penetrance-to-phenocopy rate would increase the evidence.
 
-<img src={require("./img/ex3-lclass1-flb.png").default} style={{maxHeight:"500px"}} />
+<img src={require("./img/ex3-lclass1-flb.png").default} style={{maxHeight:"550px"}} />
 
-## Two phenotypes {#two-phenotypes-1}
+However, we should account for the differences between both phenotypes,
+if they exist. Luckily, this can be easily done by adding more liability
+classes and specifying the cases to which they apply. For instance, in
+the following, we set a phenocopy rate and penetrance for the severe
+phenotype of 1% and 25%, respectively. Notice that now we also need to
+specify the parameters for the “nonaffected” phenotype (`nonaff`), which
+refer to the risk for *any* of the disease phenotypes.
 
-Luckily, we can easily account for this fact by declaring a lower
-phenocopy rate for only the severe phenotype, let’s say 1%. This can be
-done by clicking on **ADD** to add more liability classes.
+<img src={require("./img/ex3-lclass2-tab.png").default} style={{maxHeight:"225px"}} />
 
-<img src={require("./img/ex3-lclass2-tab.png").default} style={{maxHeight:"105px"}} />
-
-And with that, the FLB doubles to 41.5, resulting in strong evidence for
+And with that, the FLB shoots to 45.3, resulting in strong evidence for
 pathogenicity.
 
-<img src={require("./img/ex3-lclass2-flb.png").default} style={{maxHeight:"100px"}} />
+<img src={require("./img/ex3-lclass2-flb.png").default} style={{maxHeight:"150px"}} />
+
+## Accounting for ages {#accounting-for-ages}
+
+Now, let’s complicate the model by considering the ages (of onset or
+censoring) shown below each pedigree member. This can be done by
+declaring age-specific liability classes, but it can quickly get
+cumbersome. To do it, we will switch back to the `Relative risk` mode.
+
+In this mode, we cannot overlook the distinction between both
+phenotypes; we must specify the parameters for both. In the following,
+we use the same risk values (now referring to lifetime risks) as before.
+Additionally, we consider that phenocopies have an expected onset at
+75±20 years of age for the mild phenotype and 60±15 years for the severe
+one. Notice that for the former, we also specify that the risk conferred
+by the variant is higher at middle ages; you can find further details on
+how to do this [here](/how-to/penetrance#hazard-ratios).
+
+<img src={require("./img/ex3-rrisk-tab.png").default} style={{maxHeight:"500px"}} />
+
+After accounting for the age data, cosegregation evidence is reduced
+considerably, although it remains strong (FLB \> 32).
+
+<img src={require("./img/ex3-rrisk-flb.png").default} style={{maxHeight:"150px"}} />
 
