@@ -39,24 +39,26 @@ The data corresponding to the case is shown below:
 In this family, there are two disease phenotypes: one relatively mild
 and common, and one more rare and severe. It is hypothesized that the
 rare autosomal variant found in some members (indicated by + or –) could
-be associated with increased risks for both.
+be associated with increased risks for both. Henceforth, we will assume
+complete dominance.
 
 ## Simplified models {#simplified-models}
 
-In a first approach, we will ignore onset/censoring ages by switching to
-the `Liability class` mode and declaring age-independent classes.
+Initially, we will disregard onset/censoring ages by switching to the
+`Liability class` mode and declaring age-independent classes.
 
 The most basic strategy would be to also disregard the distinction
-between both phenotypes and treat both as the same “affected”. For
-instance, let’s assume that we suspect the phenocopy rate and penetrance
-for the mild phenotype to be 20% and 70%, respectively, and we decide to
-apply these values to all pedigree members:
+between both phenotypes and treat both as the same. For instance, let’s
+say that we suspect the phenocopy rate and penetrance for the mild
+phenotype to be 20% and 70%, respectively, and we decide to apply these
+values to all pedigree members:
 
 <img src={require("./img/ex3-lclass1-tab.png").default} style={{maxHeight:"185px"}} />
 
-With this setup, we would obtain moderate evidence for pathogenicity, as
-shown below. The sensitivity analysis also indicates that increasing the
-ratio of the penetrance-to-phenocopy rate would increase the evidence.
+With this setup, we would obtain *moderate* evidence for pathogenicity,
+as shown below. The sensitivity analysis also indicates that increasing
+the ratio of the penetrance-to-phenocopy rate would increase the
+evidence.
 
 <img src={require("./img/ex3-lclass1-flb.png").default} style={{maxHeight:"550px"}} />
 
@@ -65,13 +67,13 @@ if they exist. Luckily, this can be easily done by adding more liability
 classes and specifying the cases to which they apply. For instance, in
 the following, we set a phenocopy rate and penetrance for the severe
 phenotype of 1% and 25%, respectively. Notice that now we also need to
-specify the parameters for the “nonaffected” phenotype (`nonaff`), which
+specify the parameters for the “unaffected” phenotype (`nonaff`), which
 refer to the risk for *any* of the disease phenotypes.
 
 <img src={require("./img/ex3-lclass2-tab.png").default} style={{maxHeight:"225px"}} />
 
-And with that, the FLB shoots to 45.3, resulting in strong evidence for
-pathogenicity.
+And with that, the FLB shoots to `FLB = 45.3`, resulting in *strong*
+evidence for pathogenicity.
 
 <img src={require("./img/ex3-lclass2-flb.png").default} style={{maxHeight:"150px"}} />
 
@@ -88,13 +90,14 @@ we use the same risk values (now referring to lifetime risks) as before.
 Additionally, we consider that phenocopies have an expected onset at
 75±20 years of age for the mild phenotype and 60±15 years for the severe
 one. Notice that for the former, we also specify that the risk conferred
-by the variant is higher at middle ages; you can find further details on
-how to do this [here](/how-to/penetrance#hazard-ratios).
+by the variant is higher at middle ages; the [hazard
+ratios](/how-to/penetrance#hazard-ratios) section of the manual details
+how to do this.
 
 <img src={require("./img/ex3-rrisk-tab.png").default} style={{maxHeight:"500px"}} />
 
-After accounting for the age data, cosegregation evidence is reduced
-considerably, although it remains strong (FLB \> 32).
+After accounting for the age data, cosegregation evidence is
+considerably reduced, but it remains *strong* (FLB \> 32).
 
 <img src={require("./img/ex3-rrisk-flb.png").default} style={{maxHeight:"150px"}} />
 

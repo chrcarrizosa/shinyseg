@@ -37,11 +37,11 @@ really important, as they won’t be the focus of this analysis.
 
 A basic model for these data would be to assume complete penetrance for
 hemizygous and homozygous carriers, and no phenocopies. This can be
-easily accomplished by switching to `Liability class` and selecting `XR`
-on the *Penetrance* panel’s header. In this case, the table has two
-columns: `neg/♀het` refers to the penetrance for non-carriers and
-heterozygous carriers, while `♂het/hom` is for the heterozygous and
-homozygous carriers.
+easily accomplished by switching to the `Liability class` mode and
+selecting `XR` on the *Penetrance* panel’s header. In this case, the
+table has two columns: `neg/♀het` refers to the penetrance for
+non-carriers and heterozygous carriers, while `♂het/hom` is for the
+hemizygous and homozygous carriers.
 
 <img src={require("./img/ex2-xr-tab.png").default} style={{maxHeight:"150px"}} />
 

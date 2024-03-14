@@ -19,7 +19,11 @@ import DocCardList from '@theme/DocCardList';
 The app is designed to provide a guided experience, in the sense that
 you will not be able to move forward if there is some critical
 information missing, or wrongly specified. You will be informed of such
-cases via the notification menu on the upper right corner.
+cases via the notification menu on the upper right corner. Additionally,
+the toggle next to it allows you to show/hide the tooltips providing
+brief descriptions of each app button on hover.
+
+<img src={require("./img/notification.png").default} style={{maxHeight:"160px"}} />
 
 Note that you can save your progress at any time by clicking on **Save
 report**. The resulting HTML file can be opened with a web browser, but

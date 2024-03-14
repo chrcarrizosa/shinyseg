@@ -61,29 +61,31 @@ print(df, row.names = FALSE)
 
 <img src={require("./img/ex4-ped.png").default} style={{maxHeight:"350px"}} />
 
-Notice how the legend also includes ovarian and pancreatic cancer, even though these are not present in any of the members of the pedigree. This is because they are still relevant for computing the penetrances and therefore must be included in the analysis. The next section explains how to do so.
+Notice that, together with breast cancer (`BrCa`), the legend includes ovarian (`OvCa`) and pancreatic cancer (`PanCa`), even though these are not present in any of the members of the pedigree. This is because they are still relevant for computing the penetrances and must be included in the analysis. The next section explains how to do so.
 
 
 ## Penetrance
 
-This analysis employs the default `Relative risk` mode and autosomal dominant (`AD`) inheritance. It's important to note that when uploading previous data to the app, the relative risk table will only include a row corresponding to breast cancer (`BrCa`) for both sexes.
+This analysis employs the default `Relative risk` mode and autosomal dominant (`AD`) inheritance. When uploading the previous data to the app, the relative risk table will only allow parameter setting for breast cancer, as it's the sole observed phenotype. It will also consist of a single row applying to both sexes.
 
 <img src={require("./img/ex4-rrisk-tab1.png").default} style={{maxHeight:"400px"}} />
 
-As mentioned, in this case it's necessary to include other relevant phenotypes for calculating the penetrance for the specific gene under analysis (BRCA1). This can be achieved by entering their names into the **Extra phenotypes** input, located at the bottom of the *Penetrance* panel. Additionally, we need to specify sex-specific penetrances. This can be easily done by clicking on the entries of the sex column and changing `both` to any of the sexes. With that done, the table will look like this:
+However, in this case involving breast cancer and BRCA1, it is important to incorporate other cancer types to accurately calculate the penetrance. This can be achieved by entering their names into the **Extra phenotypes** input, located at the bottom of the *Penetrance* panel. Moreover, we need to declare sex-specific penetrances. This can be easily done by clicking on the cells of the sex column and changing `both` to any of the sexes. With that done, the table will appear as follows:
 
 <img src={require("./img/ex4-rrisk-tab3.png").default} style={{maxHeight:"600px"}} />
 
-We are now ready to start filling in the data, using similar estimates to those in [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4):
+We are now ready to start filling in the table, using the same sources as in [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4):
 
-- For the baseline parameters (`neg risk`, `neg mean`, `neg SD`), we have utilized the UK 2008-2012 estimates from Cancer Incidence in Five Continents (CI5). While not strictly necessary, in this case the data were fitted to the normal model employed by shinyseg to obtain the optimal parameters. This may be done using the [**Assistant**](../how-to/penetrance#optimal-parameters).
+- For the baseline parameters (`neg risk`, `neg mean`, `neg SD`), we employed the UK 2008-2012 estimates from [Cancer Incidence in Five Continents (CI5)](https://ci5.iarc.fr). The optimal parameters for each cancer type were identified by using shinyseg's [**Assistant**](../how-to/penetrance#optimal-parameters).
 
-- The `hazard ratios(s)` have also been adapted from [COOL's website](https://fenglab.chpc.utah.edu/cool2/manual.html). The vectors shown below are of length six, corresponding to the hazard ratios at ages approximately 1, 20, 40, 60, 80, and 100. These are then interpolated/smoothed by the app, as shown in the plots below the table.
+- The `hazard ratios(s)` were adapted from [COOL's website](https://fenglab.chpc.utah.edu/cool2/manual.html). We specified the hazard ratios at ages approximately 1, 20, 40, 60, 80, and 100, which are then interpolated/smoothed by the app as shown below.
 
 <img src={require("./img/ex4-rrisk-tab4.png").default} style={{maxHeight:"600px"}} />
 
 ## FLB
 
-Finally, we can **Calculate** the Bayes factor, which in this case points to inconclusive evidence for pathogenicity. While this conclusion aligns with that of [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4), we note a slight quantitative deviation (5.7 vs. 3.9) which is primarily attributed to how shinyseg utilizes model-based estimates instead of the raw data. The payoff of shinyseg's set up is that sensitivity analyses can now be easily performed by altering a reasonable number of parameters.
+Finally, we can **Calculate** the Bayes factor, which in this case points to *inconclusive* evidence for pathogenicity. While this conclusion aligns with that of [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4), we note a slight quantitative deviation (`5.7` vs. `3.9`) which is primarily due to how shinyseg utilizes model-based estimates instead of the raw data.
 
 <img src={require("./img/ex4-flb.png").default} style={{maxHeight:"150px"}} />
+
+The payoff of shinyseg's set up is that sensitivity analyses can now be easily performed by altering a reasonable number of parameters.

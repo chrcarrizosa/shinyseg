@@ -106,9 +106,10 @@ al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is based on:
     be specified through a **variant-associated lifetime risk**.
 
 For example, the following describes a constant relative risk model in
-which non-carrier men and heterozygous women have a lifetime risk
-(phenocopy rate) of 1% with onset at 70±15 years of age, while
-hemizygous men and homozygous women have a lifetime risk of 75%.
+which heterozygous women (`♀het`) and non-carriers (`neg`) have a
+lifetime risk (phenocopy rate) of 1% with onset at 70±15 years of age,
+while hemizygous men (`♂het`) and homozygous women (`hom`) have a
+lifetime risk of 75%.
 
 <img src={require("./img/rrisk-tab.png").default} style={{maxHeight:"300px"}} />
 

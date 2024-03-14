@@ -9,7 +9,7 @@ description: The first step. Learn here how to create/upload the family data.
 
 The first step is to input the data for the analysis. You will need to
 upload suitable pedigree file and specify who is affected, who is a
-carrier, and who is the proband or index case. All these tasks are done
+carrier, who is the proband or index case, etc. All these tasks are done
 on the *Pedigree table* panel within the app.
 
 ## Uploading a pedigree {#uploading-a-pedigree}
@@ -106,11 +106,11 @@ This information is summarized in four columns:
     onset or censoring/last follow-up.
 
 For instance, the following information states that individuals 3, 6,
-and 7 experienced the onset of a certain unspecified disease at 40 years
-of age. Conversely, individuals 4 and 5 remained unaffected until the
-age of 60. Individuals 3, 5, 6 (proband), and 7 carry one copy of the
-variant under study, while individual 4 does not. For the founders 1 and
-2, only their ages are known.
+and 7 experienced the onset of a certain disease at 40 years of age.
+Conversely, individuals 4 and 5 remained unaffected until the age of 60.
+Individuals 3, 5, 6 (proband), and 7 carry one copy of the variant under
+study, while individual 4 does not. For the founders 1 and 2, only their
+ages are known.
 
 ``` text
  id fid mid sex phenotype carrier proband age
@@ -148,9 +148,9 @@ pedfile**.
 
 :::note
 
-This option accepts various input formats, but it can be finicky with
-empty cells. For this reason, we recommend replacing these with dots to
-ensure smooth processing.
+This option accepts various input formats, but it can be finicky when
+reading empty cells. For this reason, we recommend replacing these with
+dots to ensure smooth processing.
 
 :::
 

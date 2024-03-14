@@ -27,8 +27,8 @@ model. Choose one of the options on the header:
 Note that incomplete dominance, where you can specify different
 parameters for the carriers of 1 and 2 copies of the variant, will be
 unavailable unless you also switch to the `Liability class` mode. An
-example of an analysis using this mode can be found at [#2 X-linked
-inheritance](/examples/example2).
+example of an analysis using X-linked incomplete dominance can be found
+at [#2 X-linked inheritance](/examples/example2).
 
 ## Penetrance mode {#penetrance-mode}
 
@@ -41,12 +41,12 @@ penetrances. shinyseg offers two different ways to do it:
 -   **Liability class**, where the user manually specifies them.
 
 The mode can be switched anytime with the input on the left of the
-header, but note that [Relative risk](/how-to/penetrance#relative-risk)
-will be unavailable if incomplete dominance is selected.
+header, but note that `Relative risk` will be unavailable if incomplete
+dominance is selected.
 
 ## 1) Relative risk {#relative-risk}
 
-This is a parametric version of the survival penetrances introduced by
+This is a parametric version of the survival penetrances described in
 [Belman et al. (2020)](https://doi.org/10.1038/s41436-020-0920-4). It is
 based on:
 
@@ -60,9 +60,10 @@ based on:
 
 These parameters are entered using a table generated from the phenotypes
 specified in the pedigree table. For example, the following describes a
-constant relative risk model in which non-carriers have a lifetime risk
-of `affected` of 1% (phenocopy rate) with onset at 70±15 years of age,
-while heterozygous and homozygous carriers have a lifetime risk of 75%.
+constant relative risk model in which non-carriers (`neg`) have a
+lifetime risk of 1% (phenocopy rate) with onset at 70±15 years of age,
+while heterozygous and homozygous carriers (`het/hom`) have a lifetime
+risk of 75%.
 
 <img src={require("./img/rrisk-tab1.png").default} style={{maxHeight:"325px",width:"auto"}} />
 
@@ -90,7 +91,7 @@ To undo it, change back to `both` any of two the sex-specific entries.
 ### Hazard ratios {#hazard-ratios}
 
 The previous examples ignored the **hazard ratio(s)** column, which
-contained the constant (age-independent) relative risk of `affected` in
+contained a constant (age-independent) relative risk of the disease in
 variant carriers compared to the baseline. This is because shinyseg
 allows inputting the **variant-associated lifetime risk** instead, and
 updates the other column accordingly. However, users can also manipulate
@@ -105,9 +106,10 @@ speaking, the hazard ratios at evenly spaced ages from 1 to 100 years.
 For instance, `1,10,10,20,10` would roughly correspond to the values at
 ages 1, 25, 50, 75 and 100. The app will interpolate/smooth these across
 the lifespan using a B-spline basis — you may adjust the smoothing
-degree with the **Splines** input at the bottom. [#4 Breast cancer and
-BRCA1](/examples/example4) showcases a penetrance model with
-age-dependent relative risks.
+degree with the **Splines** input at the bottom. The examples [#3 Two
+phenotypes](/examples/example3) and [#4 Breast cancer and
+BRCA1](/examples/example4) showcase penetrance models with age-dependent
+relative risks.
 
 :::note
 
@@ -137,16 +139,19 @@ To use it, simply specify pairs of age (integer between 1-100) and their
 corresponding cumulative incidence in the table provided. The **Length**
 slider also allows to fine tune the model’s complexity by defining the
 number of values for the hazard ratio vector. The app will then find the
-optimal parameters, which you may easily transfer them to your analysis
-with **Use these parameters for…**.
+optimal parameters, which you may easily transfer to your analysis with
+**Use these parameters for…**.
 
 ### Extra phenotypes {#extra-phenotypes}
 
 Sometimes, as in [#4 Breast cancer and BRCA1](/examples/example4), not
 all phenotypes relevant for the penetrance function may be observed in
 the analysis families. This means that, by default, they will not appear
-in the table where you can set their parameters. Type their names in the
-**Extra phenotypes** input, at the bottom, to remedy it.
+in the table where you can set their parameters. To include them, type
+their names in the **Extra phenotypes** input located at the bottom of
+the *Penetrance* panel.
+
+<img src={require("./img/extrapheno.png").default} style={{maxHeight:"80px"}} />
 
 ## 2) Liability class {#liability-class}
 

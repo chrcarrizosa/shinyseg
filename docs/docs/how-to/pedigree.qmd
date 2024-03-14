@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The first step is to input the data for the analysis. You will need to upload suitable pedigree file and specify who is affected, who is a carrier, and who is the proband or index case. All these tasks are done on the *Pedigree table* panel within the app.
+The first step is to input the data for the analysis. You will need to upload suitable pedigree file and specify who is affected, who is a carrier, who is the proband or index case, etc. All these tasks are done on the *Pedigree table* panel within the app.
 
 ## Uploading a pedigree
 
@@ -100,7 +100,7 @@ This refers to specifying who is affected and with what condition, who is known 
 -   **proband:** a checkbox indicating the proband or index case.
 -   **age:** an integer between 1-100 specifying the age of disease onset or censoring/last follow-up.
 
-For instance, the following information states that individuals 3, 6, and 7 experienced the onset of a certain unspecified disease at 40 years of age. Conversely, individuals 4 and 5 remained unaffected until the age of 60. Individuals 3, 5, 6 (proband), and 7 carry one copy of the variant under study, while individual 4 does not. For the founders 1 and 2, only their ages are known.
+For instance, the following information states that individuals 3, 6, and 7 experienced the onset of a certain disease at 40 years of age. Conversely, individuals 4 and 5 remained unaffected until the age of 60. Individuals 3, 5, 6 (proband), and 7 carry one copy of the variant under study, while individual 4 does not. For the founders 1 and 2, only their ages are known.
 
 ```{r}
 df3 =
@@ -147,7 +147,7 @@ For each family, ensure you have:
 Introducing all this information can be tedious, especially with many family members. However, you can streamline this process by providing some of the additional columns within the pedigree file itself. For example, try copying the previous code block and uploading it via **Add pedfile**.
 
 :::{.callout-note}
-This option accepts various input formats, but it can be finicky with empty cells. For this reason, we recommend replacing these with dots to ensure smooth processing.
+This option accepts various input formats, but it can be finicky when reading empty cells. For this reason, we recommend replacing these with dots to ensure smooth processing.
 :::
 
 Note that shinyseg will verify the uploaded data and may remove any incorrectly specified information.

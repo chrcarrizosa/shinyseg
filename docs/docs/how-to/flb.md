@@ -28,7 +28,7 @@ value will appear and be mapped to a colored key, as shown below. You
 may use this key to interpret the cosegregation evidence within the
 ACMG-AMP framework, following the thresholds outlined by [Jarvik and
 Browning (2016)](https://doi.org/10.1016%2Fj.ajhg.2016.04.003). For
-example, in this single-family analysis with FLB = 19.2, the app will
+example, in this single-family analysis with `FLB = 19.2`, the app will
 indicate that there is moderate evidence for the variant’s
 pathogenicity.
 
@@ -49,11 +49,11 @@ robustness by varying the values of the analysis parameters. [#1
 Constant relative risk](/examples/example1) provides a good example of
 why this may be relevant.
 
-To proceed, select two analysis parameters from the dropdown inputs. The
-choices will depend on all previous inputs and are presented as a list
-of sex-age-phenotype-parameter combinations. Then, specify a range of
-values to test for each one, and click on **Plot**. A contour plot will
-appear displaying the FLB as a function of the selected parameters,
+To proceed, select two analysis parameters from the dropdown inputs —
+the choices will depend on all previous inputs and are presented as a
+list of sex-age-phenotype-parameter combinations. Then, specify a range
+of values to test for each one, and click on **Plot**. A contour plot
+will appear displaying the FLB as a function of the selected parameters,
 using the same colors as the key provided earlier. If your current
 parameter values are within the specified ranges, they will also be
 displayed as a cross on the graph. For example, the following plot
