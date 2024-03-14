@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">Specifying the penetrance | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Specifying the penetrance | shinyseg"><meta data-rh="true" name="description" content="Second, read more on how to define the variant-disease model."><meta data-rh="true" property="og:description" content="Second, read more on how to define the variant-disease model."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/penetrance" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.06b1c5fa.css">
-<script src="/shinyseg/assets/js/runtime~main.add38475.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/runtime~main.c5347665.js" defer="defer"></script>
 <script src="/shinyseg/assets/js/main.f489c32d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -27,8 +27,8 @@ model. Choose one of the options on the header:</p>
 <p>Note that incomplete dominance, where you can specify different
 parameters for the carriers of 1 and 2 copies of the variant, will be
 unavailable unless you also switch to the <code>Liability class</code> mode. An
-example of an analysis using this mode can be found at <a href="/shinyseg/examples/example2">#2 X-linked
-inheritance</a>.</p>
+example of an analysis using X-linked incomplete dominance can be found
+at <a href="/shinyseg/examples/example2">#2 X-linked inheritance</a>.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="penetrance-mode">Penetrance mode<a href="#penetrance-mode" class="hash-link" aria-label="Direct link to Penetrance mode" title="Direct link to Penetrance mode">​</a></h2>
 <p>Next, it is time to assign the probabilities of observing the analysis
 phenotypes conditional on carriership status, hereafter referred to as
@@ -39,10 +39,10 @@ based on certain parameters.</li>
 <li><strong>Liability class</strong>, where the user manually specifies them.</li>
 </ul>
 <p>The mode can be switched anytime with the input on the left of the
-header, but note that <a href="/shinyseg/how-to/penetrance#relative-risk">Relative risk</a>
-will be unavailable if incomplete dominance is selected.</p>
+header, but note that <code>Relative risk</code> will be unavailable if incomplete
+dominance is selected.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="relative-risk">1) Relative risk<a href="#relative-risk" class="hash-link" aria-label="Direct link to 1) Relative risk" title="Direct link to 1) Relative risk">​</a></h2>
-<p>This is a parametric version of the survival penetrances introduced by
+<p>This is a parametric version of the survival penetrances described in
 <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et al. (2020)</a>. It is
 based on:</p>
 <ul>
@@ -56,9 +56,10 @@ be specified through a <strong>variant-associated lifetime risk</strong>.</li>
 </ul>
 <p>These parameters are entered using a table generated from the phenotypes
 specified in the pedigree table. For example, the following describes a
-constant relative risk model in which non-carriers have a lifetime risk
-of <code>affected</code> of 1% (phenocopy rate) with onset at 70±15 years of age,
-while heterozygous and homozygous carriers have a lifetime risk of 75%.</p>
+constant relative risk model in which non-carriers (<code>neg</code>) have a
+lifetime risk of 1% (phenocopy rate) with onset at 70±15 years of age,
+while heterozygous and homozygous carriers (<code>het/hom</code>) have a lifetime
+risk of 75%.</p>
 <img src="/shinyseg/assets/images/rrisk-tab1-1a9aba0a962535c51095d4a66a67b79c.png" style="max-height:325px;width:auto">
 <p>Below the table, you will also find a plot which can serve as a visual
 aid displaying the cumulative incidences, hazards, or hazard ratios
@@ -73,7 +74,7 @@ sex-dependent specification.</p>
 <p>To undo it, change back to <code>both</code> any of two the sex-specific entries.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="hazard-ratios">Hazard ratios<a href="#hazard-ratios" class="hash-link" aria-label="Direct link to Hazard ratios" title="Direct link to Hazard ratios">​</a></h3>
 <p>The previous examples ignored the <strong>hazard ratio(s)</strong> column, which
-contained the constant (age-independent) relative risk of <code>affected</code> in
+contained a constant (age-independent) relative risk of the disease in
 variant carriers compared to the baseline. This is because shinyseg
 allows inputting the <strong>variant-associated lifetime risk</strong> instead, and
 updates the other column accordingly. However, users can also manipulate
@@ -87,9 +88,10 @@ speaking, the hazard ratios at evenly spaced ages from 1 to 100 years.
 For instance, <code>1,10,10,20,10</code> would roughly correspond to the values at
 ages 1, 25, 50, 75 and 100. The app will interpolate/smooth these across
 the lifespan using a B-spline basis — you may adjust the smoothing
-degree with the <strong>Splines</strong> input at the bottom. <a href="/shinyseg/examples/example4">#4 Breast cancer and
-BRCA1</a> showcases a penetrance model with
-age-dependent relative risks.</p>
+degree with the <strong>Splines</strong> input at the bottom. The examples <a href="/shinyseg/examples/example3">#3 Two
+phenotypes</a> and <a href="/shinyseg/examples/example4">#4 Breast cancer and
+BRCA1</a> showcase penetrance models with age-dependent
+relative risks.</p>
 <div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_BuS1"><p>If you misspecify the hazard ratio(s), their values will revert to the
 previous ones to prevent issues.</p></div></div>
 <p>Note that it is also possible to leverage the <strong>variant-associated
@@ -108,14 +110,16 @@ cumulative incidence data.</p>
 corresponding cumulative incidence in the table provided. The <strong>Length</strong>
 slider also allows to fine tune the model’s complexity by defining the
 number of values for the hazard ratio vector. The app will then find the
-optimal parameters, which you may easily transfer them to your analysis
-with <strong>Use these parameters for…</strong>.</p>
+optimal parameters, which you may easily transfer to your analysis with
+<strong>Use these parameters for…</strong>.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="extra-phenotypes">Extra phenotypes<a href="#extra-phenotypes" class="hash-link" aria-label="Direct link to Extra phenotypes" title="Direct link to Extra phenotypes">​</a></h3>
 <p>Sometimes, as in <a href="/shinyseg/examples/example4">#4 Breast cancer and BRCA1</a>, not
 all phenotypes relevant for the penetrance function may be observed in
 the analysis families. This means that, by default, they will not appear
-in the table where you can set their parameters. Type their names in the
-<strong>Extra phenotypes</strong> input, at the bottom, to remedy it.</p>
+in the table where you can set their parameters. To include them, type
+their names in the <strong>Extra phenotypes</strong> input located at the bottom of
+the <em>Penetrance</em> panel.</p>
+<img src="/shinyseg/assets/images/extrapheno-4a960ef729ee6a94670abbe7374f0cd6.png" style="max-height:80px">
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="liability-class">2) Liability class<a href="#liability-class" class="hash-link" aria-label="Direct link to 2) Liability class" title="Direct link to 2) Liability class">​</a></h2>
 <p>Alternatively, users can manually define penetrances using a table. This
 table contains 2 (dominant/recessive) to 3 (incomplete inheritance)

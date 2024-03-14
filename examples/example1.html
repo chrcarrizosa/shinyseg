@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">1) Constant relative risk | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/examples/example1"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="1) Constant relative risk | shinyseg"><meta data-rh="true" name="description" content="A simple case to showcase the relative risk mode and the importance of accounting for age of onset."><meta data-rh="true" property="og:description" content="A simple case to showcase the relative risk mode and the importance of accounting for age of onset."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/examples/example1"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example1" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example1" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.06b1c5fa.css">
-<script src="/shinyseg/assets/js/runtime~main.add38475.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/runtime~main.c5347665.js" defer="defer"></script>
 <script src="/shinyseg/assets/js/main.f489c32d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -27,14 +27,15 @@ carrier, although he remained asymptomatic until his death in his 40s.</p>
 <p>The simplest way to analyze these data is to consider a single risk
 parameter for noncarriers (phenocopy rate) and another for carriers
 (penetrance). This can be achieved by switching the mode to
-<code>Liability class</code> and then setting a single liability class, which will
-apply to all cases regardless of phenotype, sex, and age. For example,
-the following will set a phenocopy rate of 0.001 and a penetrance of
-0.90, which may be viewed as somewhat conservative values.</p>
+<code>Liability class</code> and then specifying a single liability class, which
+will apply to all cases regardless of phenotype, sex, and age. For
+example, the following will set a phenocopy rate of 0.001 and a
+penetrance of 0.90, which may be viewed as somewhat conservative values.</p>
 <img src="/shinyseg/assets/images/ex1-lclass1-tab-5ea9b16bab115fc28427fd27621b0fec.png" style="max-height:150px">
 <p>After completing these steps, the <em>FLB</em> panel becomes available. Upon
-clicking on <strong>Calculate</strong>, a value of 3.2 is generated, indicating
-inconclusive evidence regarding the variant’s pathogenicity (FLB &lt; 8).</p>
+clicking on <strong>Calculate</strong>, a value of <code>FLB = 3.2</code> is generated,
+indicating <em>inconclusive</em> evidence regarding the variant’s pathogenicity
+(FLB &lt; 8).</p>
 <img src="/shinyseg/assets/images/ex1-lclass1-flb-3c24f29d3901ebf041c21972fbf96690.png" style="max-height:150px">
 <p>Now, let’s conduct a sensitivity analysis to assess the robustness of
 this result. Click on <strong>Sensitivity</strong> and select <code>het/hom risk</code>
@@ -43,27 +44,26 @@ the second. Adjust the ranges of values to test to <code>0.5–0.9999</code> and
 <code>0.0001–0.10</code>, respectively, and then click on <strong>Plot</strong>.</p>
 <img src="/shinyseg/assets/images/ex1-lclass1-sen-ffe8b741ee4b8f94766db1c3b4e199c8.png" style="max-height:350px">
 <p>We can observe that reducing the carriers’ risk enhances the evidence,
-primarily due to the presence of unaffected carriers. However, it’s
-important to note that in this case, these carriers are also young.
-Accounting for this fact may significantly increase the FLB value.</p>
+primarily due to the presence of the unaffected carriers. However, we
+know that in this case these carriers are also young. Accounting for
+this fact may significantly increase the FLB value.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="more-liability-classes">More liability classes<a href="#more-liability-classes" class="hash-link" aria-label="Direct link to More liability classes" title="Direct link to More liability classes">​</a></h2>
 <p>The easiest method to achieve this is by adding more liability classes.
-This can be accomplished effortlessly by clicking on <strong>ADD</strong> and
-completing the new rows in the liability class table. For instance, the
-following configuration specifies that the penetrance in individuals
-aged 1-40 will be 0.45, which is half the value for the older
-individuals.</p>
+This can be done by clicking on <strong>ADD</strong> and completing the new rows in
+the liability class table. For instance, the following configuration
+specifies that the penetrance in individuals aged 1-40 will be 0.45,
+which is half the value for the older individuals.</p>
 <img src="/shinyseg/assets/images/ex1-lclass2-tab-308ecc1fa7fd26b1b74a8dd170ee4889.png" style="max-height:175px">
-<p>With this simple adjustment, the FLB jumps to 34.3, indicating strong
-evidence for pathogenicity (FLB &gt; 32). However, conducting a
+<p>With this simple adjustment, the FLB jumps to <code>FLB = 34.3</code>, indicating
+<em>strong</em> evidence for pathogenicity (FLB &gt; 32). However, conducting a
 sensitivity analysis by comparing the penetrances in the young
 (<code>1-40 | het/hom risk</code>) and old (<code>41-100 | het/hom risk</code>) age groups
 reveals that this result is not robust.</p>
 <img src="/shinyseg/assets/images/ex1-lclass2-sen-ceda231ef2be9bb45d7c5e492e44d7c1.png" style="max-height:500px">
-<p>It’s possible that different conclusions may arise if we implement a
-more detailed age group classification. However, doing so makes
-sensitivity analyses increasingly cumbersome, as each new liability
-class introduces two additional parameters.</p>
+<p>Different conclusions may arise if we implement a more detailed age
+group classification. Nevertheless, doing so makes sensitivity analyses
+increasingly cumbersome, as each new liability class introduces two
+additional parameters.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="relative-risk-mode">Relative risk mode<a href="#relative-risk-mode" class="hash-link" aria-label="Direct link to Relative risk mode" title="Direct link to Relative risk mode">​</a></h2>
 <p>Alternatively, we can revert to the default <code>Relative risk</code> mode. This
 mode simplifies the specification of age-specific penetrances while
@@ -79,9 +79,9 @@ relative risk model. The plots below illustrate how these inputs
 translate to the expected cumulative incidences in carriers (solid
 lines) and non-carriers (dashed lines) of the variant.</p>
 <img src="/shinyseg/assets/images/ex1-rrisk-tab-29568c907c4b1b19f6949d4a1adbf18a.png" style="max-height:400px">
-<p>With the updated parameters, we now obtain an FLB score of 30.3,
-indicating evidence for pathogenicity (FLB &gt; 16). Conducting a
-sensitivity analysis comparing both lifetime risks demonstrates that
+<p>With the updated parameters, we now obtain an FLB score of <code>FLB = 30.3</code>,
+indicating <em>moderate</em> evidence for pathogenicity (FLB &gt; 16). Conducting
+a sensitivity analysis comparing both lifetime risks demonstrates that
 this conclusion is robust.</p>
 <img src="/shinyseg/assets/images/ex1-rrisk-sen-c8979969e13e65fc5e08ea805dbab36d.png" style="max-height:500px"></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/shinyseg/examples"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Examples</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/shinyseg/examples/example2"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">2) X-linked inheritance</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#pedigree-table" class="table-of-contents__link toc-highlight">Pedigree table</a></li><li><a href="#a-single-liability-class" class="table-of-contents__link toc-highlight">A single liability class</a></li><li><a href="#more-liability-classes" class="table-of-contents__link toc-highlight">More liability classes</a></li><li><a href="#relative-risk-mode" class="table-of-contents__link toc-highlight">Relative risk mode</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Site built with Docusaurus.</div></div></div></footer></div>
 </body>

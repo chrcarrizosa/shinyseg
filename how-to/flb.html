@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">FLB and sensitivity | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/how-to/flb"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="FLB and sensitivity | shinyseg"><meta data-rh="true" name="description" content="And third, obtain a Bayes factor and assess its robustness."><meta data-rh="true" property="og:description" content="And third, obtain a Bayes factor and assess its robustness."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/how-to/flb"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/flb" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/how-to/flb" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.06b1c5fa.css">
-<script src="/shinyseg/assets/js/runtime~main.add38475.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/runtime~main.c5347665.js" defer="defer"></script>
 <script src="/shinyseg/assets/js/main.f489c32d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -23,7 +23,7 @@ value will appear and be mapped to a colored key, as shown below. You
 may use this key to interpret the cosegregation evidence within the
 ACMG-AMP framework, following the thresholds outlined by <a href="https://doi.org/10.1016%2Fj.ajhg.2016.04.003" target="_blank" rel="noopener noreferrer">Jarvik and
 Browning (2016)</a>. For
-example, in this single-family analysis with FLB = 19.2, the app will
+example, in this single-family analysis with <code>FLB = 19.2</code>, the app will
 indicate that there is moderate evidence for the variant’s
 pathogenicity.</p>
 <img src="/shinyseg/assets/images/flb-6234f2f74de6bfb5cf7effe4b658fddb.png" style="max-height:125px">
@@ -39,11 +39,11 @@ analyses. This feature enables systematic testing of the FLB’s
 robustness by varying the values of the analysis parameters. <a href="/shinyseg/examples/example1">#1
 Constant relative risk</a> provides a good example of
 why this may be relevant.</p>
-<p>To proceed, select two analysis parameters from the dropdown inputs. The
-choices will depend on all previous inputs and are presented as a list
-of sex-age-phenotype-parameter combinations. Then, specify a range of
-values to test for each one, and click on <strong>Plot</strong>. A contour plot will
-appear displaying the FLB as a function of the selected parameters,
+<p>To proceed, select two analysis parameters from the dropdown inputs —
+the choices will depend on all previous inputs and are presented as a
+list of sex-age-phenotype-parameter combinations. Then, specify a range
+of values to test for each one, and click on <strong>Plot</strong>. A contour plot
+will appear displaying the FLB as a function of the selected parameters,
 using the same colors as the key provided earlier. If your current
 parameter values are within the specified ranges, they will also be
 displayed as a cross on the graph. For example, the following plot

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">4) Breast cancer and BRCA1 | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/examples/example4"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="4) Breast cancer and BRCA1 | shinyseg"><meta data-rh="true" name="description" content="An example from Belman et al. (2020) showing a complex model with age-dependent relative risks."><meta data-rh="true" property="og:description" content="An example from Belman et al. (2020) showing a complex model with age-dependent relative risks."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/examples/example4"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example4" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example4" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.06b1c5fa.css">
-<script src="/shinyseg/assets/js/runtime~main.add38475.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/runtime~main.c5347665.js" defer="defer"></script>
 <script src="/shinyseg/assets/js/main.f489c32d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -18,57 +18,55 @@ unobserved phenotypes.</p>
 <p>The data corresponding to the case is shown below:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"> ped id fid mid sex phenotype carrier proband age</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  1   0   0   1    nonaff       .       .  80</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  2   0   0   2      BrCa       .       .  65</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  3   1   2   2      BrCa     het       .  81</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  4   1   2   1    nonaff       .       .  41</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  5   0   0   2         .       .       .  89</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  6   0   0   1    nonaff       .       .  80</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  7   1   2   2    nonaff     het       .  75</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  8   1   2   2    nonaff     neg       .  60</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1  9   4   5   2      BrCa     het       .  41</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1 10   4   5   2      BrCa     het       .  50</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1 11   4   5   2    nonaff     het       .  52</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1 12   6   7   2      BrCa     het       1  49</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1 13   6   7   1    nonaff     het       .  36</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   1 14   6   7   2      BrCa     het       .  48</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <img src="/shinyseg/assets/images/ex4-ped-1d4a1562afb9372e0d95c59c3d6d3163.png" style="max-height:350px">
-<p>Notice how the legend also includes ovarian and pancreatic cancer, even
-though these are not present in any of the members of the pedigree. This
-is because they are still relevant for computing the penetrances and
-therefore must be included in the analysis. The next section explains
-how to do so.</p>
+<p>Notice that, together with breast cancer (<code>BrCa</code>), the legend includes
+ovarian (<code>OvCa</code>) and pancreatic cancer (<code>PanCa</code>), even though these are
+not present in any of the members of the pedigree. This is because they
+are still relevant for computing the penetrances and must be included in
+the analysis. The next section explains how to do so.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="penetrance">Penetrance<a href="#penetrance" class="hash-link" aria-label="Direct link to Penetrance" title="Direct link to Penetrance">​</a></h2>
 <p>This analysis employs the default <code>Relative risk</code> mode and autosomal
-dominant (<code>AD</code>) inheritance. It’s important to note that when uploading
-previous data to the app, the relative risk table will only include a
-row corresponding to breast cancer (<code>BrCa</code>) for both sexes.</p>
+dominant (<code>AD</code>) inheritance. When uploading the previous data to the
+app, the relative risk table will only allow parameter setting for
+breast cancer, as it’s the sole observed phenotype. It will also consist
+of a single row applying to both sexes.</p>
 <img src="/shinyseg/assets/images/ex4-rrisk-tab1-36d89df57fe257762e2145cc20cc6bdf.png" style="max-height:400px">
-<p>As mentioned, in this case it’s necessary to include other relevant
-phenotypes for calculating the penetrance for the specific gene under
-analysis (BRCA1). This can be achieved by entering their names into the
+<p>However, in this case involving breast cancer and BRCA1, it is important
+to incorporate other cancer types to accurately calculate the
+penetrance. This can be achieved by entering their names into the
 <strong>Extra phenotypes</strong> input, located at the bottom of the <em>Penetrance</em>
-panel. Additionally, we need to specify sex-specific penetrances. This
-can be easily done by clicking on the entries of the sex column and
-changing <code>both</code> to any of the sexes. With that done, the table will look
-like this:</p>
+panel. Moreover, we need to declare sex-specific penetrances. This can
+be easily done by clicking on the cells of the sex column and changing
+<code>both</code> to any of the sexes. With that done, the table will appear as
+follows:</p>
 <img src="/shinyseg/assets/images/ex4-rrisk-tab3-9d7f0c96dbc94f282d8079d5d7319307.png" style="max-height:600px">
-<p>We are now ready to start filling in the data, using similar estimates
-to those in <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et
-al. (2020)</a>:</p>
+<p>We are now ready to start filling in the table, using the same sources
+as in <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et al. (2020)</a>:</p>
 <ul>
 <li>
 <p>For the baseline parameters (<code>neg risk</code>, <code>neg mean</code>, <code>neg SD</code>), we
-have utilized the UK 2008-2012 estimates from Cancer Incidence in
-Five Continents (CI5). While not strictly necessary, in this case
-the data were fitted to the normal model employed by shinyseg to
-obtain the optimal parameters. This may be done using the
+employed the UK 2008-2012 estimates from <a href="https://ci5.iarc.fr" target="_blank" rel="noopener noreferrer">Cancer Incidence in Five
+Continents (CI5)</a>. The optimal parameters for
+each cancer type were identified by using shinyseg’s
 <a href="/shinyseg/how-to/penetrance#optimal-parameters"><strong>Assistant</strong></a>.</p>
 </li>
 <li>
-<p>The <code>hazard ratios(s)</code> have also been adapted from <a href="https://fenglab.chpc.utah.edu/cool2/manual.html" target="_blank" rel="noopener noreferrer">COOL’s
-website</a>. The
-vectors shown below are of length six, corresponding to the hazard
-ratios at ages approximately 1, 20, 40, 60, 80, and 100. These are
-then interpolated/smoothed by the app, as shown in the plots below
-the table.</p>
+<p>The <code>hazard ratios(s)</code> were adapted from <a href="https://fenglab.chpc.utah.edu/cool2/manual.html" target="_blank" rel="noopener noreferrer">COOL’s
+website</a>. We
+specified the hazard ratios at ages approximately 1, 20, 40, 60, 80,
+and 100, which are then interpolated/smoothed by the app as shown
+below.</p>
 </li>
 </ul>
 <img src="/shinyseg/assets/images/ex4-rrisk-tab4-5e0c860e2ccbc3d6580697ecc13c0385.png" style="max-height:600px">
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="flb">FLB<a href="#flb" class="hash-link" aria-label="Direct link to FLB" title="Direct link to FLB">​</a></h2>
 <p>Finally, we can <strong>Calculate</strong> the Bayes factor, which in this case
-points to inconclusive evidence for pathogenicity. While this conclusion
-aligns with that of <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et
+points to <em>inconclusive</em> evidence for pathogenicity. While this
+conclusion aligns with that of <a href="https://doi.org/10.1038/s41436-020-0920-4" target="_blank" rel="noopener noreferrer">Belman et
 al. (2020)</a>, we note a slight
-quantitative deviation (5.7 vs. 3.9) which is primarily attributed to
-how shinyseg utilizes model-based estimates instead of the raw data. The
-payoff of shinyseg’s set up is that sensitivity analyses can now be
-easily performed by altering a reasonable number of parameters.</p>
-<img src="/shinyseg/assets/images/ex4-flb-864b241d42e875f590e979a2ea7c8203.png" style="max-height:150px"></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/shinyseg/examples/example3"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">3) Two phenotypes</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#pedigree-table" class="table-of-contents__link toc-highlight">Pedigree table</a></li><li><a href="#penetrance" class="table-of-contents__link toc-highlight">Penetrance</a></li><li><a href="#flb" class="table-of-contents__link toc-highlight">FLB</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Site built with Docusaurus.</div></div></div></footer></div>
+quantitative deviation (<code>5.7</code> vs. <code>3.9</code>) which is primarily due to how
+shinyseg utilizes model-based estimates instead of the raw data.</p>
+<img src="/shinyseg/assets/images/ex4-flb-864b241d42e875f590e979a2ea7c8203.png" style="max-height:150px">
+<p>The payoff of shinyseg’s set up is that sensitivity analyses can now be
+easily performed by altering a reasonable number of parameters.</p></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/shinyseg/examples/example3"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">3) Two phenotypes</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#pedigree-table" class="table-of-contents__link toc-highlight">Pedigree table</a></li><li><a href="#penetrance" class="table-of-contents__link toc-highlight">Penetrance</a></li><li><a href="#flb" class="table-of-contents__link toc-highlight">FLB</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Site built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>

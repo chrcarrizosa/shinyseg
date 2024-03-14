@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">3) Two phenotypes | shinyseg</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://chrcarrizosa.github.io/shinyseg/examples/example3"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="3) Two phenotypes | shinyseg"><meta data-rh="true" name="description" content="An example with two phenotypes in a consanguineous family."><meta data-rh="true" property="og:description" content="An example with two phenotypes in a consanguineous family."><link data-rh="true" rel="canonical" href="https://chrcarrizosa.github.io/shinyseg/examples/example3"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example3" hreflang="en"><link data-rh="true" rel="alternate" href="https://chrcarrizosa.github.io/shinyseg/examples/example3" hreflang="x-default"><link rel="stylesheet" href="/shinyseg/assets/css/styles.06b1c5fa.css">
-<script src="/shinyseg/assets/js/runtime~main.add38475.js" defer="defer"></script>
+<script src="/shinyseg/assets/js/runtime~main.c5347665.js" defer="defer"></script>
 <script src="/shinyseg/assets/js/main.f489c32d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -19,30 +19,32 @@ consanguineous families.</p>
 <p>In this family, there are two disease phenotypes: one relatively mild
 and common, and one more rare and severe. It is hypothesized that the
 rare autosomal variant found in some members (indicated by + or –) could
-be associated with increased risks for both.</p>
+be associated with increased risks for both. Henceforth, we will assume
+complete dominance.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="simplified-models">Simplified models<a href="#simplified-models" class="hash-link" aria-label="Direct link to Simplified models" title="Direct link to Simplified models">​</a></h2>
-<p>In a first approach, we will ignore onset/censoring ages by switching to
-the <code>Liability class</code> mode and declaring age-independent classes.</p>
+<p>Initially, we will disregard onset/censoring ages by switching to the
+<code>Liability class</code> mode and declaring age-independent classes.</p>
 <p>The most basic strategy would be to also disregard the distinction
-between both phenotypes and treat both as the same “affected”. For
-instance, let’s assume that we suspect the phenocopy rate and penetrance
-for the mild phenotype to be 20% and 70%, respectively, and we decide to
-apply these values to all pedigree members:</p>
+between both phenotypes and treat both as the same. For instance, let’s
+say that we suspect the phenocopy rate and penetrance for the mild
+phenotype to be 20% and 70%, respectively, and we decide to apply these
+values to all pedigree members:</p>
 <img src="/shinyseg/assets/images/ex3-lclass1-tab-eca12be8ea017e7d213d0bd685414fdb.png" style="max-height:185px">
-<p>With this setup, we would obtain moderate evidence for pathogenicity, as
-shown below. The sensitivity analysis also indicates that increasing the
-ratio of the penetrance-to-phenocopy rate would increase the evidence.</p>
+<p>With this setup, we would obtain <em>moderate</em> evidence for pathogenicity,
+as shown below. The sensitivity analysis also indicates that increasing
+the ratio of the penetrance-to-phenocopy rate would increase the
+evidence.</p>
 <img src="/shinyseg/assets/images/ex3-lclass1-flb-2b757ea09ae239fbfdd9053e8d33aef3.png" style="max-height:550px">
 <p>However, we should account for the differences between both phenotypes,
 if they exist. Luckily, this can be easily done by adding more liability
 classes and specifying the cases to which they apply. For instance, in
 the following, we set a phenocopy rate and penetrance for the severe
 phenotype of 1% and 25%, respectively. Notice that now we also need to
-specify the parameters for the “nonaffected” phenotype (<code>nonaff</code>), which
+specify the parameters for the “unaffected” phenotype (<code>nonaff</code>), which
 refer to the risk for <em>any</em> of the disease phenotypes.</p>
 <img src="/shinyseg/assets/images/ex3-lclass2-tab-c6f2e58a79cb74ed4cde90d192ffdf59.png" style="max-height:225px">
-<p>And with that, the FLB shoots to 45.3, resulting in strong evidence for
-pathogenicity.</p>
+<p>And with that, the FLB shoots to <code>FLB = 45.3</code>, resulting in <em>strong</em>
+evidence for pathogenicity.</p>
 <img src="/shinyseg/assets/images/ex3-lclass2-flb-92b8bc4f7af283fbe76c165df510fe5b.png" style="max-height:150px">
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="accounting-for-ages">Accounting for ages<a href="#accounting-for-ages" class="hash-link" aria-label="Direct link to Accounting for ages" title="Direct link to Accounting for ages">​</a></h2>
 <p>Now, let’s complicate the model by considering the ages (of onset or
@@ -55,11 +57,12 @@ we use the same risk values (now referring to lifetime risks) as before.
 Additionally, we consider that phenocopies have an expected onset at
 75±20 years of age for the mild phenotype and 60±15 years for the severe
 one. Notice that for the former, we also specify that the risk conferred
-by the variant is higher at middle ages; you can find further details on
-how to do this <a href="/shinyseg/how-to/penetrance#hazard-ratios">here</a>.</p>
+by the variant is higher at middle ages; the <a href="/shinyseg/how-to/penetrance#hazard-ratios">hazard
+ratios</a> section of the manual details
+how to do this.</p>
 <img src="/shinyseg/assets/images/ex3-rrisk-tab-00c3df49266aad95a6fc4bd23fff7f8e.png" style="max-height:500px">
-<p>After accounting for the age data, cosegregation evidence is reduced
-considerably, although it remains strong (FLB &gt; 32).</p>
+<p>After accounting for the age data, cosegregation evidence is
+considerably reduced, but it remains <em>strong</em> (FLB &gt; 32).</p>
 <img src="/shinyseg/assets/images/ex3-rrisk-flb-66a2915e989a0dba1a3bc6fc8b243728.png" style="max-height:150px"></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/shinyseg/examples/example2"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">2) X-linked inheritance</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/shinyseg/examples/example4"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">4) Breast cancer and BRCA1</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#pedigree-table" class="table-of-contents__link toc-highlight">Pedigree table</a></li><li><a href="#simplified-models" class="table-of-contents__link toc-highlight">Simplified models</a></li><li><a href="#accounting-for-ages" class="table-of-contents__link toc-highlight">Accounting for ages</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Site built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
