@@ -1,7 +1,7 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "help"),
       label = NULL,
@@ -10,12 +10,11 @@ w_help = function(id)
       size = "s",
       icon = icon("question")
     ),
-    title = NULL,
-    content = "See help on this panel."
+    title = "See help on this panel."
   )
 
 # w_addCI = function(id)
-#   popover(
+#   tooltip(
 #     actionBttn(
 #       inputId = NS(id, "addCI"),
 #       label = "ADD",
@@ -23,12 +22,11 @@ w_help = function(id)
 #       size = "xs",
 #       icon = icon("plus")
 #     ),
-#     title = NULL,
-#     content = "Add an entry."
+#     title = "Add an entry."
 #   )
 # 
 # w_rmvCI = function(id)
-#   popover(
+#   tooltip(
 #     actionBttn(
 #       inputId = NS(id, "rmvCI"),
 #       label = "RMV",
@@ -36,12 +34,11 @@ w_help = function(id)
 #       size = "xs",
 #       icon = icon("minus")
 #     ),
-#     title = NULL,
-#     content = "Delete the last entry."
+#     title = "Delete the last entry."
 #   )
 
 w_splDF = function(id)
-  popover(
+  tooltip(
     sliderTextInput(
       inputId = NS(id, "splDF"),
       label = HTML("<i class='fa fa-ruler'></i> Length"),
@@ -49,8 +46,7 @@ w_splDF = function(id)
       selected = 4,
       grid = FALSE
     ),
-    title = NULL,
-    content = "Select the length of the hazard ratio vector.",
+    title = "Select the length of the hazard ratio vector.",
     placement = "right"
   )
 

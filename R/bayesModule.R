@@ -1,7 +1,7 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "help"),
       label = NULL,
@@ -10,12 +10,11 @@ w_help = function(id)
       size = "s",
       icon = icon("question")
     ),
-    title = NULL,
-    content = "See help on this panel."
+    title = "See help on this panel."
   )
 
 w_calculate = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "calculate"),
       label = "Calculate",
@@ -23,12 +22,11 @@ w_calculate = function(id)
       size = "s",
       icon = icon("calculator")
     ),
-    title = NULL,
-    content = "Calculate and display the Bayes factor value."
+    title = "Calculate and display the Bayes factor value."
   )
 
 w_sensitivity = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "sensitivity"),
       label = "Sensitivity",
@@ -36,8 +34,7 @@ w_sensitivity = function(id)
       size = "s",
       icon = icon("rocket")
     ),
-    title = NULL,
-    content = "Perform sensitivity analyses."
+    title = "Perform sensitivity analyses."
   )
 
 w_senV1 = function(id)
@@ -95,7 +92,7 @@ w_senX2 = function(id)
   )
 
 w_plot = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "plot"),
       label = "Plot",
@@ -103,8 +100,7 @@ w_plot = function(id)
       size = "s",
       icon = icon("chart-area")
     ),
-    title = NULL,
-    content = "Display FLB values on a contour plot."
+    title = "Display FLB values on a contour plot."
   )
 
 # Module code -------------------------------------------------------------

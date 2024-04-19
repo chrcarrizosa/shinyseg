@@ -39,3 +39,10 @@ function disableFill(hot) {
     fillHandle: false
   });
 }
+
+// Hide all tooltips on click
+$(function () {
+  $('html').on('click', function(el) {
+     $('[data-toggle=tooltip]').tooltip('hide');
+  });
+})

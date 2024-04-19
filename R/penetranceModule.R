@@ -1,7 +1,7 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "help"),
       label = NULL,
@@ -10,12 +10,11 @@ w_help = function(id)
       size = "s",
       icon = icon("question")
     ),
-    title = NULL,
-    content = "See help on this panel."
+    title = "See help on this panel."
   )
 
 w_mode = function(id)
-  popover(
+  tooltip(
     radioGroupButtons(
       inputId = NS(id, "mode"),
       label = NULL,
@@ -24,12 +23,11 @@ w_mode = function(id)
       individual = TRUE,
       status = "gray"
     ),
-    title = NULL,
-    content = "Switch between penetrance modes."
+    title = "Switch between penetrance modes."
   )
 
 w_inheritance = function(id)
-  popover(
+  tooltip(
     radioGroupButtons(
       inputId = NS(id, "inheritance"),
       label = NULL,
@@ -38,12 +36,11 @@ w_inheritance = function(id)
       individual = TRUE,
       status = "gray"
     ),
-    title = NULL,
-    content = "Select the inheritance pattern."
+    title = "Select the inheritance pattern."
   )
 
 w_loadLclass = function(id)
-  popover(
+  tooltip(
     fileInput2(
       inputId = NS(id, "loadLclass"),
       label = "Load file",
@@ -51,12 +48,11 @@ w_loadLclass = function(id)
       progress = FALSE,
       divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
     ),
-    title = NULL,
-    content = "Upload a liability class table."
+    title = "Upload a liability class table."
   )
 
 w_addLclass = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "addLclass"),
       label = "ADD",
@@ -64,12 +60,11 @@ w_addLclass = function(id)
       size = "xs",
       icon = icon("plus")
     ),
-    title = NULL,
-    content = "Add another liability class."
+    title = "Add another liability class."
   )
 
 w_rmvLclass = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "rmvLclass"),
       label = "RMV",
@@ -77,12 +72,11 @@ w_rmvLclass = function(id)
       size = "xs",
       icon = icon("minus")
     ),
-    title = NULL,
-    content = "Delete the last liability class."
+    title = "Delete the last liability class."
   )
 
 w_assistant = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "assistant"),
       label = "Assistant",
@@ -90,12 +84,11 @@ w_assistant = function(id)
       size = "s",
       icon = icon("circle-info")
     ),
-    title = NULL,
-    content = "Optimize model parameters from incidence data."
+    title = "Optimize model parameters from incidence data."
   )
 
 w_plotType = function(id)
-  popover(
+  tooltip(
     pickerInput(
       inputId = NS(id, "plotType"),
       label = HTML("<i class='fa fa-chart-line'></i> Plot"),
@@ -106,12 +99,11 @@ w_plotType = function(id)
         `style` = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
       )
     ),
-    title = NULL,
-    content = "Change summary to display."
+    title = "Change summary to display."
   )
 
 w_polDegree = function(id)
-  popover(
+  tooltip(
     pickerInput(
       inputId = NS(id, "polDegree"),
       label = HTML("<i class='fa fa-wave-square'></i> Splines"),
@@ -122,12 +114,11 @@ w_polDegree = function(id)
         `style` = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
       )
     ),
-    title = NULL,
-    content = "Change the spline basis degree. Only relevant for age-dependent hazard ratios."
+    title = "Change the spline basis degree. Only relevant for age-dependent hazard ratios."
   )
 
 w_extraPheno = function(id)
-  popover(
+  tooltip(
     selectizeInput(
       inputId = NS(id, "extraPheno"),
       label = HTML("<i class='fa fa-plus'></i> Extra phenotypes"),
@@ -141,8 +132,7 @@ w_extraPheno = function(id)
           plugins = list("remove_button")
         )
     ),
-    title = NULL,
-    content = "Add extra phenotypes associated with the variant."
+    title = "Add extra phenotypes associated with the variant."
   )
 
 # Module code -------------------------------------------------------------

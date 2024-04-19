@@ -1,7 +1,7 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "help"),
       label = NULL,
@@ -10,12 +10,11 @@ w_help = function(id)
       size = "s",
       icon = icon("question")
     ),
-    title = NULL,
-    content = "See help on this panel."
+    title = "See help on this panel."
   )
 
 w_pedPrev = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "pedPrev"),
       label = NULL,
@@ -23,12 +22,11 @@ w_pedPrev = function(id)
       size = "xs",
       icon = icon("backward-step")
     ),
-    title = NULL,
-    content = "Go to the previous family."
+    title = "Go to the previous family."
   )
 
 w_pedNext = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "pedNext"),
       label = NULL,
@@ -36,8 +34,7 @@ w_pedNext = function(id)
       size = "xs",
       icon = icon("forward-step")
     ),
-    title = NULL,
-    content = "Go to the next family."
+    title = "Go to the next family."
   )
 
 

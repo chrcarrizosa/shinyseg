@@ -1,7 +1,7 @@
 # Input widgets -----------------------------------------------------------
 
 w_help = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "help"),
       label = NULL,
@@ -10,8 +10,7 @@ w_help = function(id)
       size = "s",
       icon = icon("question")
     ),
-    title = NULL,
-    content = "See help on this panel."
+    title = "See help on this panel."
   )
 
 w_pedCases = function(id)
@@ -28,7 +27,7 @@ w_pedCases = function(id)
   )
 
 w_loadPed = function(id)
-  popover(
+  tooltip(
     fileInput2(
       inputId = NS(id, "loadPed"),
       label = "Load pedfile",
@@ -36,12 +35,11 @@ w_loadPed = function(id)
       progress = FALSE,
       divClass = "action-button bttn bttn-jelly bttn-sm bttn-default bttn-no-outline shiny-bound-input"
     ),
-    title = NULL,
-    content = "Upload a pedigree from a ped file."
+    title = "Upload a pedigree from a ped file."
   )
 
 # w_addChild = function(id)
-#   popover(
+#   tooltip(
 #     actionBttn(
 #       inputId = NS(id, "addChild"),
 #       label = NULL,
@@ -49,12 +47,11 @@ w_loadPed = function(id)
 #       size = "s",
 #       icon = icon("person-circle-plus")
 #     ),
-#     title = NULL,
-#     content = "Add children."
+#     title = "Add children."
 #   )
 
 # w_rmvPeople = function(id)
-#   popover(
+#   tooltip(
 #     actionBttn(
 #       inputId = NS(id, "rmvPeople"),
 #       label = NULL,
@@ -62,12 +59,11 @@ w_loadPed = function(id)
 #       size = "s",
 #       icon = icon("person-circle-xmark")
 #     ),
-#     title = NULL,
-#     content = "Remove people."
+#     title = "Remove people."
 #   )
 
 # w_swapSex = function(id)
-#   popover(
+#   tooltip(
 #     actionBttn(
 #       inputId = NS(id, "swapSex"),
 #       label = NULL,
@@ -75,12 +71,11 @@ w_loadPed = function(id)
 #       size = "s",
 #       icon = icon("restroom")
 #     ),
-#     title = NULL,
-#     content = "Swap sex."
+#     title = "Swap sex."
 #   )
 
 w_rmvPed = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "rmvPed"),
       label = NULL,
@@ -88,12 +83,11 @@ w_rmvPed = function(id)
       size = "s",
       icon = icon("users-slash")
     ),
-    title = NULL,
-    content = "Remove a family."
+    title = "Remove a family."
   )
 
 w_modify = function(id)
-  popover(
+  tooltip(
     dropdown(
       label = "Modify",
       icon = icon("person-digging"),
@@ -108,12 +102,11 @@ w_modify = function(id)
         w_rmvPed(id)
       )
     ),
-    title = NULL,
-    content = "Make changes on loaded families."
+    title = "Make changes on loaded families."
   )
 
 w_quickPed = function(id)
-  popover(
+  tooltip(
     actionBttn(
       inputId = NS(id, "QuickPed"),
       label = "Use QuickPed",
@@ -123,8 +116,7 @@ w_quickPed = function(id)
       value = "Open popup",
       onclick = "window.open('https://magnusdv.shinyapps.io/quickped/')"
     ),
-    title = NULL,
-    content = "Make a pedigree using the QuickPed app."
+    title = "Make a pedigree using the QuickPed app."
   )
 
 

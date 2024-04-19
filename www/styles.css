@@ -1,3 +1,17 @@
+/*tooltips*/
+.tooltip {
+  opacity: 1!important;
+}
+.tooltip-inner {
+  color: white;
+  background-color: #4e4e4e;
+  border: 1px solid white;
+  padding: 5px;
+}
+.tooltip.top .tooltip-arrow {
+  background-color: red;
+}
+
 /*navigation bar*/
 .navbar-primary {
   background-color: #024378;

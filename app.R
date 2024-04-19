@@ -24,7 +24,7 @@ suppressPackageStartupMessages({
 # Input widgets -----------------------------------------------------------
 
 w_saveReport = 
-  popover(
+  tooltip(
     downloadBttn(
       outputId = "saveReport",
       icon = icon("save"),
@@ -35,12 +35,11 @@ w_saveReport =
       label = "Save report",
       color = "primary"
     ),
-    title = NULL,
-    content = "Save the session data in an HTML file."
+    title = "Save the session data in an HTML file."
   )
 
 w_loadReport =
-  popover(
+  tooltip(
     fileInput2(
       inputId = "loadReport",
       label = "Load report",
@@ -48,12 +47,11 @@ w_loadReport =
       progress = FALSE,
       divClass = "action-button bttn bttn-jelly bttn-sm bttn-primary bttn-no-outline shiny-bound-input"
     ),
-    title = NULL,
-    content = "Restore a previous session by uploading a saved HTML file."
+    title = "Restore a previous session by uploading a saved HTML file."
   )
 
 w_afreq =
-  popover(
+  tooltip(
     numericInputIcon(
       inputId = "afreq",
       label = HTML("<i class='fa fa-dna'></i> Allele frequency"),
@@ -62,62 +60,57 @@ w_afreq =
       max = 0.1,
       step = 0.00001
     ),
-    title = NULL,
-    content = "Select the frequency of the rare variant in the population.",
+    title = "Select the frequency of the rare variant in the population.",
     placement = "right"
   )
 
 w_example1 = 
-  popover(
+  tooltip(
     boxDropdownItem(
       boxLabel("1", status = "gray"),
       HTML("&nbsp;Constant relative risk"),
       id = "example1"
     ),
-    title = NULL,
-    content = "A simple case to showcase the relative risk mode and the importance of accounting for age of onset.",
+    title = "A simple case to showcase the relative risk mode and the importance of accounting for age of onset.",
     placement = "right"
   )
 
 w_example2 = 
-  popover(
+  tooltip(
     boxDropdownItem(
       boxLabel("2", status = "gray"),
       HTML("&nbsp;X-linked inheritance"),
       id = "example2"
     ),
-    title = NULL,
-    content = "An example for the analysis of an X-linked inheritance case.",
+    title = "An example for the analysis of an X-linked inheritance case.",
     placement = "right"
   )
 
 w_example3 = 
-  popover(
+  tooltip(
     boxDropdownItem(
       boxLabel("3", status = "gray"),
       HTML("&nbsp;Two phenotypes"),
       id = "example3"
     ),
-    title = NULL,
-    content = "A consanguineous family with two disease phenotypes: one mild and common, and other rare and severe.",
+    title = "A consanguineous family with two disease phenotypes: one mild and common, and other rare and severe.",
     placement = "right"
   )
 
 w_example4 =
-  popover(
+  tooltip(
     boxDropdownItem(
       boxLabel("4", status = "gray"),
       HTML("&nbsp;Breast cancer and BRCA1"),
       id = "example4"
     ),
-    title = NULL,
-    content = "A breast cancer case from Belman et al. (2020) requiring additional phenotypes and age-dependent relative risks.",
+    title = "A breast cancer case from Belman et al. (2020) requiring additional phenotypes and age-dependent relative risks.",
     placement = "right"
   )
 
 
 w_examples =
-  popover(
+  tooltip(
     dropdown(
       label = "Examples",
       icon = icon("person-chalkboard"),
@@ -130,13 +123,12 @@ w_examples =
       w_example3,
       w_example4
     ),
-    title = NULL,
-    content = "Load a worked example.",
+    title = "Load a worked example.",
     placement = "right"
   )
 
 w_docs =
-  popover(
+  tooltip(
     actionBttn(
       inputId = "docs",
       label = "Documentation",
@@ -147,8 +139,7 @@ w_docs =
       value = "Open popup",
       onclick = "window.open('https://chrcarrizosa.github.io/shinyseg/')"
     ),
-    title = NULL,
-    content = "Go to documentation website."
+    title = "Go to documentation website."
   )
 
 
@@ -204,7 +195,7 @@ ui = dashboardPage(
         ),
         tags$li(
           class = "dropdown",
-          popover(
+          tooltip(
             dropdownMenu(
               type = "notifications",
               badgeStatus = "danger",
@@ -220,8 +211,7 @@ ui = dashboardPage(
                 notificationItem(inputId = "message8", status = "danger", text = "Missing penetrance parameters")
               )
             ),
-            title = NULL,
-            content = "Minimum steps that are still required in your analysis.",
+            title = "Minimum steps that are still required in your analysis.",
             placement = "right"
           )
         )
@@ -242,7 +232,7 @@ ui = dashboardPage(
       tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
     ),
     includeScript("www/customHandlers.js"),
-    
+
     fluidRow(
       column(7,
              pedigreeBoxUI("pedigree"),
